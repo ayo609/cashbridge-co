@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Applications | CashBridge Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #0f172a;
+      --text: #e2e8f0;
+      --text-light: #94a3b8;
+      --primary: #22c55e;
+      --accent: #38bdf8;
+      --danger: #ef4444;
+      --warning: #eab308;
+      --border: rgba(34, 197, 94, 0.18);
+      --success-bg: rgba(34, 197, 94, 0.1);
+      --danger-bg: rgba(239, 68, 68, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to bottom, #020617, #0a0f1e);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .header h1 {
+      color: var(--primary);
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: var(--text-light);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(34, 197, 94, 0.2);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow-x: auto;
+      display: table;
+    }
+
+    th, td {
+      padding: 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    th:nth-child(1), td:nth-child(1) { width: 15%; min-width: 150px; }
+    th:nth-child(2), td:nth-child(2) { width: 12%; min-width: 120px; }
+    th:nth-child(3), td:nth-child(3) { width: 18%; min-width: 180px; }
+    th:nth-child(4), td:nth-child(4) { width: 15%; min-width: 150px; }
+    th:nth-child(5), td:nth-child(5) { width: 15%; min-width: 150px; }
+    th:nth-child(6), td:nth-child(6) { width: 25%; min-width: 240px; }
+
+    tbody tr {
+      transition: all 0.3s ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(34, 197, 94, 0.08);
+      transform: scale(1.01);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .user-name {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .user-email {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      word-break: break-word;
+    }
+
+    .amount-display {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    .date-display {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      line-height: 1.6;
+      white-space: normal;
+    }
+
+    .loan-details {
+      font-size: 0.875rem;
+      line-height: 1.8;
+      color: var(--text);
+    }
+
+    .detail-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      align-items: flex-start;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 90px;
+      flex-shrink: 0;
+    }
+
+    .detail-value {
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .status-badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-pending {
+      background: rgba(234, 179, 8, 0.2);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+
+    .status-approved {
+      background: var(--success-bg);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .status-rejected {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .btn-success {
+      background: var(--primary);
+      color: #000;
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-info {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-info:hover {
+      background: #0284c7;
+      transform: translateY(-2px);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-light);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--primary);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 1rem 2rem;
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+      margin-top: 2rem;
+    }
+
+    .back-link:hover {
+      background: rgba(59, 130, 246, 0.1);
+      transform: translateX(-5px);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .tab {
+      padding: 1rem 2rem;
+      background: transparent;
+      border: none;
+      color: var(--text-light);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab:hover {
+      color: var(--text);
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: rgba(34, 197, 94, 0.05);
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .toggle-label {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 80px;
+      height: 40px;
+      background: var(--danger);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 32px;
+      height: 32px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(40px);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 1rem;
+        overflow-x: auto;
+      }
+
+      table {
+        font-size: 0.8rem;
+        min-width: 900px;
+      }
+
+      th, td {
+        padding: 0.75rem 0.5rem;
+      }
+
+      .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      .tabs {
+        overflow-x: auto;
+      }
+
+      .tab {
+        padding: 0.75rem 1rem;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-hand-holding-usd"></i> Loan Applications Manager</h1>
+      <p>Review and manage investor loan applications</p>
+    </div>
+
+    <!-- Loan System Toggle -->
+    <div class="toggle-container">
+      <span class="toggle-label">Loan System Status:</span>
+      <div class="toggle-switch" id="toggleSwitch" onclick="toggleLoanSystem()">
+        <div class="toggle-slider"></div>
+      </div>
+      <span class="toggle-label" id="statusText">Checking...</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-value" id="pendingCount">0</div>
+        <div class="stat-label">Pending Applications</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="approvedCount">0</div>
+        <div class="stat-label">Approved Loans</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">❌</div>
+        <div class="stat-value" id="rejectedCount">0</div>
+        <div class="stat-label">Rejected Applications</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value" id="totalLoanAmount">₦0</div>
+        <div class="stat-label">Total Loan Amount</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('pending')">
+        <i class="fas fa-clock"></i> Pending
+      </button>
+      <button class="tab" onclick="switchTab('approved')">
+        <i class="fas fa-check"></i> Approved
+      </button>
+      <button class="tab" onclick="switchTab('rejected')">
+        <i class="fas fa-times"></i> Rejected
+      </button>
+    </div>
+
+    <!-- Pending Applications -->
+    <div class="card" id="pendingSection">
+      <h2 class="card-title">
+        <i class="fas fa-clock"></i> Pending Loan Applications
+      </h2>
+      <div id="pendingContainer" class="loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading applications...
+      </div>
+    </div>
+
+    <!-- Approved Applications -->
+    <div class="card" id="approvedSection" style="display: none;">
+      <h2 class="card-title">
+        <i class="fas fa-check"></i> Approved Loans
+      </h2>
+      <div id="approvedContainer" class="loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading approved loans...
+      </div>
+    </div>
+
+    <!-- Rejected Applications -->
+    <div class="card" id="rejectedSection" style="display: none;">
+      <h2 class="card-title">
+        <i class="fas fa-times"></i> Rejected Applications
+      </h2>
+      <div id="rejectedContainer" class="loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading rejected applications...
+      </div>
+    </div>
+
+    <div style="text-align: center;">
+      <a href="admin-dashboard.html" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
+      </a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, getDocs, collection, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+      authDomain: "cashbridge-a688e.firebaseapp.com",
+      projectId: "cashbridge-a688e",
+      storageBucket: "cashbridge-a688e.firebasestorage.app",
+      messagingSenderId: "345273765518",
+      appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentStatus = false;
+
+    const formatCurrency = (amount) => "₦" + Number(amount || 0).toLocaleString();
+
+    window.switchTab = function(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.closest('.tab').classList.add('active');
+
+      document.getElementById('pendingSection').style.display = tab === 'pending' ? 'block' : 'none';
+      document.getElementById('approvedSection').style.display = tab === 'approved' ? 'block' : 'none';
+      document.getElementById('rejectedSection').style.display = tab === 'rejected' ? 'block' : 'none';
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'admin-login.html';
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Access Denied',
+            text: 'Administrator privileges required',
+            confirmButtonColor: '#ef4444'
+          });
+          await signOut(auth);
+          window.location.href = 'admin-login.html';
+          return;
+        }
+
+        await loadLoanSystemStatus();
+        loadAllApplications();
+      } catch (error) {
+        console.error('Auth error:', error);
+        Swal.fire('Error', 'Authentication failed', 'error');
+      }
+    });
+
+    async function loadLoanSystemStatus() {
+      try {
+        const settingsDoc = await getDoc(doc(db, 'settings', 'loanSystem'));
+        
+        if (settingsDoc.exists()) {
+          currentStatus = settingsDoc.data().enabled || false;
+        } else {
+          await setDoc(doc(db, 'settings', 'loanSystem'), { enabled: false });
+          currentStatus = false;
+        }
+
+        updateToggleUI();
+      } catch (error) {
+        console.error('Load status error:', error);
+      }
+    }
+
+    function updateToggleUI() {
+      const toggleSwitch = document.getElementById('toggleSwitch');
+      const statusText = document.getElementById('statusText');
+
+      if (currentStatus) {
+        toggleSwitch.classList.add('active');
+        statusText.textContent = '🟢 ENABLED';
+        statusText.style.color = 'var(--primary)';
+      } else {
+        toggleSwitch.classList.remove('active');
+        statusText.textContent = '🔴 DISABLED';
+        statusText.style.color = 'var(--danger)';
+      }
+    }
+
+    window.toggleLoanSystem = async function() {
+      const newStatus = !currentStatus;
+      const action = newStatus ? 'enable' : 'disable';
+
+      const result = await Swal.fire({
+        title: `${action.charAt(0).toUpperCase() + action.slice(1)} Loan System?`,
+        html: `
+          <p>Are you sure you want to <strong>${action}</strong> the loan application system?</p>
+          <p style="margin-top: 1rem; color: #64748b;">
+            ${newStatus ? 'Eligible investors will be able to submit loan applications.' : 'Investors will see "Coming Soon" on the submit button.'}
+          </p>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: `Yes, ${action}`,
+        confirmButtonColor: newStatus ? '#22c55e' : '#ef4444',
+        cancelButtonColor: '#6b7280'
+      });
+
+      if (!result.isConfirmed) return;
+
+      try {
+        Swal.fire({
+          title: 'Updating...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        await setDoc(doc(db, 'settings', 'loanSystem'), { enabled: newStatus });
+        currentStatus = newStatus;
+        updateToggleUI();
+
+        Swal.fire({
+          icon: 'success',
+          title: `Loan System ${newStatus ? 'Enabled' : 'Disabled'}!`,
+          confirmButtonColor: '#22c55e'
+        });
+      } catch (error) {
+        console.error('Toggle error:', error);
+        Swal.fire('Error', 'Failed to update: ' + error.message, 'error');
+      }
+    };
+
+    async function loadAllApplications() {
+      try {
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        let allPending = [];
+        let allApproved = [];
+        let allRejected = [];
+        let totalApprovedAmount = 0;
+
+        for (const userDoc of usersSnapshot.docs) {
+          const userId = userDoc.id;
+          const userData = userDoc.data();
+          
+          const loansSnapshot = await getDocs(collection(db, `users/${userId}/loanApplications`));
+          
+          loansSnapshot.forEach(loanDoc => {
+            const loanData = loanDoc.data();
+            const loanInfo = {
+              id: loanDoc.id,
+              userId: userId,
+              username: userData.fullName || 'Unknown',
+              userEmail: userData.email || '—',
+              ...loanData
+            };
+            
+            if (loanData.status === 'pending') {
+              allPending.push(loanInfo);
+            } else if (loanData.status === 'approved') {
+              allApproved.push(loanInfo);
+              totalApprovedAmount += Number(loanData.loanAmount || 0);
+            } else if (loanData.status === 'rejected') {
+              allRejected.push(loanInfo);
+            }
+          });
+        }
+
+        document.getElementById('pendingCount').textContent = allPending.length;
+        document.getElementById('approvedCount').textContent = allApproved.length;
+        document.getElementById('rejectedCount').textContent = allRejected.length;
+        document.getElementById('totalLoanAmount').textContent = formatCurrency(totalApprovedAmount);
+
+        renderApplications('pending', allPending, 'pendingContainer');
+        renderApplications('approved', allApproved, 'approvedContainer');
+        renderApplications('rejected', allRejected, 'rejectedContainer');
+      } catch (error) {
+        console.error('Load applications error:', error);
+      }
+    }
+
+    function renderApplications(type, applications, containerId) {
+      const container = document.getElementById(containerId);
+      
+      applications.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis?.() || 0;
+        const timeB = b.createdAt?.toMillis?.() || 0;
+        return timeB - timeA;
+      });
+
+      if (applications.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>No ${type} applications</h3>
+            <p>All clear!</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Amount</th>
+              <th>Loan Details</th>
+              <th>Employment</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      applications.forEach(loan => {
+        const dateString = loan.createdAt?.toDate?.().toLocaleString() || '—';
+        const processedDate = (loan.approvedAt || loan.rejectedAt)?.toDate?.().toLocaleString() || '—';
+        
+        let actionButtons = '';
+        if (type === 'pending') {
+          actionButtons = `
+            <div class="action-buttons">
+              <button class="btn btn-info" onclick="window.viewLoanDetails('${loan.id}', '${loan.userId}', ${JSON.stringify(loan).replace(/"/g, '&quot;')})">
+                <i class="fas fa-eye"></i> View Details
+              </button>
+              <button class="btn btn-success" onclick="window.approveLoan('${loan.id}', '${loan.userId}', ${loan.loanAmount}, '${loan.username}')">
+                <i class="fas fa-check"></i> Approve
+              </button>
+              <button class="btn btn-danger" onclick="window.rejectLoan('${loan.id}', '${loan.userId}', '${loan.username}')">
+                <i class="fas fa-times"></i> Reject
+              </button>
+            </div>
+          `;
+        } else if (type === 'approved') {
+          actionButtons = `
+            <div style="text-align: center; color: var(--text-light);">
+              <p><strong>Approved</strong></p>
+              <p style="font-size: 0.85rem;">${processedDate}</p>
+            </div>
+          `;
+        } else {
+          actionButtons = `
+            <div style="text-align: center; color: var(--text-light);">
+              <p><strong>Rejected</strong></p>
+              <p style="font-size: 0.85rem;">${processedDate}</p>
+              ${loan.rejectionReason ? `<p style="font-size: 0.85rem; color: var(--danger); margin-top: 0.5rem;">Reason: ${loan.rejectionReason}</p>` : ''}
+            </div>
+          `;
+        }
+
+        html += `
+          <tr>
+            <td>
+              <div class="user-info">
+                <span class="user-name">${loan.username}</span>
+                <span class="user-email">${loan.userEmail}</span>
+              </div>
+            </td>
+            <td>
+              <div class="amount-display">${formatCurrency(loan.loanAmount)}</div>
+            </td>
+            <td>
+              <div class="loan-details">
+                <div class="detail-row">
+                  <span class="detail-label">Period:</span>
+                  <span class="detail-value">${loan.repaymentPeriod} Month(s)</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Purpose:</span>
+                  <span class="detail-value">${loan.loanPurpose || '—'}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Income:</span>
+                  <span class="detail-value">${formatCurrency(loan.monthlyIncome)}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-size: 0.9rem;">
+                ${loan.employmentStatus || '—'}
+              </div>
+            </td>
+            <td>
+              <div class="date-display">${dateString}</div>
+            </td>
+            <td>
+              ${actionButtons}
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    window.viewLoanDetails = function(loanId, userId, loanData) {
+      Swal.fire({
+        title: 'Loan Application Details',
+        html: `
+          <div style="text-align: left; padding: 1rem; background: rgba(15,23,42,0.5); border-radius: 12px; max-height: 400px; overflow-y: auto;">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">${loanData.username}</h3>
+            
+            <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+              <p><strong>Email:</strong> ${loanData.userEmail}</p>
+              <p><strong>Loan Amount:</strong> <span style="color: var(--primary); font-size: 1.3rem;">${formatCurrency(loanData.loanAmount)}</span></p>
+              <p><strong>Repayment Period:</strong> ${loanData.repaymentPeriod} Month(s)</p>
+            </div>
+            
+            <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+              <p><strong>Purpose:</strong> ${loanData.loanPurpose}</p>
+              <p><strong>Monthly Income:</strong> ${formatCurrency(loanData.monthlyIncome)}</p>
+              <p><strong>Employment Status:</strong> ${loanData.employmentStatus}</p>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+              <p><strong>Additional Information:</strong></p>
+              <p style="color: var(--text-light); margin-top: 0.5rem; line-height: 1.6;">
+                ${loanData.additionalInfo || 'No additional information provided'}
+              </p>
+            </div>
+            
+            <div style="background: rgba(34, 197, 94, 0.1); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+              <p style="font-size: 0.85rem; color: var(--text-light);">
+                <strong>Applied on:</strong> ${loanData.createdAt?.toDate?.().toLocaleString() || '—'}
+              </p>
+            </div>
+          </div>
+        `,
+        width: 600,
+        confirmButtonColor: '#22c55e',
+        confirmButtonText: 'Close'
+      });
+    };
+
+    window.approveLoan = async function(loanId, userId, amount, username) {
+      const result = await Swal.fire({
+        title: '✅ Approve Loan?',
+        html: `
+          <div style="text-align: left; line-height: 2; padding: 1rem;">
+            <p><strong>User:</strong> ${username}</p>
+            <p><strong>Loan Amount:</strong> <span style="color: #22c55e; font-size: 1.3rem;">${formatCurrency(amount)}</span></p>
+            <p style="color: #94a3b8; margin-top: 1rem;">
+              ⚠️ This will credit ${formatCurrency(amount)} to the user's wallet immediately.
+            </p>
+          </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Approve Loan',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#22c55e',
+        cancelButtonColor: '#6b7280'
+      });
+
+      if (!result.isConfirmed) return;
+
+      try {
+        Swal.fire({ 
+          title: 'Processing Approval...', 
+          allowOutsideClick: false, 
+          didOpen: () => Swal.showLoading() 
+        });
+
+        console.log('🔄 Approving loan:', { loanId, userId, amount });
+
+        // Update loan application status
+        const loanRef = doc(db, `users/${userId}/loanApplications`, loanId);
+        await updateDoc(loanRef, {
+          status: 'approved',
+          approvedAt: serverTimestamp(),
+          approvedBy: auth.currentUser.uid
+        });
+
+        console.log('✅ Loan status updated to approved');
+
+        // Credit user wallet
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, {
+          wallet: increment(Number(amount))
+        });
+
+        console.log('✅ Wallet credited:', formatCurrency(amount));
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Loan Approved!',
+          html: `
+            <p>${formatCurrency(amount)} has been credited to ${username}'s wallet</p>
+            <p style="margin-top: 1rem; color: #64748b; font-size: 0.9rem;">
+              The user can now access their funds immediately.
+            </p>
+          `,
+          confirmButtonColor: '#22c55e'
+        });
+
+        // Reload all applications
+        loadAllApplications();
+      } catch (error) {
+        console.error('❌ Approve error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Approval Failed',
+          text: error.message,
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    };
+
+    window.rejectLoan = async function(loanId, userId, username) {
+      const result = await Swal.fire({
+        title: '❌ Reject Loan Application?',
+        html: `
+          <div style="text-align: left; padding: 1rem;">
+            <p>User: <strong>${username}</strong></p>
+            <p style="color: #eab308; margin-top: 1rem;">⚠️ Please provide a reason for rejection:</p>
+          </div>
+        `,
+        input: 'textarea',
+        inputPlaceholder: 'e.g., Insufficient income verification, high debt ratio, incomplete information...',
+        inputAttributes: {
+          style: 'min-height: 100px;'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Reject Application',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'Please provide a reason for rejection';
+          }
+          if (value.length < 10) {
+            return 'Please provide a more detailed reason (at least 10 characters)';
+          }
+        }
+      });
+
+      if (!result.isConfirmed) return;
+
+      try {
+        Swal.fire({ 
+          title: 'Processing Rejection...', 
+          allowOutsideClick: false, 
+          didOpen: () => Swal.showLoading() 
+        });
+
+        console.log('🔄 Rejecting loan:', { loanId, userId, reason: result.value });
+
+        const loanRef = doc(db, `users/${userId}/loanApplications`, loanId);
+        await updateDoc(loanRef, {
+          status: 'rejected',
+          rejectionReason: result.value,
+          rejectedAt: serverTimestamp(),
+          rejectedBy: auth.currentUser.uid
+        });
+
+        console.log('✅ Loan status updated to rejected');
+
+        await Swal.fire({
+          icon: 'info',
+          title: 'Application Rejected',
+          html: `
+            <p>${username}'s loan application has been rejected.</p>
+            <p style="margin-top: 1rem; color: #64748b; font-size: 0.9rem;">
+              Reason: ${result.value}
+            </p>
+          `,
+          confirmButtonColor: '#38bdf8'
+        });
+
+        // Reload all applications
+        loadAllApplications();
+      } catch (error) {
+        console.error('❌ Reject error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Rejection Failed',
+          text: error.message,
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    };
+  </script>
+
+</body>
+</html>

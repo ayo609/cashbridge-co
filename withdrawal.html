@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Withdraw Funds | CashBridge</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    :root {
+      --bg:#020617;
+      --card:#0f172a;
+      --text:#e2e8f0;
+      --text-light:#94a3b8;
+      --primary:#22c55e;
+      --accent:#38bdf8;
+      --danger:#ef4444;
+      --warning:#eab308;
+      --border:rgba(34,197,94,0.18);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+    body{
+      background:linear-gradient(to bottom,#020617,#0a0f1e);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .container{
+      background:var(--card);
+      padding:3rem 2.5rem;
+      border-radius:28px;
+      width:100%;
+      max-width:600px;
+      box-shadow:0 25px 70px rgba(0,0,0,.7);
+      border:1px solid var(--border);
+    }
+    h1{
+      font-family:'Playfair Display',serif;
+      color:var(--primary);
+      text-align:center;
+      margin-bottom:1.5rem;
+    }
+    .balance-display{
+      background:rgba(34,197,94,.1);
+      border:2px solid var(--primary);
+      border-radius:16px;
+      padding:1.5rem;
+      text-align:center;
+      margin-bottom:1.5rem;
+    }
+    .balance-amount{
+      font-size:2.3rem;
+      font-weight:700;
+      color:var(--primary);
+    }
+    .form-group{margin-bottom:1.3rem}
+    label{display:block;margin-bottom:.4rem;color:var(--text-light)}
+    input{
+      width:100%;
+      padding:1rem;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--text);
+    }
+    input:focus{outline:none;border-color:var(--primary)}
+    .btn{
+      width:100%;
+      padding:1.2rem;
+      border:none;
+      border-radius:12px;
+      font-size:1.1rem;
+      font-weight:700;
+      cursor:pointer;
+      margin-top:1rem;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,var(--primary),#16a34a);
+      color:#000;
+    }
+    .btn-primary:disabled{
+      background:#64748b;
+      cursor:not-allowed;
+      opacity:0.6;
+    }
+    .back-link{
+      display:block;
+      text-align:center;
+      margin-top:1.5rem;
+      color:var(--accent);
+      text-decoration:none;
+    }
+    .fee-info{
+      background:rgba(234,179,8,.1);
+      border:1px solid var(--warning);
+      border-radius:12px;
+      padding:1rem;
+      margin:1rem 0;
+      font-size:.9rem;
+    }
+    .fee-info div{
+      display:flex;
+      justify-content:space-between;
+      margin:.3rem 0;
+    }
+    .disabled-notice{
+      background:rgba(239,68,68,.1);
+      border:2px solid var(--danger);
+      border-radius:16px;
+      padding:2rem;
+      text-align:center;
+      margin:2rem 0;
+    }
+    .disabled-notice h2{
+      color:var(--danger);
+      margin-bottom:1rem;
+    }
+    .disabled-notice p{
+      color:var(--text-light);
+      line-height:1.6;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container" id="mainContent">
+  <h1>Loading...</h1>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  getDocs,
+  runTransaction,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+  authDomain: "cashbridge-a688e.firebaseapp.com",
+  projectId: "cashbridge-a688e",
+  storageBucket: "cashbridge-a688e.firebasestorage.app",
+  messagingSenderId: "345273765518",
+  appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const MIN_WITHDRAWAL = 1000;
+const FEE_PERCENT = 10;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = "login.html";
+
+  const container = document.getElementById("mainContent");
+
+  try {
+    // Check if withdrawal system is enabled
+    const settingsDoc = await getDoc(doc(db, 'settings', 'withdrawalSystem'));
+    const withdrawalEnabled = settingsDoc.exists() ? (settingsDoc.data().enabled || false) : true;
+
+    if (!withdrawalEnabled) {
+      container.innerHTML = `
+        <h1>Withdrawals Temporarily Disabled</h1>
+        <div class="disabled-notice">
+          <h2><i class="fas fa-exclamation-triangle"></i> Withdrawal Closed</h2>
+          <p>Withdrawal Notice
+Withdrawals are currently temporarily closed by the administrator. Kindly check back later.
+Please note that withdrawals are not processed on weekends (Saturdays and Sundays).
+Withdrawal hours:
+🕘 9:00 AM – 5:00 PM (Monday to Friday)
+Thank you for choosing CASHBRIDGE.</P>
+        </div>
+        <a class="back-link" href="dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+      `;
+      return;
+    }
+
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) throw "User profile missing";
+
+    const userData = userSnap.data();
+    const balance = Number(userData.wallet || 0);
+
+    // Check active plan
+    const plansSnap = await getDocs(collection(db, `users/${user.uid}/activePlans`));
+    let hasActive = false;
+    plansSnap.forEach(p => {
+      if (p.data().active !== false && p.data().daysLeft > 0) hasActive = true;
+    });
+
+    if (!hasActive) {
+      container.innerHTML = `
+        <h1>Withdrawal Locked</h1>
+        <p style="text-align:center;color:#94a3b8;margin:1rem 0">
+          You must have an active investment plan to withdraw.
+        </p>
+        <button class="btn btn-primary" onclick="location.href='plans.html'">View Plans</button>
+        <a class="back-link" href="dashboard.html">Back to Dashboard</a>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <h1>Withdraw Funds</h1>
+
+      <div class="balance-display">
+        <div>Available Balance</div>
+        <div class="balance-amount">₦${balance.toLocaleString()}</div>
+      </div>
+
+      <form id="withdrawForm">
+        <div class="form-group">
+          <label>Amount (Min: ₦${MIN_WITHDRAWAL.toLocaleString()})</label>
+          <input type="number" id="amount" min="${MIN_WITHDRAWAL}" max="${balance}" required>
+        </div>
+
+        <div class="fee-info" id="feeInfo" style="display:none">
+          <div><span>Amount:</span><span id="amtDisplay">₦0</span></div>
+          <div><span>Fee (${FEE_PERCENT}%):</span><span id="feeDisplay">₦0</span></div>
+          <div style="border-top:1px solid var(--warning);padding-top:.5rem;margin-top:.5rem;font-weight:700">
+            <span>You'll Receive:</span><span id="finalDisplay">₦0</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Bank Name</label>
+          <input type="text" id="bankName" required>
+        </div>
+
+        <div class="form-group">
+          <label>Account Name</label>
+          <input type="text" id="accountName" required>
+        </div>
+
+        <div class="form-group">
+          <label>Account Number</label>
+          <input type="text" id="accountNumber" maxlength="10" pattern="[0-9]{10}" required>
+        </div>
+
+        <button class="btn btn-primary" type="submit">
+          Submit Withdrawal Request
+        </button>
+      </form>
+
+      <a class="back-link" href="dashboard.html">Back to Dashboard</a>
+    `;
+
+    const amtInput = document.getElementById("amount");
+    const feeInfo = document.getElementById("feeInfo");
+    
+    amtInput.addEventListener("input", () => {
+      const amt = Number(amtInput.value);
+      if (amt >= MIN_WITHDRAWAL) {
+        const fee = Math.floor(amt * (FEE_PERCENT / 100));
+        const final = amt - fee;
+        document.getElementById("amtDisplay").textContent = `₦${amt.toLocaleString()}`;
+        document.getElementById("feeDisplay").textContent = `₦${fee.toLocaleString()}`;
+        document.getElementById("finalDisplay").textContent = `₦${final.toLocaleString()}`;
+        feeInfo.style.display = "block";
+      } else {
+        feeInfo.style.display = "none";
+      }
+    });
+
+    document.getElementById("withdrawForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const amount = Number(document.getElementById("amount").value);
+      const bankName = document.getElementById("bankName").value.trim();
+      const accountName = document.getElementById("accountName").value.trim();
+      const accountNumber = document.getElementById("accountNumber").value.trim();
+
+      if (amount < MIN_WITHDRAWAL || amount > balance) {
+        return Swal.fire("Invalid Amount", `Amount must be between ₦${MIN_WITHDRAWAL.toLocaleString()} and ₦${balance.toLocaleString()}`, "warning");
+      }
+
+      if (accountNumber.length !== 10 || !/^\d+$/.test(accountNumber)) {
+        return Swal.fire("Invalid Account", "Account number must be 10 digits", "warning");
+      }
+
+      const fee = Math.floor(amount * (FEE_PERCENT / 100));
+      const finalAmount = amount - fee;
+      const withdrawalId = `WTH_${Date.now()}`;
+
+      const result = await Swal.fire({
+        title: 'Confirm Withdrawal',
+        html: `
+          <div style="text-align:left;line-height:2">
+            <p><b>Amount:</b> ₦${amount.toLocaleString()}</p>
+            <p><b>Fee:</b> ₦${fee.toLocaleString()}</p>
+            <p><b>You'll Receive:</b> ₦${finalAmount.toLocaleString()}</p>
+            <p><b>Bank:</b> ${bankName}</p>
+            <p><b>Account:</b> ${accountName} - ${accountNumber}</p>
+            <p style="color:#eab308;margin-top:1rem"><b>Note:</b> Funds will be deducted immediately</p>
+          </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Submit Request',
+        confirmButtonColor: '#22c55e'
+      });
+
+      if (!result.isConfirmed) return;
+
+      try {
+        Swal.fire({
+          title: 'Processing...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        await runTransaction(db, async (tx) => {
+          const snap = await tx.get(userRef);
+          if (snap.data().wallet < amount) throw "Insufficient balance";
+
+          // Deduct funds immediately when request is made
+          tx.update(userRef, {
+            wallet: snap.data().wallet - amount
+          });
+
+          const data = {
+            withdrawalId,
+            userId: user.uid,
+            username: userData.fullName || 'User',
+            userEmail: userData.email,
+            amount,
+            fee,
+            amountAfterFee: finalAmount,
+            bankName,
+            accountName,
+            accountNumber,
+            status: "pending",
+            createdAt: serverTimestamp()
+          };
+
+          tx.set(doc(db, `users/${user.uid}/withdrawals`, withdrawalId), data);
+        });
+
+        await Swal.fire("Success!", "Withdrawal request submitted. Awaiting admin approval.", "success");
+        location.href = "dashboard.html";
+
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", err.toString(), "error");
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<h1>Error Loading Page</h1>`;
+  }
+});
+</script>
+
+</body>
+</html>

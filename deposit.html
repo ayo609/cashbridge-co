@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deposit Funds | CashBridge</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+:root {
+  --bg: #020617;
+  --card: #0f172a;
+  --text: #e2e8f0;
+  --text-light: #94a3b8;
+  --primary: #22c55e;
+  --accent: #38bdf8;
+  --border: rgba(34,197,94,0.18);
+  --whatsapp: #25d366;
+  --telegram: #0088cc;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+
+body {
+  background: linear-gradient(to bottom, #020617, #0a0f1e);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.deposit-container {
+  background: var(--card);
+  padding: 3rem 2.5rem;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.7);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.deposit-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 20%, rgba(34,197,94,0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.step {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: 0.3s;
+}
+
+.step.active {
+  background: var(--primary);
+  color: #000;
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+}
+
+.step.completed {
+  background: rgba(34, 197, 94, 0.3);
+  color: var(--primary);
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-title {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.amount-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.amount-btn {
+  padding: 1.5rem 1rem;
+  background: rgba(34,197,94,0.1);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.amount-btn:hover {
+  background: rgba(34,197,94,0.2);
+  transform: translateY(-3px);
+}
+
+.amount-btn.selected {
+  border-color: var(--primary);
+  background: rgba(34,197,94,0.25);
+  box-shadow: 0 0 20px rgba(34,197,94,0.4);
+}
+
+.custom-amount {
+  margin: 2rem 0;
+}
+
+.input-label {
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+  display: block;
+  font-size: 0.95rem;
+}
+
+.custom-input {
+  width: 100%;
+  padding: 1.2rem 1.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(15,23,42,0.8);
+  color: var(--text);
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.custom-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(34,197,94,0.2);
+}
+
+.payment-info {
+  background: rgba(34,197,94,0.08);
+  border: 2px solid var(--primary);
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.payment-info h3 {
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.2);
+}
+
+.info-row:last-child {
+  border: none;
+}
+
+.info-label {
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+.info-value {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.copy-btn {
+  background: rgba(34, 197, 94, 0.2);
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: 0.3s;
+}
+
+.copy-btn:hover {
+  background: rgba(34, 197, 94, 0.3);
+}
+
+.contact-options {
+  margin: 2rem 0;
+}
+
+.contact-options h3 {
+  text-align: center;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+}
+
+.contact-options p {
+  text-align: center;
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.contact-card {
+  background: rgba(34,197,94,0.05);
+  border: 2px solid transparent;
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.contact-card:hover {
+  transform: translateY(-5px);
+}
+
+.contact-card.whatsapp {
+  border-color: var(--whatsapp);
+  background: rgba(37, 211, 102, 0.1);
+}
+
+.contact-card.whatsapp:hover {
+  box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+}
+
+.contact-card.telegram {
+  border-color: var(--telegram);
+  background: rgba(0, 136, 204, 0.1);
+}
+
+.contact-card.telegram:hover {
+  box-shadow: 0 10px 30px rgba(0, 136, 204, 0.3);
+}
+
+.contact-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.whatsapp .contact-icon {
+  color: var(--whatsapp);
+}
+
+.telegram .contact-icon {
+  color: var(--telegram);
+}
+
+.contact-card h4 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.contact-card p {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.btn {
+  width: 100%;
+  padding: 1.2rem;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #16a34a);
+  color: #000;
+  box-shadow: 0 10px 30px rgba(34,197,94,0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(34,197,94,0.6);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-secondary:hover {
+  background: rgba(34,197,94,0.1);
+}
+
+.btn-whatsapp {
+  background: linear-gradient(135deg, var(--whatsapp), #20b858);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+}
+
+.btn-whatsapp:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6);
+}
+
+.btn-telegram {
+  background: linear-gradient(135deg, var(--telegram), #0077b5);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 136, 204, 0.4);
+}
+
+.btn-telegram:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(0, 136, 204, 0.6);
+}
+
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 1.5rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  color: var(--primary);
+}
+
+.alert {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: var(--accent);
+}
+
+.instruction-box {
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid #eab308;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.instruction-box h4 {
+  color: #eab308;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.instruction-box ol {
+  margin-left: 1.5rem;
+  line-height: 2;
+  color: var(--text-light);
+}
+
+.instruction-box li {
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 600px) {
+  .amount-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .deposit-container {
+    padding: 2rem 1.5rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="deposit-container">
+  <div class="content">
+    
+    <div class="header">
+      <div class="header-icon">💰</div>
+      <h1>Deposit Funds</h1>
+      <p class="subtitle">Fund your wallet securely via bank transfer</p>
+    </div>
+
+    <div class="step-indicator">
+      <div class="step active" id="step1">1</div>
+      <div class="step" id="step2">2</div>
+    </div>
+
+    <!-- Step 1: Select Amount -->
+    <div class="section active" id="section1">
+      <h3 class="section-title">Select Deposit Amount</h3>
+      
+      <div class="alert">
+        <i class="fas fa-info-circle"></i> Minimum deposit: ₦3,000
+      </div>
+
+      <div class="amount-options">
+        <div class="amount-btn" data-amount="5000">₦5,000</div>
+        <div class="amount-btn" data-amount="10000">₦10,000</div>
+        <div class="amount-btn" data-amount="20000">₦20,000</div>
+        <div class="amount-btn" data-amount="30000">₦30,000</div>
+        <div class="amount-btn" data-amount="50000">₦50,000</div>
+        <div class="amount-btn" data-amount="100000">₦100,000</div>
+      </div>
+
+      <div class="custom-amount">
+        <label class="input-label">Or enter custom amount:</label>
+        <input type="number" id="customAmount" class="custom-input" placeholder="e.g. 15000" min="3000">
+      </div>
+
+      <button class="btn btn-primary" id="nextBtn1" disabled>
+        <i class="fas fa-arrow-right"></i> Continue to Payment
+      </button>
+    </div>
+
+    <!-- Step 2: Payment Details & Contact Options -->
+    <div class="section" id="section2">
+      <h3 class="section-title">Complete Your Deposit</h3>
+
+      <div class="payment-info">
+        <h3><i class="fas fa-university"></i> Bank Transfer Details</h3>
+        
+        <div class="info-row">
+          <span class="info-label">Account Name</span>
+          <span class="info-value">Taufeek Muftau</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Account Number</span>
+          <span class="info-value">
+            <span id="accountNumber">7018051146</span>
+            <button class="copy-btn" onclick="copyText('7018051146')">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Bank Name</span>
+          <span class="info-value">Palmpay</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Amount to Pay</span>
+          <span class="info-value" id="displayAmount" style="color: var(--primary); font-size: 1.5rem;">₦0</span>
+        </div>
+      </div>
+
+      <div class="instruction-box">
+        <h4><i class="fas fa-list-ol"></i> Follow These Steps:</h4>
+        <ol>
+          <li>Transfer <strong id="instructionAmount" style="color: var(--primary);">₦0</strong> to the account above</li>
+          <li>Take a screenshot of your payment confirmation</li>
+          <li>Choose WhatsApp or Telegram below</li>
+          <li>Send your payment screenshot to complete the deposit</li>
+        </ol>
+      </div>
+
+      <div class="contact-options">
+        <h3><i class="fas fa-paper-plane"></i> Submit Payment Proof</h3>
+        <p>Choose your preferred platform to send your payment screenshot for instant verification.</p>
+        <p style="color: var(--primary); font-weight: 600; text-align: center;">
+          ⚡ Verification takes 5-10 minutes!
+        </p>
+
+        <div class="contact-grid">
+          <!-- WhatsApp Card -->
+          <div class="contact-card whatsapp">
+            <div class="contact-icon">
+              <i class="fab fa-whatsapp"></i>
+            </div>
+            <h4>WhatsApp</h4>
+            <p>Quick & Easy</p>
+            <a href="#" class="btn btn-whatsapp" id="whatsappBtn" target="_blank">
+              <i class="fab fa-whatsapp"></i> Send via WhatsApp
+            </a>
+          </div>
+
+          <!-- Telegram Card -->
+          <div class="contact-card telegram">
+            <div class="contact-icon">
+              <i class="fab fa-telegram"></i>
+            </div>
+            <h4>Telegram</h4>
+            <p>Fast & Secure</p>
+            <a href="#" class="btn btn-telegram" id="telegramBtn" target="_blank">
+              <i class="fab fa-telegram"></i> Send via Telegram
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-secondary" onclick="goToStep(1)">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <a href="dashboard.html" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+  authDomain: "cashbridge-a688e.firebaseapp.com",
+  projectId: "cashbridge-a688e",
+  storageBucket: "cashbridge-a688e.firebasestorage.app",
+  messagingSenderId: "345273765518",
+  appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// CONTACT NUMBERS - CHANGE THESE TO YOUR NUMBERS
+const WHATSAPP_NUMBER = "2347018051146"; // Format: 234XXXXXXXXXX (no + or spaces)
+const TELEGRAM_USERNAME = "cashbridgeagent"; // Format: username (without @)
+
+const MIN_AMOUNT = 3000;
+let selectedAmount = 0;
+let currentUser = null;
+let userData = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  currentUser = user;
+  const userSnap = await getDoc(doc(db, 'users', user.uid));
+  if (userSnap.exists()) {
+    userData = userSnap.data();
+  }
+});
+
+// Amount selection
+const amountButtons = document.querySelectorAll('.amount-btn');
+const customInput = document.getElementById('customAmount');
+const nextBtn1 = document.getElementById('nextBtn1');
+
+amountButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    amountButtons.forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedAmount = Number(btn.dataset.amount);
+    customInput.value = '';
+    nextBtn1.disabled = selectedAmount < MIN_AMOUNT;
+  });
+});
+
+customInput.addEventListener('input', () => {
+  amountButtons.forEach(b => b.classList.remove('selected'));
+  selectedAmount = Number(customInput.value) || 0;
+  nextBtn1.disabled = selectedAmount < MIN_AMOUNT;
+});
+
+nextBtn1.addEventListener('click', async () => {
+  if (selectedAmount >= MIN_AMOUNT) {
+    document.getElementById('displayAmount').textContent = `₦${selectedAmount.toLocaleString()}`;
+    document.getElementById('instructionAmount').textContent = `₦${selectedAmount.toLocaleString()}`;
+    
+    // Create pending deposit record in Firestore
+    try {
+      const depositId = `DEP_${Date.now()}`;
+      await setDoc(doc(db, `users/${currentUser.uid}/deposits`, depositId), {
+        depositId: depositId,
+        userId: currentUser.uid,
+        username: userData?.fullName || 'User',
+        userEmail: userData?.email || currentUser.email,
+        amount: selectedAmount,
+        status: 'pending',
+        method: 'Bank Transfer - WhatsApp/Telegram Verification',
+        accountName: 'Taufeek Muftau',
+        accountNumber: '7018051146',
+        bankName: 'Palmpay',
+        proofUrl: 'Via WhatsApp/Telegram',
+        createdAt: serverTimestamp(),
+        approvedAt: null,
+        approvedBy: null
+      });
+      
+      console.log('Deposit record created:', depositId);
+    } catch (error) {
+      console.error('Error creating deposit record:', error);
+    }
+    
+    // Generate message for both platforms
+    const username = userData?.fullName || 'User';
+    const message = `Hello! I'm ${username} from CashBridge.
+
+I've made a deposit of *₦${selectedAmount.toLocaleString()}* to:
+- Account: Taufeek Muftau
+- Bank: Palmpay
+- Account Number: 7018051146
+
+I'm sending my payment screenshot for verification.
+
+Thank you!`;
+
+    // WhatsApp URL
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    document.getElementById('whatsappBtn').href = whatsappUrl;
+    
+    // Telegram URL
+    const telegramUrl = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(message)}`;
+    document.getElementById('telegramBtn').href = telegramUrl;
+    
+    goToStep(2);
+  }
+});
+
+// Step navigation
+window.goToStep = function(step) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active', 'completed'));
+  
+  document.getElementById(`section${step}`).classList.add('active');
+  document.getElementById(`step${step}`).classList.add('active');
+  
+  for (let i = 1; i < step; i++) {
+    document.getElementById(`step${i}`).classList.add('completed');
+  }
+};
+
+// Copy function
+window.copyText = function(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    Swal.fire({
+      icon: 'success',
+      title: 'Copied!',
+      text: 'Account number copied to clipboard',
+      timer: 1500,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
+  });
+};
+
+// Contact button click tracking
+function handleContactClick(platform) {
+  setTimeout(() => {
+    Swal.fire({
+      icon: 'info',
+      title: `${platform} Opened`,
+      html: `
+        <p>Send your payment screenshot to complete the deposit.</p>
+        <p style="margin-top: 1rem; color: #22c55e; font-weight: 600;">Your deposit will be verified within 5-10 minutes!</p>
+      `,
+      confirmButtonText: 'Go to Dashboard',
+      confirmButtonColor: '#22c55e'
+    }).then(() => {
+      window.location.href = 'dashboard.html';
+    });
+  }, 1000);
+}
+
+document.getElementById('whatsappBtn').addEventListener('click', () => {
+  handleContactClick('WhatsApp');
+});
+
+document.getElementById('telegramBtn').addEventListener('click', () => {
+  handleContactClick('Telegram');
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CashBridge • Create Account</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #0f172a;
+      --text: #e2e8f0;
+      --text-light: #94a3b8;
+      --primary: #22c55e;
+      --primary-dark: #16a34a;
+      --accent: #38bdf8;
+      --border: rgba(34,197,94,0.18);
+      --error: #ef4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #020617, #0a0f1e);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .register-container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 1.2s ease-out;
+    }
+
+    .register-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 20%, rgba(34,197,94,0.12) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6rem;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 0.8rem;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-light);
+      margin-bottom: 2.5rem;
+      font-size: 1.05rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.6rem;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.6rem;
+      color: var(--text-light);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .label-hint {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      font-weight: 400;
+      margin-left: 0.3rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 1.1rem 1.3rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(2,6,23,0.7);
+      color: var(--text);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.25);
+      background: rgba(2,6,23,0.9);
+    }
+
+    input.error {
+      border-color: var(--error);
+    }
+
+    input.success {
+      border-color: var(--primary);
+    }
+
+    input::placeholder {
+      color: #64748b;
+    }
+
+    .username-input {
+      font-family: monospace;
+      font-size: 1.1rem;
+    }
+
+    .referral-input {
+      background: rgba(34,197,94,0.08);
+      border-color: rgba(34,197,94,0.3);
+    }
+
+    .input-feedback {
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .input-feedback.show {
+      display: block;
+    }
+
+    .input-feedback.error {
+      color: var(--error);
+    }
+
+    .input-feedback.success {
+      color: var(--primary);
+    }
+
+    .input-feedback.checking {
+      color: var(--accent);
+    }
+
+    .password-strength {
+      margin-top: 0.5rem;
+      height: 4px;
+      background: rgba(148,163,184,0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0%;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .strength-weak { background: #ef4444; width: 33%; }
+    .strength-medium { background: #f59e0b; width: 66%; }
+    .strength-strong { background: #22c55e; width: 100%; }
+
+    .password-hint {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 0.4rem;
+    }
+
+    .terms-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      color: var(--text-light);
+      font-size: 0.95rem;
+      margin: 1.8rem 0 2rem;
+    }
+
+    .terms-label input[type="checkbox"] {
+      width: auto;
+      margin-top: 0.2rem;
+      cursor: pointer;
+    }
+
+    .terms-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .terms-link:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1.2rem;
+      background: linear-gradient(135deg, var(--primary) 0%, #16a34a 100%);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.35s ease;
+      box-shadow: 0 6px 20px rgba(34,197,94,0.35);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(34,197,94,0.5);
+      background: linear-gradient(135deg, #38bdf8 0%, var(--accent) 100%);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 1.8rem;
+      color: var(--text-light);
+      font-size: 0.98rem;
+    }
+
+    .login-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-link a:hover {
+      color: var(--accent);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .register-container {
+        padding: 2.5rem 1.8rem;
+      }
+      h1 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="register-container">
+  <h1>Join CashBridge</h1>
+  <p class="subtitle">Create your account and start investing today</p>
+
+  <form id="registerForm">
+    <div class="form-group">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" placeholder="John Doe" required minlength="2">
+    </div>
+
+    <div class="form-group">
+      <label for="username">
+        Username 
+        <span class="label-hint">(This will be your referral code)</span>
+      </label>
+      <input type="text" id="username" class="username-input" placeholder="johnsmith" required minlength="3" maxlength="20" pattern="[a-z0-9]+" title="Only lowercase letters and numbers">
+      <div class="input-feedback" id="usernameFeedback"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="name@example.com" required>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="At least 8 characters" required minlength="8">
+      <div class="password-strength">
+        <div class="password-strength-bar" id="strengthBar"></div>
+      </div>
+      <p class="password-hint" id="passwordHint">Use 8+ characters with letters and numbers</p>
+    </div>
+
+    <div class="form-group">
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+    </div>
+
+    <div class="form-group">
+      <label for="referral">Referral Code (Optional)</label>
+      <input type="text" id="referral" placeholder="Enter username (e.g. johnsmith)" class="referral-input">
+      <div class="input-feedback" id="referralFeedback"></div>
+    </div>
+
+    <label class="terms-label">
+      <input type="checkbox" id="terms" required>
+      <span>I agree to the <a href="terms.html" class="terms-link" target="_blank">Terms & Conditions</a> and understand the <a href="terms.html#risk" class="terms-link" target="_blank">Risk Disclaimer</a></span>
+    </label>
+
+    <button type="submit" class="submit-btn" id="submitBtn">Create Account</button>
+    <p class="login-link">Already have an account? <a href="login.html">Sign in</a></p>
+  </form>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+  authDomain: "cashbridge-a688e.firebaseapp.com",
+  projectId: "cashbridge-a688e",
+  storageBucket: "cashbridge-a688e.firebasestorage.app",
+  messagingSenderId: "345273765518",
+  appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Pre-fill referral code from URL
+const urlParams = new URLSearchParams(window.location.search);
+const refCode = urlParams.get('ref');
+if (refCode) {
+  document.getElementById('referral').value = refCode.toLowerCase();
+}
+
+// Username validation with better error handling
+const usernameInput = document.getElementById('username');
+const usernameFeedback = document.getElementById('usernameFeedback');
+let usernameCheckTimeout;
+let lastCheckedUsername = '';
+
+usernameInput.addEventListener('input', async (e) => {
+  let username = e.target.value.toLowerCase();
+  username = username.replace(/[^a-z0-9]/g, '');
+  e.target.value = username;
+  
+  clearTimeout(usernameCheckTimeout);
+  
+  if (username.length < 3) {
+    usernameInput.classList.remove('success', 'error');
+    usernameFeedback.classList.remove('show');
+    lastCheckedUsername = '';
+    return;
+  }
+  
+  // Don't recheck the same username
+  if (username === lastCheckedUsername) return;
+  
+  usernameFeedback.textContent = 'Checking availability...';
+  usernameFeedback.className = 'input-feedback show checking';
+  usernameInput.classList.remove('success', 'error');
+  
+  usernameCheckTimeout = setTimeout(async () => {
+    try {
+      const q = query(collection(db, "users"), where("username", "==", username));
+      const snapshot = await getDocs(q);
+      
+      lastCheckedUsername = username;
+      
+      if (snapshot.empty) {
+        usernameInput.classList.remove('error');
+        usernameInput.classList.add('success');
+        usernameFeedback.textContent = '✓ Username available';
+        usernameFeedback.className = 'input-feedback show success';
+      } else {
+        usernameInput.classList.remove('success');
+        usernameInput.classList.add('error');
+        usernameFeedback.textContent = '✗ Username already taken';
+        usernameFeedback.className = 'input-feedback show error';
+      }
+    } catch (error) {
+      console.error('Username check error:', error);
+      usernameFeedback.textContent = '⚠ Unable to check username. You can continue.';
+      usernameFeedback.className = 'input-feedback show';
+      usernameInput.classList.remove('success', 'error');
+    }
+  }, 600);
+});
+
+// Referral code validation
+const referralInput = document.getElementById('referral');
+const referralFeedback = document.getElementById('referralFeedback');
+let referralCheckTimeout;
+
+referralInput.addEventListener('input', (e) => {
+  let referralCode = e.target.value.toLowerCase().trim();
+  referralCode = referralCode.replace(/[^a-z0-9]/g, '');
+  e.target.value = referralCode;
+  
+  clearTimeout(referralCheckTimeout);
+  
+  if (referralCode.length === 0) {
+    referralInput.classList.remove('success', 'error');
+    referralFeedback.classList.remove('show');
+    return;
+  }
+  
+  if (referralCode.length < 3) {
+    referralFeedback.textContent = 'Enter at least 3 characters';
+    referralFeedback.className = 'input-feedback show';
+    return;
+  }
+  
+  referralFeedback.textContent = 'Checking referral code...';
+  referralFeedback.className = 'input-feedback show checking';
+  
+  referralCheckTimeout = setTimeout(async () => {
+    try {
+      const q = query(collection(db, "users"), where("username", "==", referralCode));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        referralInput.classList.remove('error');
+        referralInput.classList.add('success');
+        referralFeedback.textContent = '✓ Valid referral code';
+        referralFeedback.className = 'input-feedback show success';
+      } else {
+        referralInput.classList.remove('success');
+        referralInput.classList.add('error');
+        referralFeedback.textContent = '✗ Invalid referral code';
+        referralFeedback.className = 'input-feedback show error';
+      }
+    } catch (error) {
+      console.error('Referral check error:', error);
+      referralFeedback.textContent = '⚠ Unable to verify code';
+      referralFeedback.className = 'input-feedback show';
+    }
+  }, 600);
+});
+
+// Find user by username
+async function findUserByUsername(username) {
+  try {
+    const q = query(collection(db, "users"), where("username", "==", username.toLowerCase()));
+    const snapshot = await getDocs(q);
+    return snapshot.empty ? null : { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+  } catch (error) {
+    console.error('Error finding user:', error);
+    throw error;
+  }
+}
+
+// Password strength
+document.getElementById('password').addEventListener('input', (e) => {
+  const password = e.target.value;
+  const strengthBar = document.getElementById('strengthBar');
+  const hint = document.getElementById('passwordHint');
+  
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+  if (password.match(/[0-9]/)) strength++;
+  if (password.match(/[^a-zA-Z0-9]/)) strength++;
+  
+  strengthBar.className = 'password-strength-bar';
+  if (strength <= 1) {
+    strengthBar.classList.add('strength-weak');
+    hint.textContent = 'Weak password';
+  } else if (strength <= 2) {
+    strengthBar.classList.add('strength-medium');
+    hint.textContent = 'Medium strength';
+  } else {
+    strengthBar.classList.add('strength-strong');
+    hint.textContent = 'Strong password!';
+  }
+});
+
+// Password match
+document.getElementById('confirmPassword').addEventListener('input', (e) => {
+  const password = document.getElementById('password').value;
+  const confirmPassword = e.target.value;
+  
+  if (confirmPassword && password !== confirmPassword) {
+    e.target.classList.add('error');
+  } else {
+    e.target.classList.remove('error');
+  }
+});
+
+// Form submission
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const submitBtn = document.getElementById('submitBtn');
+  const name = document.getElementById('name').value.trim();
+  const username = document.getElementById('username').value.trim().toLowerCase();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const referralCode = document.getElementById('referral').value.trim().toLowerCase();
+  const termsChecked = document.getElementById('terms').checked;
+
+  // Validation
+  if (username.length < 3) {
+    return Swal.fire({
+      icon: 'error',
+      title: 'Username too short',
+      text: 'Username must be at least 3 characters',
+      confirmButtonColor: '#22c55e'
+    });
+  }
+
+  if (!/^[a-z0-9]+$/.test(username)) {
+    return Swal.fire({
+      icon: 'error',
+      title: 'Invalid username',
+      text: 'Username can only contain lowercase letters and numbers',
+      confirmButtonColor: '#22c55e'
+    });
+  }
+
+  if (password !== confirmPassword) {
+    return Swal.fire({
+      icon: 'error',
+      title: 'Passwords do not match',
+      confirmButtonColor: '#22c55e'
+    });
+  }
+
+  if (password.length < 8) {
+    return Swal.fire({
+      icon: 'error',
+      title: 'Password too short',
+      text: 'Password must be at least 8 characters',
+      confirmButtonColor: '#22c55e'
+    });
+  }
+
+  if (!termsChecked) {
+    return Swal.fire({
+      icon: 'warning',
+      title: 'Terms required',
+      text: 'Please accept the terms and conditions',
+      confirmButtonColor: '#22c55e'
+    });
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Creating Account...';
+
+  try {
+    // Double-check username availability
+    const usernameExists = await findUserByUsername(username);
+    if (usernameExists) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Account';
+      return Swal.fire({
+        icon: 'error',
+        title: 'Username taken',
+        text: 'This username is already registered. Please choose another.',
+        confirmButtonColor: '#22c55e'
+      });
+    }
+
+    // Validate referral code if provided
+    let referrerData = null;
+    if (referralCode) {
+      try {
+        referrerData = await findUserByUsername(referralCode);
+        
+        if (!referrerData) {
+          const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Referral Code',
+            text: `Username "${referralCode}" not found. Continue without referral?`,
+            showCancelButton: true,
+            confirmButtonText: 'Continue Anyway',
+            cancelButtonText: 'Fix Referral Code',
+            confirmButtonColor: '#22c55e',
+            cancelButtonColor: '#64748b'
+          });
+          
+          if (!result.isConfirmed) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Account';
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Referral validation error:', error);
+      }
+    }
+
+    // Create Auth account
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const newUserId = userCredential.user.uid;
+
+    await updateProfile(userCredential.user, { displayName: name });
+
+    // Build 3-level referral chain
+    let level1Referrer = referrerData ? referrerData.id : null;
+    let level2Referrer = referrerData?.referredBy || null;
+    let level3Referrer = null;
+    
+    if (level2Referrer) {
+      try {
+        const level2Doc = await getDoc(doc(db, 'users', level2Referrer));
+        if (level2Doc.exists()) {
+          level3Referrer = level2Doc.data().referredBy || null;
+        }
+      } catch (error) {
+        console.error('Error fetching level 2 referrer:', error);
+      }
+    }
+
+    // Create user document
+    await setDoc(doc(db, "users", newUserId), {
+      uid: newUserId,
+      fullName: name,
+      username: username,
+      email: email,
+      role: "user",
+      status: "active",
+      referredBy: level1Referrer,
+      level2Referrer: level2Referrer,
+      level3Referrer: level3Referrer,
+      wallet: 0,
+      totalDeposits: 0,
+      totalWithdrawals: 0,
+      totalEarnings: 0,
+      activeInvestments: 0,
+      emailVerified: false,
+      createdAt: serverTimestamp(),
+      lastLogin: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    // Create referral records for all 3 levels
+    if (level1Referrer) {
+      try {
+        await setDoc(doc(db, `users/${level1Referrer}/referrals`, newUserId), {
+          referredUserId: newUserId,
+          referredUserName: name,
+          referredUserEmail: email,
+          referredUsername: username,
+          level: 1,
+          commission: 20,
+          referredAt: serverTimestamp(),
+          totalEarned: 0
+        });
+      } catch (error) {
+        console.error('Error creating level 1 referral:', error);
+      }
+    }
+
+    if (level2Referrer) {
+      try {
+        await setDoc(doc(db, `users/${level2Referrer}/referrals`, newUserId), {
+          referredUserId: newUserId,
+          referredUserName: name,
+          referredUserEmail: email,
+          referredUsername: username,
+          level: 2,
+          commission: 2,
+          referredAt: serverTimestamp(),
+          totalEarned: 0
+        });
+      } catch (error) {
+        console.error('Error creating level 2 referral:', error);
+      }
+    }
+
+    if (level3Referrer) {
+      try {
+        await setDoc(doc(db, `users/${level3Referrer}/referrals`, newUserId), {
+          referredUserId: newUserId,
+          referredUserName: name,
+          referredUserEmail: email,
+          referredUsername: username,
+          level: 3,
+          commission: 1,
+          referredAt: serverTimestamp(),
+          totalEarned: 0
+        });
+      } catch (error) {
+        console.error('Error creating level 3 referral:', error);
+      }
+    }
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Account Created!',
+      html: `<p>Welcome to CashBridge!</p><p style="margin-top:1rem">Your username: <strong style="color:#22c55e">@${username}</strong></p>`,
+      timer: 3000,
+      showConfirmButton: false
+    });
+
+    window.location.href = "home.html";
+
+  } catch (error) {
+    console.error("Registration error:", error);
+    
+    let message = 'Registration failed. Please try again.';
+    if (error.code === 'auth/email-already-in-use') {
+      message = 'This email is already registered. Please sign in instead.';
+    } else if (error.code === 'auth/invalid-email') {
+      message = 'Invalid email address format.';
+    } else if (error.code === 'auth/weak-password') {
+      message = 'Password is too weak. Use at least 8 characters.';
+    } else if (error.code === 'permission-denied') {
+      message = 'Permission error. Please check Firestore security rules.';
+    } else if (error.message) {
+      message = error.message;
+    }
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Registration Failed',
+      text: message,
+      confirmButtonColor: '#22c55e'
+    });
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Create Account';
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Withdrawal Management | CashBridge Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+:root {
+  --bg: #020617;
+  --card: #0f172a;
+  --text: #e2e8f0;
+  --text-light: #94a3b8;
+  --primary: #22c55e;
+  --accent: #38bdf8;
+  --danger: #ef4444;
+  --warning: #eab308;
+  --border: rgba(34, 197, 94, 0.18);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: linear-gradient(to bottom, #020617, #0a0f1e);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header h1 {
+  color: var(--primary);
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toggle-label {
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 60px;
+  height: 30px;
+  background: #64748b;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.toggle-switch.active {
+  background: var(--primary);
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-switch.active::after {
+  left: 33px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.card {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+th, td {
+  padding: 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background: rgba(30, 41, 59, 0.8);
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+tbody tr {
+  transition: 0.3s;
+}
+
+tbody tr:hover {
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.status-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-pending {
+  background: rgba(234, 179, 8, 0.2);
+  color: var(--warning);
+}
+
+.status-completed {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--primary);
+}
+
+.status-rejected {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.9rem;
+}
+
+.btn-success {
+  background: var(--primary);
+  color: #000;
+}
+
+.btn-success:hover {
+  background: #16a34a;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-light);
+}
+
+.empty-state i {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .header h1 {
+    font-size: 1.8rem;
+  }
+  
+  table {
+    font-size: 0.8rem;
+  }
+  
+  th, td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-money-check-alt"></i> Withdrawal Management</h1>
+    <div class="toggle-container">
+      <span class="toggle-label">Withdrawal System:</span>
+      <div class="toggle-switch" id="systemToggle">
+      </div>
+      <span id="systemStatus" class="toggle-label">Loading...</span>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="pendingCount">0</div>
+      <div class="stat-label">Pending Withdrawals</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="pendingAmount">₦0</div>
+      <div class="stat-label">Total Pending Amount</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="approvedToday">0</div>
+      <div class="stat-label">Approved Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="rejectedToday">0</div>
+      <div class="stat-label">Rejected Today</div>
+    </div>
+  </div>
+
+  <!-- Pending Withdrawals -->
+  <div class="card">
+    <h2 class="card-title">
+      <i class="fas fa-clock"></i> Pending Withdrawals
+    </h2>
+    <div id="withdrawalsContainer" class="loading">
+      <i class="fas fa-spinner fa-spin"></i> Loading withdrawals...
+    </div>
+  </div>
+
+  <!-- Withdrawal History -->
+  <div class="card">
+    <h2 class="card-title">
+      <i class="fas fa-history"></i> Withdrawal History
+    </h2>
+    <div id="historyContainer" class="loading">
+      <i class="fas fa-spinner fa-spin"></i> Loading history...
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 2rem;">
+    <a href="admin-dashboard.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">
+      <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
+    </a>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, updateDoc, setDoc, collection, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+  authDomain: "cashbridge-a688e.firebaseapp.com",
+  projectId: "cashbridge-a688e",
+  storageBucket: "cashbridge-a688e.firebasestorage.app",
+  messagingSenderId: "345273765518",
+  appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const formatCurrency = (amount) => "₦" + Number(amount || 0).toLocaleString();
+
+// Check admin authentication
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = 'admin-login.html';
+    return;
+  }
+
+  try {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Access Denied',
+        text: 'Administrator privileges required',
+        confirmButtonColor: '#ef4444'
+      });
+      await signOut(auth);
+      window.location.href = 'admin-login.html';
+      return;
+    }
+
+    await loadSystemStatus();
+    await loadWithdrawals();
+    await loadHistory();
+  } catch (error) {
+    console.error('Auth error:', error);
+    Swal.fire('Error', 'Authentication failed', 'error');
+  }
+});
+
+// System toggle
+async function loadSystemStatus() {
+  try {
+    const settingsDoc = await getDoc(doc(db, 'settings', 'withdrawalSystem'));
+    const enabled = settingsDoc.exists() ? (settingsDoc.data().enabled || false) : true;
+    
+    const toggle = document.getElementById('systemToggle');
+    const status = document.getElementById('systemStatus');
+    
+    if (enabled) {
+      toggle.classList.add('active');
+      status.textContent = 'Enabled';
+      status.style.color = 'var(--primary)';
+    } else {
+      toggle.classList.remove('active');
+      status.textContent = 'Disabled';
+      status.style.color = 'var(--danger)';
+    }
+    
+    toggle.onclick = () => toggleSystem(enabled);
+  } catch (error) {
+    console.error('Load status error:', error);
+  }
+}
+
+async function toggleSystem(currentStatus) {
+  const result = await Swal.fire({
+    title: currentStatus ? 'Disable Withdrawals?' : 'Enable Withdrawals?',
+    text: currentStatus ? 'Users will not be able to request withdrawals' : 'Users will be able to request withdrawals',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: currentStatus ? 'Disable' : 'Enable',
+    confirmButtonColor: currentStatus ? '#ef4444' : '#22c55e'
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await setDoc(doc(db, 'settings', 'withdrawalSystem'), {
+      enabled: !currentStatus,
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser.uid
+    });
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'System Updated',
+      text: `Withdrawals ${!currentStatus ? 'enabled' : 'disabled'} successfully`,
+      timer: 1500,
+      showConfirmButton: false
+    });
+
+    await loadSystemStatus();
+  } catch (error) {
+    console.error('Toggle error:', error);
+    Swal.fire('Error', 'Failed to update system status', 'error');
+  }
+}
+
+async function loadWithdrawals() {
+  const container = document.getElementById('withdrawalsContainer');
+  
+  try {
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    let allPendingWithdrawals = [];
+    let totalPendingAmount = 0;
+    let approvedTodayCount = 0;
+    let rejectedTodayCount = 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const userDoc of usersSnapshot.docs) {
+      const userId = userDoc.id;
+      const userData = userDoc.data();
+      
+      const withdrawalsSnapshot = await getDocs(collection(db, `users/${userId}/withdrawals`));
+      
+      withdrawalsSnapshot.forEach(withdrawalDoc => {
+        const withdrawalData = withdrawalDoc.data();
+        
+        if (withdrawalData.status === 'pending') {
+          allPendingWithdrawals.push({
+            id: withdrawalDoc.id,
+            userId: userId,
+            username: userData.fullName || 'Unknown',
+            userEmail: userData.email || '—',
+            ...withdrawalData
+          });
+          totalPendingAmount += Number(withdrawalData.amount || 0);
+        }
+        
+        if (withdrawalData.status === 'completed' && withdrawalData.approvedAt) {
+          const approvedDate = withdrawalData.approvedAt.toDate();
+          if (approvedDate >= today) {
+            approvedTodayCount++;
+          }
+        }
+
+        if (withdrawalData.status === 'rejected' && withdrawalData.rejectedAt) {
+          const rejectedDate = withdrawalData.rejectedAt.toDate();
+          if (rejectedDate >= today) {
+            rejectedTodayCount++;
+          }
+        }
+      });
+    }
+
+    document.getElementById('pendingCount').textContent = allPendingWithdrawals.length;
+    document.getElementById('pendingAmount').textContent = formatCurrency(totalPendingAmount);
+    document.getElementById('approvedToday').textContent = approvedTodayCount;
+    document.getElementById('rejectedToday').textContent = rejectedTodayCount;
+
+    allPendingWithdrawals.sort((a, b) => {
+      const timeA = a.createdAt?.toMillis?.() || 0;
+      const timeB = b.createdAt?.toMillis?.() || 0;
+      return timeB - timeA;
+    });
+
+    if (allPendingWithdrawals.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-check-circle"></i>
+          <h3>All Clear!</h3>
+          <p>No pending withdrawals at the moment</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Amount</th>
+            <th>Fee</th>
+            <th>To Receive</th>
+            <th>Bank Details</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    allPendingWithdrawals.forEach(withdrawal => {
+      const dateString = withdrawal.createdAt?.toDate?.().toLocaleString() || '—';
+      
+      html += `
+        <tr>
+          <td>
+            <div><strong>${withdrawal.username}</strong></div>
+            <div style="font-size:0.85rem;color:var(--text-light)">${withdrawal.userEmail}</div>
+          </td>
+          <td><strong>${formatCurrency(withdrawal.amount)}</strong></td>
+          <td style="color:var(--danger)">${formatCurrency(withdrawal.fee)}</td>
+          <td style="color:var(--primary);font-weight:700">${formatCurrency(withdrawal.amountAfterFee)}</td>
+          <td>
+            <div><strong>${withdrawal.bankName}</strong></div>
+            <div style="font-size:0.85rem">${withdrawal.accountName}</div>
+            <div style="font-size:0.85rem;color:var(--text-light)">${withdrawal.accountNumber}</div>
+          </td>
+          <td style="font-size:0.85rem">${dateString}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-success" onclick="window.approveWithdrawal('${withdrawal.id}', '${withdrawal.userId}', ${withdrawal.amountAfterFee}, '${withdrawal.username.replace(/'/g, "\\'")}')">
+                <i class="fas fa-check"></i> Approve
+              </button>
+              <button class="btn btn-danger" onclick="window.rejectWithdrawal('${withdrawal.id}', '${withdrawal.userId}', ${withdrawal.amount}, '${withdrawal.username.replace(/'/g, "\\'")}')">
+                <i class="fas fa-times"></i> Reject
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+  } catch (error) {
+    console.error('Load withdrawals error:', error);
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>${error.message}</p></div>`;
+  }
+}
+
+async function loadHistory() {
+  const container = document.getElementById('historyContainer');
+  
+  try {
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    let historyWithdrawals = [];
+
+    for (const userDoc of usersSnapshot.docs) {
+      const userId = userDoc.id;
+      const userData = userDoc.data();
+      
+      const withdrawalsSnapshot = await getDocs(collection(db, `users/${userId}/withdrawals`));
+      
+      withdrawalsSnapshot.forEach(withdrawalDoc => {
+        const withdrawalData = withdrawalDoc.data();
+        
+        if (withdrawalData.status === 'completed' || withdrawalData.status === 'rejected') {
+          historyWithdrawals.push({
+            username: userData.fullName || 'Unknown',
+            userEmail: userData.email || '—',
+            ...withdrawalData
+          });
+        }
+      });
+    }
+
+    historyWithdrawals.sort((a, b) => {
+      const timeA = (a.approvedAt || a.rejectedAt)?.toMillis?.() || 0;
+      const timeB = (b.approvedAt || b.rejectedAt)?.toMillis?.() || 0;
+      return timeB - timeA;
+    });
+
+    if (historyWithdrawals.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-history"></i>
+          <h3>No History Yet</h3>
+          <p>No approved or rejected withdrawals recorded</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Processed Date</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    historyWithdrawals.forEach(withdrawal => {
+      const processedDate = (withdrawal.approvedAt || withdrawal.rejectedAt)?.toDate?.().toLocaleString() || '—';
+      const statusClass = withdrawal.status === 'completed' ? 'status-completed' : 'status-rejected';
+      const statusText = withdrawal.status === 'completed' ? 'Approved' : 'Rejected';
+      const notes = withdrawal.status === 'rejected' ? (withdrawal.rejectionReason || 'No reason provided') : '—';
+
+      html += `
+        <tr>
+          <td>
+            <div><strong>${withdrawal.username}</strong></div>
+            <div style="font-size:0.85rem;color:var(--text-light)">${withdrawal.userEmail}</div>
+          </td>
+          <td><strong>${formatCurrency(withdrawal.amount)}</strong></td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td style="font-size:0.85rem">${processedDate}</td>
+          <td style="font-size:0.9rem">${notes}</td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+  } catch (error) {
+    console.error('Load history error:', error);
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading History</h3></div>`;
+  }
+}
+
+window.approveWithdrawal = async (withdrawalId, userId, amountAfterFee, username) => {
+  const result = await Swal.fire({
+    title: '✅ Approve Withdrawal?',
+    html: `
+      <div style="text-align: left; line-height: 2; padding: 1rem;">
+        <p><strong>User:</strong> ${username}</p>
+        <p><strong>Amount to Send:</strong> <span style="color: #22c55e; font-size: 1.3rem;">${formatCurrency(amountAfterFee)}</span></p>
+        <p style="color: #94a3b8; margin-top: 1rem;">
+          This confirms you have sent the funds to the user's bank account.
+        </p>
+      </div>
+    `,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Approve',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#22c55e'
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    Swal.fire({ 
+      title: 'Processing...', 
+      allowOutsideClick: false, 
+      didOpen: () => Swal.showLoading() 
+    });
+
+    await updateDoc(doc(db, `users/${userId}/withdrawals`, withdrawalId), {
+      status: 'completed',
+      approvedAt: serverTimestamp(),
+      approvedBy: auth.currentUser.uid
+    });
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Withdrawal Approved!',
+      text: `${formatCurrency(amountAfterFee)} sent to ${username}`,
+      confirmButtonColor: '#22c55e'
+    });
+
+    loadWithdrawals();
+    loadHistory();
+  } catch (error) {
+    console.error('Approve error:', error);
+    Swal.fire('Error', 'Failed to approve: ' + error.message, 'error');
+  }
+};
+
+window.rejectWithdrawal = async (withdrawalId, userId, amount, username) => {
+  const result = await Swal.fire({
+    title: '❌ Reject Withdrawal?',
+    html: `
+      <div style="text-align: left; padding: 1rem;">
+        <p>User: <strong>${username}</strong></p>
+        <p>Amount: <strong>${formatCurrency(amount)}</strong></p>
+        <p style="color: #eab308; margin-top: 1rem;">⚠️ Reason for rejection:</p>
+      </div>
+    `,
+    input: 'textarea',
+    inputPlaceholder: 'e.g., Invalid bank details, suspicious activity',
+    showCancelButton: true,
+    confirmButtonText: 'Reject & Refund',
+    confirmButtonColor: '#ef4444',
+    inputValidator: (value) => !value ? 'Reason required' : null
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    Swal.fire({ 
+      title: 'Processing...', 
+      allowOutsideClick: false, 
+      didOpen: () => Swal.showLoading() 
+    });
+
+    // Update withdrawal status
+    await updateDoc(doc(db, `users/${userId}/withdrawals`, withdrawalId), {
+      status: 'rejected',
+      rejectionReason: result.value,
+      rejectedAt: serverTimestamp(),
+      rejectedBy: auth.currentUser.uid
+    });
+
+    // Refund the amount to user's wallet
+    await updateDoc(doc(db, 'users', userId), {
+      wallet: increment(amount)
+    });
+
+    await Swal.fire({
+      icon: 'info',
+      title: 'Withdrawal Rejected',
+      html: `<p>User has been notified and <strong>${formatCurrency(amount)}</strong> refunded</p>`,
+      confirmButtonColor: '#38bdf8'
+    });
+
+    loadWithdrawals();
+    loadHistory();
+  } catch (error) {
+    console.error('Reject error:', error);
+    Swal.fire('Error', 'Failed to reject: ' + error.message, 'error');
+  }
+};
+</script>
+
+</body>
+</html>

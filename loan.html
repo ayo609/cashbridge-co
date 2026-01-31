@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investment Loans | CashBridge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  
+  <style>
+    :root {
+      --bg-dark: #020617;
+      --bg-secondary: #0f172a;
+      --card-bg: rgba(15, 23, 42, 0.8);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --primary: #22c55e;
+      --primary-dark: #16a34a;
+      --accent: #3b82f6;
+      --accent-gold: #eab308;
+      --danger: #ef4444;
+      --border: rgba(148, 163, 184, 0.1);
+      --glow: rgba(34, 197, 94, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #020617 0%, #0a0f1e 50%, #020617 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 80px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(34, 197, 94, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+      animation: pulseGlow 8s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: linear-gradient(135deg, rgba(22, 163, 74, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+      border-radius: 24px;
+      margin-bottom: 3rem;
+      border: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      background: linear-gradient(135deg, var(--primary) 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .eligibility-banner {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .eligibility-status {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .status-icon {
+      font-size: 3rem;
+    }
+
+    .status-text h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .status-text p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .active-loan-notice {
+      background: rgba(234, 179, 8, 0.1);
+      border: 2px solid var(--accent-gold);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .active-loan-notice h3 {
+      color: var(--accent-gold);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .active-loan-notice p {
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .loan-clearance-date {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      margin-top: 0.75rem;
+    }
+
+    .criteria-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .criteria-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .criteria-card {
+      background: rgba(34, 197, 94, 0.05);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .criteria-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--primary);
+      box-shadow: 0 10px 30px var(--glow);
+    }
+
+    .criteria-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .criteria-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .criteria-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .loan-selection-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .loan-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .loan-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loan-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .loan-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px var(--glow);
+    }
+
+    .loan-card:hover::before {
+      opacity: 1;
+    }
+
+    .loan-card.selected {
+      border-color: var(--primary);
+      background: rgba(34, 197, 94, 0.15);
+      box-shadow: 0 10px 30px var(--glow);
+    }
+
+    .loan-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .loan-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .loan-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .custom-amount-section {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .custom-amount-title {
+      font-size: 1.3rem;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .custom-amount-input {
+      width: 100%;
+      padding: 1.25rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .custom-amount-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--glow);
+    }
+
+    .custom-amount-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .amount-hint {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 0.75rem;
+    }
+
+    .application-form {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(10px);
+      margin-bottom: 3rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--glow);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1.25rem 2rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px var(--glow);
+    }
+
+    .submit-btn:disabled {
+      background: linear-gradient(135deg, #64748b, #475569);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .coming-soon-badge {
+      background: linear-gradient(135deg, var(--accent-gold), #f59e0b);
+      color: #000;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-box h3 {
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-box ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .info-box li {
+      padding: 0.5rem 0;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .info-box li i {
+      color: var(--accent);
+      margin-top: 0.25rem;
+    }
+
+    .history-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .history-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .history-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .history-card:hover {
+      border-color: var(--primary);
+      transform: translateX(5px);
+      box-shadow: 0 10px 30px var(--glow);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .loan-amount-display {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .status-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-pending {
+      background: rgba(234, 179, 8, 0.2);
+      color: var(--accent-gold);
+      border: 2px solid var(--accent-gold);
+    }
+
+    .status-approved {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      animation: pulse-success 2s infinite;
+    }
+
+    @keyframes pulse-success {
+      0%, 100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); }
+    }
+
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      border: 2px solid var(--danger);
+    }
+
+    .status-active {
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+
+    .history-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .detail-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .detail-value {
+      font-size: 1rem;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .rejection-reason {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .rejection-reason-label {
+      font-size: 0.9rem;
+      color: var(--danger);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .rejection-reason-text {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .approval-notice {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .approval-notice i {
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .approval-notice p {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .empty-history {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-history i {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-history h3 {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 0.75rem 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.75rem;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+    }
+
+    .nav-item i {
+      font-size: 1.3rem;
+    }
+
+    .nav-item:hover {
+      color: var(--primary);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem 1rem;
+      }
+
+      .header {
+        padding: 2rem 1rem;
+      }
+
+      .criteria-section,
+      .application-form,
+      .loan-selection-container,
+      .history-section {
+        padding: 1.5rem;
+      }
+
+      .loan-options {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.875rem;
+      }
+
+      .loan-card {
+        padding: 1.25rem 0.75rem;
+      }
+
+      .loan-amount {
+        font-size: 1.75rem;
+      }
+
+      .loan-label {
+        font-size: 0.75rem;
+      }
+
+      .custom-amount-input {
+        font-size: 1.25rem;
+        padding: 1rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .history-details {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-hand-holding-usd"></i> Investment Loans</h1>
+      <p>Unlock financial opportunities with our exclusive investor loan program</p>
+    </div>
+
+    <!-- Eligibility Status -->
+    <div class="eligibility-banner" id="eligibilityBanner">
+      <div class="eligibility-status">
+        <div class="status-icon" id="statusIcon">⏳</div>
+        <div class="status-text">
+          <h2 id="statusTitle">Checking Eligibility...</h2>
+          <p id="statusMessage">Please wait while we verify your investment status</p>
+        </div>
+      </div>
+      <div id="activeLoanNotice" style="display: none;"></div>
+    </div>
+
+    <!-- Loan Criteria -->
+    <div class="criteria-section">
+      <h2 class="section-title">
+        <i class="fas fa-clipboard-check"></i>
+        Eligibility Criteria
+      </h2>
+      
+      <div class="criteria-grid">
+        <div class="criteria-card">
+          <span class="criteria-icon">💰</span>
+          <h3 class="criteria-title">Minimum Investment</h3>
+          <p class="criteria-desc">Must have purchased a total of ₦300,000 worth of investment plans</p>
+        </div>
+        
+        <div class="criteria-card">
+          <span class="criteria-icon">✅</span>
+          <h3 class="criteria-title">Active Account</h3>
+          <p class="criteria-desc">Your account must be in good standing with no pending issues</p>
+        </div>
+        
+        <div class="criteria-card">
+          <span class="criteria-icon">📊</span>
+          <h3 class="criteria-title">Investment History</h3>
+          <p class="criteria-desc">Consistent investment activity on the platform</p>
+        </div>
+        
+        <div class="criteria-card">
+          <span class="criteria-icon">🔒</span>
+          <h3 class="criteria-title">No Active Loans</h3>
+          <p class="criteria-desc">All previous loans must be cleared before applying for a new one</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <h3><i class="fas fa-info-circle"></i> Important Information</h3>
+        <ul>
+          <li><i class="fas fa-check"></i> Loans are subject to admin approval</li>
+          <li><i class="fas fa-check"></i> Interest rates vary based on loan amount and duration</li>
+          <li><i class="fas fa-check"></i> Repayment period ranges from 1 to 6 months</li>
+          <li><i class="fas fa-check"></i> Only ONE active loan allowed at a time</li>
+          <li><i class="fas fa-check"></i> Loan funds are credited to your wallet within 24 hours of approval</li>
+          <li><i class="fas fa-check"></i> You can apply for a new loan after your current loan period expires</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Loan Options -->
+    <div class="loan-selection-container" id="loanSection" style="display: none;">
+      <h2 class="section-title">
+        <i class="fas fa-money-bill-wave"></i>
+        Select Loan Amount
+      </h2>
+      
+      <div class="loan-options">
+        <div class="loan-card" onclick="selectLoan(50000)">
+          <div class="loan-amount">₦50K</div>
+          <div class="loan-label">Starter</div>
+        </div>
+        
+        <div class="loan-card" onclick="selectLoan(100000)">
+          <div class="loan-amount">₦100K</div>
+          <div class="loan-label">Standard</div>
+        </div>
+        
+        <div class="loan-card" onclick="selectLoan(200000)">
+          <div class="loan-amount">₦200K</div>
+          <div class="loan-label">Premium</div>
+        </div>
+        
+        <div class="loan-card" onclick="selectLoan(500000)">
+          <div class="loan-amount">₦500K</div>
+          <div class="loan-label">Elite</div>
+        </div>
+      </div>
+
+      <div class="custom-amount-section">
+        <h3 class="custom-amount-title">
+          <i class="fas fa-edit"></i>
+          Or Enter Custom Amount
+        </h3>
+        <input 
+          type="number" 
+          class="custom-amount-input" 
+          id="customAmountInput"
+          placeholder="Enter amount (min ₦50,000)"
+          min="50000"
+          step="1000"
+        >
+        <p class="amount-hint">
+          <i class="fas fa-info-circle"></i> Minimum loan amount is ₦50,000
+        </p>
+      </div>
+    </div>
+
+    <!-- Application Form -->
+    <div class="application-form" id="applicationForm" style="display: none;">
+      <h2 class="section-title">
+        <i class="fas fa-file-alt"></i>
+        Loan Application Form
+      </h2>
+
+      <form id="loanForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Loan Amount</label>
+            <input type="text" class="form-input" id="loanAmountDisplay" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Repayment Period</label>
+            <select class="form-select" id="repaymentPeriod" required>
+              <option value="">Select period</option>
+              <option value="1">1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="3">3 Months</option>
+        
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Purpose of Loan</label>
+            <select class="form-select" id="loanPurpose" required>
+              <option value="">Select purpose</option>
+              <option value="business">Business Expansion</option>
+              <option value="investment">Additional Investment</option>
+              <option value="emergency">Emergency</option>
+              <option value="education">Education</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Monthly Income (₦)</label>
+            <input type="number" class="form-input" id="monthlyIncome" placeholder="e.g., 150000" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Employment Status</label>
+          <select class="form-select" id="employmentStatus" required>
+            <option value="">Select status</option>
+            <option value="employed">Employed</option>
+            <option value="self-employed">Self-Employed</option>
+            <option value="business-owner">Business Owner</option>
+            <option value="student">Student</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Additional Information</label>
+          <textarea class="form-textarea" id="additionalInfo" placeholder="Provide any additional details that might support your application..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <i class="fas fa-paper-plane"></i>
+          <span id="submitBtnText">Coming Soon</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Loan History Section -->
+    <div class="history-section">
+      <h2 class="section-title">
+        <i class="fas fa-history"></i>
+        My Loan History
+      </h2>
+      <div id="loanHistoryContainer">
+        <div class="empty-history">
+          <i class="fas fa-inbox"></i>
+          <h3>No Loan Applications Yet</h3>
+          <p>Your loan applications will appear here once you submit them</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="plans.html" class="nav-item">
+      <i class="fas fa-layer-group"></i>
+      <span>Plans</span>
+    </a>
+    <a href="loan.html" class="nav-item">
+      <i class="fas fa-hand-holding-usd"></i>
+      <span>Loans</span>
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <i class="fas fa-chart-pie"></i>
+      <span>Dashboard</span>
+    </a>
+  </nav>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+      authDomain: "cashbridge-a688e.firebaseapp.com",
+      projectId: "cashbridge-a688e",
+      storageBucket: "cashbridge-a688e.firebasestorage.app",
+      messagingSenderId: "345273765518",
+      appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let selectedLoanAmount = 0;
+    let isEligible = false;
+    let loanSystemEnabled = false;
+    let hasActiveLoan = false;
+    let loanClearanceDate = null;
+
+    window.selectLoan = function(amount) {
+      if (hasActiveLoan) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Active Loan Exists',
+          html: `You already have an active loan. You can apply for a new loan after <strong>${loanClearanceDate}</strong>.`,
+          confirmButtonColor: '#eab308'
+        });
+        return;
+      }
+
+      selectedLoanAmount = amount;
+      
+      document.getElementById('customAmountInput').value = '';
+      document.querySelectorAll('.loan-card').forEach(card => card.classList.remove('selected'));
+      event.target.closest('.loan-card').classList.add('selected');
+      document.getElementById('loanAmountDisplay').value = '₦' + amount.toLocaleString();
+      document.getElementById('applicationForm').style.display = 'block';
+      document.getElementById('applicationForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const customInput = document.getElementById('customAmountInput');
+      
+      if (customInput) {
+        customInput.addEventListener('input', (e) => {
+          if (hasActiveLoan) {
+            e.target.value = '';
+            Swal.fire({
+              icon: 'warning',
+              title: 'Active Loan Exists',
+              html: `You already have an active loan. You can apply for a new loan after <strong>${loanClearanceDate}</strong>.`,
+              confirmButtonColor: '#eab308'
+            });
+            return;
+          }
+
+          let value = parseInt(e.target.value);
+          
+          if (value && value >= 50000) {
+            selectedLoanAmount = value;
+            document.querySelectorAll('.loan-card').forEach(card => card.classList.remove('selected'));
+            document.getElementById('loanAmountDisplay').value = '₦' + value.toLocaleString();
+            document.getElementById('applicationForm').style.display = 'block';
+            customInput.style.borderColor = 'var(--primary)';
+          } else if (value && value < 50000) {
+            customInput.style.borderColor = '#ef4444';
+            selectedLoanAmount = 0;
+          } else {
+            customInput.style.borderColor = 'var(--border)';
+          }
+        });
+        
+        customInput.addEventListener('blur', (e) => {
+          let value = parseInt(e.target.value);
+          
+          if (value && value < 50000) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Amount Too Low',
+              text: 'Minimum loan amount is ₦50,000',
+              confirmButtonColor: '#22c55e'
+            });
+            e.target.value = '';
+            e.target.style.borderColor = 'var(--border)';
+          }
+        });
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      await checkEligibility(user.uid);
+      await checkActiveLoan(user.uid);
+      await checkLoanSystem();
+      await loadLoanHistory(user.uid);
+    });
+
+    async function checkActiveLoan(userId) {
+      try {
+        const loansSnapshot = await getDocs(collection(db, `users/${userId}/loanApplications`));
+        
+        hasActiveLoan = false;
+        loanClearanceDate = null;
+
+        loansSnapshot.forEach(doc => {
+          const loan = doc.data();
+          
+          // Check if loan is approved or active
+          if (loan.status === 'approved' || loan.status === 'active') {
+            const loanDate = loan.createdAt?.toDate();
+            const duration = parseInt(loan.repaymentPeriod || loan.duration || 0);
+            
+            if (loanDate && duration > 0) {
+              // Calculate clearance date (loan date + duration months)
+              const clearanceDate = new Date(loanDate);
+              clearanceDate.setMonth(clearanceDate.getMonth() + duration);
+              
+              const today = new Date();
+              
+              // If clearance date is in the future, loan is still active
+              if (clearanceDate > today) {
+                hasActiveLoan = true;
+                loanClearanceDate = clearanceDate.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                });
+              }
+            }
+          }
+        });
+
+        // Show active loan notice if exists
+        if (hasActiveLoan) {
+          const notice = document.getElementById('activeLoanNotice');
+          notice.style.display = 'block';
+          notice.innerHTML = `
+            <div class="active-loan-notice">
+              <h3><i class="fas fa-exclamation-triangle"></i> Active Loan in Progress</h3>
+              <p>You currently have an active loan. You must wait until your loan period expires before applying for a new one.</p>
+              <p class="loan-clearance-date">
+                <i class="fas fa-calendar-check"></i> You can apply for a new loan after: <strong>${loanClearanceDate}</strong>
+              </p>
+            </div>
+          `;
+
+          // Disable loan selection
+          document.getElementById('loanSection').style.display = 'none';
+          document.getElementById('applicationForm').style.display = 'none';
+        }
+
+      } catch (error) {
+        console.error('Check active loan error:', error);
+      }
+    }
+
+    async function checkEligibility(userId) {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        if (!userDoc.exists()) return;
+
+        const userData = userDoc.data();
+        const totalInvested = userData.totalDeposits || 0;
+
+        if (totalInvested >= 300000) {
+          isEligible = true;
+          document.getElementById('statusIcon').textContent = '✅';
+          document.getElementById('statusTitle').textContent = 'You\'re Eligible!';
+          document.getElementById('statusMessage').textContent = `You've invested ₦${totalInvested.toLocaleString()} and qualify for our loan program.`;
+          document.getElementById('eligibilityBanner').style.border = '2px solid var(--primary)';
+          
+          if (!hasActiveLoan) {
+            document.getElementById('loanSection').style.display = 'block';
+          }
+        } else {
+          isEligible = false;
+          const remaining = 300000 - totalInvested;
+          document.getElementById('statusIcon').textContent = '❌';
+          document.getElementById('statusTitle').textContent = 'Not Eligible Yet';
+          document.getElementById('statusMessage').textContent = `You need to invest ₦${remaining.toLocaleString()} more to qualify for loans. Current investment: ₦${totalInvested.toLocaleString()}`;
+          document.getElementById('eligibilityBanner').style.border = '2px solid var(--danger)';
+        }
+      } catch (error) {
+        console.error('Eligibility check error:', error);
+      }
+    }
+
+    async function checkLoanSystem() {
+      try {
+        const settingsDoc = await getDoc(doc(db, 'settings', 'loanSystem'));
+        if (settingsDoc.exists()) {
+          loanSystemEnabled = settingsDoc.data().enabled || false;
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+
+        if (loanSystemEnabled && isEligible && !hasActiveLoan) {
+          submitBtn.disabled = false;
+          submitBtnText.innerHTML = 'Submit Application';
+        } else if (hasActiveLoan) {
+          submitBtn.disabled = true;
+          submitBtnText.innerHTML = `<i class="fas fa-lock"></i> Active Loan Exists`;
+        } else if (!loanSystemEnabled) {
+          submitBtn.disabled = true;
+          submitBtnText.innerHTML = '<span class="coming-soon-badge"><i class="fas fa-clock"></i> Coming Soon</span>';
+        } else {
+          submitBtn.disabled = true;
+          submitBtnText.textContent = 'Not Eligible';
+        }
+      } catch (error) {
+        console.error('Loan system check error:', error);
+      }
+    }
+
+    async function loadLoanHistory(userId) {
+      const container = document.getElementById('loanHistoryContainer');
+      
+      try {
+        const loansSnapshot = await getDocs(collection(db, `users/${userId}/loanApplications`));
+        
+        if (loansSnapshot.empty) {
+          container.innerHTML = `
+            <div class="empty-history">
+              <i class="fas fa-inbox"></i>
+              <h3>No Loan Applications Yet</h3>
+              <p>Your loan applications will appear here once you submit them</p>
+            </div>
+          `;
+          return;
+        }
+
+        const loans = [];
+        loansSnapshot.forEach(doc => {
+          loans.push({ id: doc.id, ...doc.data() });
+        });
+
+        loans.sort((a, b) => {
+          const timeA = a.createdAt?.toMillis?.() || 0;
+          const timeB = b.createdAt?.toMillis?.() || 0;
+          return timeB - timeA;
+        });
+
+        let html = '<div class="history-grid">';
+
+        loans.forEach(loan => {
+          const dateString = loan.createdAt?.toDate?.().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }) || 'Unknown date';
+
+          const processedDate = (loan.approvedAt || loan.rejectedAt)?.toDate?.().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }) || '';
+
+          // Calculate loan clearance date
+          let clearanceInfo = '';
+          if (loan.status === 'approved' || loan.status === 'active') {
+            const loanDate = loan.createdAt?.toDate();
+            const duration = parseInt(loan.repaymentPeriod || loan.duration || 0);
+            
+            if (loanDate && duration > 0) {
+              const clearanceDate = new Date(loanDate);
+              clearanceDate.setMonth(clearanceDate.getMonth() + duration);
+              
+              const today = new Date();
+              const isActive = clearanceDate > today;
+              
+              const clearanceDateStr = clearanceDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              });
+
+              if (isActive) {
+                clearanceInfo = `
+                  <div class="detail-item" style="grid-column: 1 / -1;">
+                    <span class="detail-label">Loan Clearance Date</span>
+                    <span class="detail-value" style="color: var(--accent-gold);">
+                      <i class="fas fa-calendar-check"></i> ${clearanceDateStr}
+                    </span>
+                  </div>
+                `;
+              }
+            }
+          }
+
+          let statusBadge = '';
+          let statusIcon = '';
+          let additionalInfo = '';
+
+          if (loan.status === 'pending') {
+            statusBadge = `<span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending Review</span>`;
+            statusIcon = '⏳';
+          } else if (loan.status === 'approved' || loan.status === 'active') {
+            statusBadge = `<span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Approved</span>`;
+            statusIcon = '✅';
+            additionalInfo = `
+              <div class="approval-notice">
+                <i class="fas fa-check-circle"></i>
+                <p>🎉 Your loan has been approved and credited to your wallet!</p>
+                ${processedDate ? `<p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Approved on ${processedDate}</p>` : ''}
+              </div>
+            `;
+          } else if (loan.status === 'rejected') {
+            statusBadge = `<span class="status-badge status-rejected"><i class="fas fa-times-circle"></i> Rejected</span>`;
+            statusIcon = '❌';
+            if (loan.rejectionReason) {
+              additionalInfo = `
+                <div class="rejection-reason">
+                  <div class="rejection-reason-label">
+                    <i class="fas fa-info-circle"></i>
+                    Reason for Rejection:
+                  </div>
+                  <div class="rejection-reason-text">${loan.rejectionReason}</div>
+                  ${processedDate ? `<p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem;">Rejected on ${processedDate}</p>` : ''}
+                </div>
+              `;
+            }
+          }
+
+          const purposeMap = {
+            'business': 'Business Expansion',
+            'investment': 'Additional Investment',
+            'emergency': 'Emergency',
+            'education': 'Education',
+            'other': 'Other'
+          };
+
+          const employmentMap = {
+            'employed': 'Employed',
+            'self-employed': 'Self-Employed',
+            'business-owner': 'Business Owner',
+            'student': 'Student',
+            'other': 'Other'
+          };
+
+          html += `
+            <div class="history-card">
+              <div class="history-header">
+                <div class="loan-amount-display">₦${Number(loan.loanAmount || 0).toLocaleString()}</div>
+                ${statusBadge}
+              </div>
+
+              <div class="history-details">
+                <div class="detail-item">
+                  <span class="detail-label">Repayment Period</span>
+                  <span class="detail-value">${loan.repaymentPeriod || loan.duration || '—'} Month(s)</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Purpose</span>
+                  <span class="detail-value">${purposeMap[loan.loanPurpose] || loan.loanPurpose || '—'}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Monthly Income</span>
+                  <span class="detail-value">₦${Number(loan.monthlyIncome || 0).toLocaleString()}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Employment</span>
+                  <span class="detail-value">${employmentMap[loan.employmentStatus] || loan.employmentStatus || '—'}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Applied On</span>
+                  <span class="detail-value">${dateString}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Status</span>
+                  <span class="detail-value">${statusIcon} ${loan.status.charAt(0).toUpperCase() + loan.status.slice(1)}</span>
+                </div>
+
+                ${clearanceInfo}
+              </div>
+
+              ${additionalInfo}
+            </div>
+          `;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+
+      } catch (error) {
+        console.error('Load loan history error:', error);
+        container.innerHTML = `
+          <div class="empty-history">
+            <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+            <h3>Error Loading History</h3>
+            <p style="color: var(--danger);">${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    document.getElementById('loanForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (hasActiveLoan) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Active Loan Exists',
+          html: `You already have an active loan. You can apply for a new loan after <strong>${loanClearanceDate}</strong>.`,
+          confirmButtonColor: '#eab308'
+        });
+        return;
+      }
+
+      if (!loanSystemEnabled) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Coming Soon',
+          text: 'Loan applications are not available yet. Stay tuned!',
+          confirmButtonColor: '#22c55e'
+        });
+        return;
+      }
+
+      if (!isEligible) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Not Eligible',
+          text: 'You need to invest ₦300,000 or more to apply for loans.',
+          confirmButtonColor: '#ef4444'
+        });
+        return;
+      }
+
+      if (selectedLoanAmount === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Select Loan Amount',
+          text: 'Please select a loan amount or enter a custom amount (minimum ₦50,000).',
+          confirmButtonColor: '#eab308'
+        });
+        return;
+      }
+
+      if (selectedLoanAmount < 50000) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Amount',
+          text: 'Minimum loan amount is ₦50,000',
+          confirmButtonColor: '#ef4444'
+        });
+        return;
+      }
+
+      const formData = {
+        loanAmount: selectedLoanAmount,
+        repaymentPeriod: document.getElementById('repaymentPeriod').value,
+        duration: document.getElementById('repaymentPeriod').value,
+        loanPurpose: document.getElementById('loanPurpose').value,
+        monthlyIncome: document.getElementById('monthlyIncome').value,
+        employmentStatus: document.getElementById('employmentStatus').value,
+        additionalInfo: document.getElementById('additionalInfo').value,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        userId: auth.currentUser.uid
+      };
+
+      try {
+        Swal.fire({
+          title: 'Submitting...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        const loanRef = doc(collection(db, `users/${auth.currentUser.uid}/loanApplications`));
+        await setDoc(loanRef, formData);
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Application Submitted!',
+          html: `
+            <p>Your loan application for <strong>₦${selectedLoanAmount.toLocaleString()}</strong> has been submitted successfully.</p>
+            <p style="margin-top: 1rem; color: #64748b;">You will be notified once it's reviewed by our team.</p>
+          `,
+          confirmButtonColor: '#22c55e'
+        });
+
+        document.getElementById('loanForm').reset();
+        selectedLoanAmount = 0;
+        document.querySelectorAll('.loan-card').forEach(card => card.classList.remove('selected'));
+        document.getElementById('applicationForm').style.display = 'none';
+
+        // Reload to check for active loan
+        await checkActiveLoan(auth.currentUser.uid);
+        await loadLoanHistory(auth.currentUser.uid);
+
+      } catch (error) {
+        console.error('Submit error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Submission Failed',
+          text: error.message,
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>

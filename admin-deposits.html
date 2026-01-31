@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Approve Deposits | CashBridge Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+:root {
+  --bg: #020617;
+  --card: #0f172a;
+  --text: #e2e8f0;
+  --text-light: #94a3b8;
+  --primary: #22c55e;
+  --accent: #38bdf8;
+  --danger: #ef4444;
+  --warning: #eab308;
+  --whatsapp: #25d366;
+  --telegram: #0088cc;
+  --border: rgba(34, 197, 94, 0.18);
+  --success-bg: rgba(34, 197, 94, 0.1);
+  --danger-bg: rgba(239, 68, 68, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: linear-gradient(to bottom, #020617, #0a0f1e);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.header h1 {
+  color: var(--primary);
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: var(--text-light);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.card {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow-x: auto;
+  display: table;
+}
+
+th, td {
+  padding: 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+th {
+  background: rgba(30, 41, 59, 0.8);
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+th:nth-child(1), td:nth-child(1) { width: 18%; min-width: 180px; }
+th:nth-child(2), td:nth-child(2) { width: 12%; min-width: 120px; }
+th:nth-child(3), td:nth-child(3) { width: 18%; min-width: 180px; }
+th:nth-child(4), td:nth-child(4) { width: 15%; min-width: 140px; }
+th:nth-child(5), td:nth-child(5) { width: 14%; min-width: 130px; }
+th:nth-child(6), td:nth-child(6) { width: 23%; min-width: 220px; }
+
+tbody tr {
+  transition: all 0.3s ease;
+}
+
+tbody tr:hover {
+  background: rgba(34, 197, 94, 0.08);
+  transform: scale(1.01);
+}
+
+.status-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-pending {
+  background: rgba(234, 179, 8, 0.1);
+  color: var(--warning);
+}
+
+.status-completed {
+  background: var(--success-bg);
+  color: var(--primary);
+}
+
+.status-rejected {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.method-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.method-whatsapp {
+  background: rgba(37, 211, 102, 0.1);
+  color: var(--whatsapp);
+  border: 1px solid var(--whatsapp);
+}
+
+.method-telegram {
+  background: rgba(0, 136, 204, 0.1);
+  color: var(--telegram);
+  border: 1px solid var(--telegram);
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.btn-success {
+  background: var(--primary);
+  color: #000;
+}
+
+.btn-success:hover {
+  background: #16a34a;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-light);
+}
+
+.empty-state i {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--primary);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+.user-name {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.user-email {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  word-break: break-word;
+}
+
+.amount-display {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.date-display {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  white-space: normal;
+}
+
+.bank-details {
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.bank-details-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  align-items: flex-start;
+}
+
+.bank-label {
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 65px;
+  flex-shrink: 0;
+}
+
+.bank-value {
+  color: var(--text);
+  word-break: break-word;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.action-buttons .btn {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contact-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.whatsapp-link {
+  color: var(--whatsapp);
+  background: rgba(37, 211, 102, 0.1);
+  border: 1px solid var(--whatsapp);
+}
+
+.whatsapp-link:hover {
+  background: rgba(37, 211, 102, 0.2);
+  transform: translateX(3px);
+}
+
+.telegram-link {
+  color: var(--telegram);
+  background: rgba(0, 136, 204, 0.1);
+  border: 1px solid var(--telegram);
+}
+
+.telegram-link:hover {
+  background: rgba(0, 136, 204, 0.2);
+  transform: translateX(3px);
+}
+
+.notification-badge {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+  }
+  
+  .header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  
+  table {
+    font-size: 0.8rem;
+    min-width: 800px;
+  }
+  
+  th, td {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .amount-display {
+    font-size: 1.1rem;
+  }
+  
+  .bank-details {
+    font-size: 0.75rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-shield-alt"></i> Deposit Management</h1>
+    <p>Review and approve deposits from WhatsApp & Telegram</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-value" id="pendingCount">0</div>
+      <div class="stat-label">Pending Deposits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value" id="pendingAmount">₦0</div>
+      <div class="stat-label">Total Pending Amount</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value" id="approvedToday">0</div>
+      <div class="stat-label">Approved Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">❌</div>
+      <div class="stat-value" id="rejectedToday">0</div>
+      <div class="stat-label">Rejected Today</div>
+    </div>
+  </div>
+
+  <!-- Pending Deposits -->
+  <div class="card">
+    <h2 class="card-title">
+      <i class="fas fa-clock"></i> Pending Deposits
+    </h2>
+    <div id="depositsContainer" class="loading">
+      <i class="fas fa-spinner fa-spin"></i> Loading deposits...
+    </div>
+  </div>
+
+  <!-- Deposit History -->
+  <div class="card">
+    <h2 class="card-title">
+      <i class="fas fa-history"></i> Deposit History
+    </h2>
+    <div id="historyContainer" class="loading">
+      <i class="fas fa-spinner fa-spin"></i> Loading history...
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 2rem;">
+    <a href="admin-dashboard.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">
+      <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
+    </a>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, updateDoc, collection, increment, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+  authDomain: "cashbridge-a688e.firebaseapp.com",
+  projectId: "cashbridge-a688e",
+  storageBucket: "cashbridge-a688e.firebasestorage.app",
+  messagingSenderId: "345273765518",
+  appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const formatCurrency = (amount) => "₦" + Number(amount || 0).toLocaleString();
+
+// Detect deposit method from deposit data
+function getDepositMethod(deposit) {
+  const method = deposit.method || '';
+  if (method.toLowerCase().includes('telegram')) return 'telegram';
+  if (method.toLowerCase().includes('whatsapp')) return 'whatsapp';
+  // Default fallback
+  return 'whatsapp';
+}
+
+// Check admin authentication
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = 'admin-login.html';
+    return;
+  }
+
+  try {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Access Denied',
+        text: 'Administrator privileges required',
+        confirmButtonColor: '#ef4444'
+      });
+      await signOut(auth);
+      window.location.href = 'admin-login.html';
+      return;
+    }
+
+    loadDeposits();
+    loadHistory();
+  } catch (error) {
+    console.error('Auth error:', error);
+    Swal.fire('Error', 'Authentication failed', 'error');
+  }
+});
+
+async function loadDeposits() {
+  const container = document.getElementById('depositsContainer');
+  
+  try {
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    let allPendingDeposits = [];
+    let totalPendingAmount = 0;
+    let approvedTodayCount = 0;
+    let rejectedTodayCount = 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const userDoc of usersSnapshot.docs) {
+      const userId = userDoc.id;
+      const userData = userDoc.data();
+      
+      const depositsSnapshot = await getDocs(collection(db, `users/${userId}/deposits`));
+      
+      depositsSnapshot.forEach(depositDoc => {
+        const depositData = depositDoc.data();
+        
+        if (depositData.status === 'pending') {
+          allPendingDeposits.push({
+            id: depositDoc.id,
+            userId: userId,
+            username: userData.fullName || 'Unknown',
+            userEmail: userData.email || '—',
+            ...depositData
+          });
+          totalPendingAmount += Number(depositData.amount || 0);
+        }
+        
+        if (depositData.status === 'completed' && depositData.approvedAt) {
+          const approvedDate = depositData.approvedAt.toDate();
+          if (approvedDate >= today) {
+            approvedTodayCount++;
+          }
+        }
+
+        if (depositData.status === 'rejected' && depositData.rejectedAt) {
+          const rejectedDate = depositData.rejectedAt.toDate();
+          if (rejectedDate >= today) {
+            rejectedTodayCount++;
+          }
+        }
+      });
+    }
+
+    document.getElementById('pendingCount').textContent = allPendingDeposits.length;
+    document.getElementById('pendingAmount').textContent = formatCurrency(totalPendingAmount);
+    document.getElementById('approvedToday').textContent = approvedTodayCount;
+    document.getElementById('rejectedToday').textContent = rejectedTodayCount;
+
+    allPendingDeposits.sort((a, b) => {
+      const timeA = a.createdAt?.toMillis?.() || 0;
+      const timeB = b.createdAt?.toMillis?.() || 0;
+      return timeB - timeA;
+    });
+
+    if (allPendingDeposits.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-check-circle"></i>
+          <h3>All Clear!</h3>
+          <p>No pending deposits at the moment</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Amount</th>
+            <th>Bank Details</th>
+            <th>Date</th>
+            <th>Contact</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    allPendingDeposits.forEach(deposit => {
+      const dateString = deposit.createdAt?.toDate?.().toLocaleString() || '—';
+      const username = deposit.username;
+      const userEmail = deposit.userEmail;
+      const amount = deposit.amount;
+      const depositId = deposit.id;
+      const userId = deposit.userId;
+      const bankName = deposit.bankName || 'Palmpay';
+      const accountNumber = deposit.accountNumber || '7018051146';
+      const accountName = deposit.accountName || 'Taufeek Muftau';
+      const method = getDepositMethod(deposit);
+      
+      const methodBadge = method === 'telegram' 
+        ? '<span class="method-badge method-telegram"><i class="fab fa-telegram"></i> Telegram</span>'
+        : '<span class="method-badge method-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</span>';
+      
+      // Contact links
+      const whatsappLink = `https://wa.me/2347018051146?text=Hi%20${encodeURIComponent(username)},%20regarding%20your%20deposit%20of%20${formatCurrency(amount)}`;
+      const telegramLink = `https://t.me/Taufeek0?text=Hi%20${encodeURIComponent(username)},%20regarding%20your%20deposit%20of%20${formatCurrency(amount)}`;
+      
+      html += `
+        <tr>
+          <td>
+            <div class="user-info">
+              <span class="user-name">${username}</span>
+              <span class="user-email">${userEmail}</span>
+              <div style="margin-top: 0.5rem;">${methodBadge}</div>
+            </div>
+          </td>
+          <td>
+            <div class="amount-display">${formatCurrency(amount)}</div>
+          </td>
+          <td>
+            <div class="bank-details">
+              <div class="bank-details-row">
+                <span class="bank-label">Bank:</span>
+                <span class="bank-value">${bankName}</span>
+              </div>
+              <div class="bank-details-row">
+                <span class="bank-label">Account:</span>
+                <span class="bank-value">${accountNumber}</span>
+              </div>
+              <div class="bank-details-row">
+                <span class="bank-label">Name:</span>
+                <span class="bank-value">${accountName}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="date-display">${dateString}</div>
+          </td>
+          <td>
+            <div class="contact-links">
+              <a href="${whatsappLink}" class="contact-link whatsapp-link" target="_blank">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+              </a>
+              <a href="${telegramLink}" class="contact-link telegram-link" target="_blank">
+                <i class="fab fa-telegram"></i> Telegram
+              </a>
+            </div>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-success" onclick="window.approveDeposit('${depositId}', '${userId}', ${amount}, '${username.replace(/'/g, "\\'")}')">
+                <i class="fas fa-check"></i> Approve
+              </button>
+              <button class="btn btn-danger" onclick="window.rejectDeposit('${depositId}', '${userId}', '${username.replace(/'/g, "\\'")}')">
+                <i class="fas fa-times"></i> Reject
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+  } catch (error) {
+    console.error('Load deposits error:', error);
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>${error.message}</p></div>`;
+  }
+}
+
+async function loadHistory() {
+  const container = document.getElementById('historyContainer');
+  
+  try {
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    let historyDeposits = [];
+
+    for (const userDoc of usersSnapshot.docs) {
+      const userId = userDoc.id;
+      const userData = userDoc.data();
+      
+      const depositsSnapshot = await getDocs(collection(db, `users/${userId}/deposits`));
+      
+      depositsSnapshot.forEach(depositDoc => {
+        const depositData = depositDoc.data();
+        
+        if (depositData.status === 'completed' || depositData.status === 'rejected') {
+          historyDeposits.push({
+            id: depositDoc.id,
+            username: userData.fullName || 'Unknown',
+            userEmail: userData.email || '—',
+            ...depositData
+          });
+        }
+      });
+    }
+
+    historyDeposits.sort((a, b) => {
+      const timeA = (a.approvedAt || a.rejectedAt)?.toMillis?.() || 0;
+      const timeB = (b.approvedAt || b.rejectedAt)?.toMillis?.() || 0;
+      return timeB - timeA;
+    });
+
+    if (historyDeposits.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-history"></i>
+          <h3>No History Yet</h3>
+          <p>No approved or rejected deposits recorded</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Processed Date</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    historyDeposits.forEach(deposit => {
+      const processedDate = (deposit.approvedAt || deposit.rejectedAt)?.toDate?.().toLocaleString() || '—';
+      const statusClass = deposit.status === 'completed' ? 'status-completed' : 'status-rejected';
+      const statusText = deposit.status === 'completed' ? 'Approved' : 'Rejected';
+      const method = getDepositMethod(deposit);
+      
+      const methodBadge = method === 'telegram' 
+        ? '<span class="method-badge method-telegram"><i class="fab fa-telegram"></i> Telegram</span>'
+        : '<span class="method-badge method-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</span>';
+
+      const notes = deposit.status === 'rejected' 
+        ? `<span class="notification-badge"><i class="fas fa-exclamation-circle"></i> ${deposit.rejectionReason || 'No reason provided'}</span>`
+        : '—';
+
+      html += `
+        <tr>
+          <td>
+            <div class="user-info">
+              <span class="user-name">${deposit.username}</span>
+              <span class="user-email">${deposit.userEmail}</span>
+            </div>
+          </td>
+          <td><div class="amount-display">${formatCurrency(deposit.amount)}</div></td>
+          <td>${methodBadge}</td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td><div class="date-display">${processedDate}</div></td>
+          <td>${notes}</td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+  } catch (error) {
+    console.error('Load history error:', error);
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading History</h3></div>`;
+  }
+}
+
+window.approveDeposit = async (depositId, userId, amount, username) => {
+  console.log('Approving deposit:', { depositId, userId, amount, username });
+  
+  const result = await Swal.fire({
+    title: '✅ Approve Deposit?',
+    html: `
+      <div style="text-align: left; line-height: 2; padding: 1rem;">
+        <p><strong>User:</strong> ${username}</p>
+        <p><strong>Amount:</strong> <span style="color: #22c55e; font-size: 1.3rem;">${formatCurrency(amount)}</span></p>
+        <p style="color: #94a3b8; margin-top: 1rem;">
+          This will credit ${formatCurrency(amount)} to the user's wallet immediately.
+        </p>
+      </div>
+    `,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Approve',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#22c55e',
+    cancelButtonColor: '#6b7280'
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    Swal.fire({ 
+      title: 'Processing...', 
+      allowOutsideClick: false, 
+      didOpen: () => Swal.showLoading() 
+    });
+
+    // Update deposit status
+    await updateDoc(doc(db, `users/${userId}/deposits`, depositId), {
+      status: 'completed',
+      approvedAt: serverTimestamp(),
+      approvedBy: auth.currentUser.uid
+    });
+
+    // Credit user wallet
+    await updateDoc(doc(db, 'users', userId), {
+      wallet: increment(Number(amount))
+    });
+
+    console.log('Deposit approved successfully');
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Deposit Approved!',
+      html: `<p>${formatCurrency(amount)} credited to ${username}'s wallet</p>`,
+      confirmButtonColor: '#22c55e'
+    });
+
+    // Reload data
+    loadDeposits();
+    loadHistory();
+  } catch (error) {
+    console.error('Approve error:', error);
+    Swal.fire('Error', 'Failed to approve: ' + error.message, 'error');
+  }
+};
+
+window.rejectDeposit = async (depositId, userId, username) => {
+  console.log('Rejecting deposit:', { depositId, userId, username });
+  
+  const result = await Swal.fire({
+    title: '❌ Reject Deposit?',
+    html: `
+      <div style="text-align: left; padding: 1rem;">
+        <p>User: <strong>${username}</strong></p>
+        <p style="color: #eab308;">⚠️ Reason for rejection (user will be notified):</p>
+      </div>
+    `,
+    input: 'textarea',
+    inputPlaceholder: 'e.g., Invalid payment proof, wrong amount, fake screenshot',
+    showCancelButton: true,
+    confirmButtonText: 'Reject Deposit',
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#6b7280',
+    inputValidator: (value) => !value ? 'Please provide a reason for rejection' : null
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    Swal.fire({ 
+      title: 'Processing...', 
+      allowOutsideClick: false, 
+      didOpen: () => Swal.showLoading() 
+    });
+
+    await updateDoc(doc(db, `users/${userId}/deposits`, depositId), {
+      status: 'rejected',
+      rejectionReason: result.value,
+      rejectedAt: serverTimestamp(),
+      rejectedBy: auth.currentUser.uid
+    });
+
+    console.log('Deposit rejected successfully');
+
+    await Swal.fire({
+      icon: 'info',
+      title: 'Deposit Rejected',
+      html: `<p>User <strong>${username}</strong> has been notified</p><p style="margin-top: 1rem; color: #94a3b8;">Reason: ${result.value}</p>`,
+      confirmButtonColor: '#38bdf8'
+    });
+
+    // Reload data
+    loadDeposits();
+    loadHistory();
+  } catch (error) {
+    console.error('Reject error:', error);
+    Swal.fire('Error', 'Failed to reject: ' + error.message, 'error');
+  }
+};
+</script>
+
+</body>
+</html>

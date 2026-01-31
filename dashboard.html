@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CashBridge • Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --card: rgba(15, 23, 42, 0.65);
+      --text: #f1f5f9;
+      --text-light: #94a3b8;
+      --primary: #22c55e;
+      --accent: #eab308;
+      --border: rgba(34, 197, 94, 0.2);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+    body {
+      background: linear-gradient(to bottom, #0a0e17, #020617);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      padding: 3rem 5% 4rem;
+      border-bottom-left-radius: 36px;
+      border-bottom-right-radius: 36px;
+      position: relative;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.15), transparent 60%);
+      pointer-events: none;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .user-greeting {
+      font-size: 1.2rem;
+      color: rgba(0,0,0,0.8);
+      margin-bottom: 0.5rem;
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 6vw, 3rem);
+      color: #000;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .wallet-display {
+      font-size: 1.1rem;
+      color: rgba(0,0,0,0.85);
+      font-weight: 600;
+    }
+
+    .wallet-amount {
+      font-size: 2.2rem;
+      color: #000;
+      font-weight: 700;
+      display: block;
+      margin-top: 0.5rem;
+    }
+
+    .logout-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      background: rgba(0,0,0,0.3);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.3rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logout-btn:hover {
+      background: rgba(0,0,0,0.5);
+      transform: scale(1.05);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      max-width: 1400px;
+      margin: -3rem auto 2rem;
+      padding: 0 5%;
+      position: relative;
+      z-index: 3;
+    }
+
+    .stat-card {
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+      transition: all 0.35s ease;
+      text-align: center;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 5%;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .action-btn {
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary), #16a34a);
+      color: white;
+      font-weight: 700;
+      padding: 1.3rem;
+      border-radius: 16px;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(34,197,94,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(34,197,94,0.6);
+    }
+
+    .action-btn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .loan-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.3rem;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .loan-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .loan-btn:hover::before {
+      left: 100%;
+    }
+
+    .loan-btn:hover {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(239, 68, 68, 0.6);
+    }
+
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+
+    .card-title {
+      font-size: 2rem;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab {
+      padding: 0.8rem 1.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text-light);
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      border-bottom: 3px solid transparent;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab:hover {
+      color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow-x: auto;
+      display: block;
+    }
+
+    thead, tbody { display: table; width: 100%; table-layout: fixed; }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    th {
+      background: rgba(30,41,59,0.6);
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+
+    td {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    tr:hover {
+      background: rgba(34,197,94,0.05);
+    }
+
+    .status-badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-pending { background: rgba(234, 179, 8, 0.2); color: #eab308; }
+    .status-completed { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .status-approved { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .status-rejected { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .status-active { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .status-paid { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
+
+    .type-deposit { color: #22c55e; }
+    .type-withdrawal { color: #eab308; }
+    .type-bonus { color: #3b82f6; }
+    .type-referral { color: #a855f7; }
+    .type-loan { color: #ef4444; }
+
+    .bonus-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.7rem;
+      background: rgba(168, 85, 247, 0.15);
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #a855f7;
+    }
+
+    .level-1 { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .level-2 { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .level-3 { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+
+    .no-data {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-light);
+    }
+
+    .no-data i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--primary);
+    }
+
+    .support-card {
+      text-align: center;
+    }
+
+    .whatsapp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #25D366;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      margin: 0.5rem;
+      transition: 0.3s;
+      box-shadow: 0 8px 25px rgba(37,211,102,0.4);
+    }
+
+    .whatsapp-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(37,211,102,0.6);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 0.75rem 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 0.75rem;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+    }
+
+    .nav-item i { font-size: 1.3rem; }
+
+    .nav-item.active {
+      color: var(--primary);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+      
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+      
+      table {
+        font-size: 0.75rem;
+      }
+      
+      th, td {
+        padding: 0.6rem 0.4rem;
+      }
+      
+      .tab {
+        padding: 0.7rem 1rem;
+        font-size: 0.8rem;
+      }
+      
+      .card {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <button class="logout-btn" id="logoutBtn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+    <div class="header-content">
+      <p class="user-greeting">Welcome back, <span id="userName">Investor</span>!</p>
+      <h1>Your Dashboard</h1>
+      <div class="wallet-display">
+        Wallet Balance
+        <span class="wallet-amount" id="walletBalance">₦0</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-label">Total Invested</div>
+      <div class="stat-value" id="totalInvested">₦0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📈</div>
+      <div class="stat-label">Total Earnings</div>
+      <div class="stat-value" id="totalEarnings">₦0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🎁</div>
+      <div class="stat-label">Referral Bonus</div>
+      <div class="stat-value" id="referralBonus">₦0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-label">Active Plans</div>
+      <div class="stat-value" id="activePlans">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-label">Total Referrals</div>
+      <div class="stat-value" id="totalReferrals">0</div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="quick-actions">
+      <a href="deposit.html" class="action-btn">
+        <i class="fas fa-plus-circle"></i> Deposit
+      </a>
+      <a href="withdrawal.html" id="withdrawBtn" class="action-btn">
+        <i class="fas fa-money-bill-wave"></i> Withdraw
+      </a>
+      <a href="plans.html" class="action-btn">
+        <i class="fas fa-rocket"></i> Invest
+      </a>
+      <a href="referral.html" class="action-btn">
+        <i class="fas fa-share-nodes"></i> Refer
+      </a>
+      <a href="loan.html" class="loan-btn">
+        <i class="fas fa-hand-holding-usd"></i> Request Loan
+      </a>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">
+        <i class="fas fa-history"></i> Transaction History
+      </h2>
+      
+      <div class="tabs">
+        <button class="tab active" data-tab="all">
+          <i class="fas fa-list"></i> All
+        </button>
+        <button class="tab" data-tab="deposits">
+          <i class="fas fa-arrow-down"></i> Deposits
+        </button>
+        <button class="tab" data-tab="withdrawals">
+          <i class="fas fa-arrow-up"></i> Withdrawals
+        </button>
+        <button class="tab" data-tab="loans">
+          <i class="fas fa-hand-holding-usd"></i> Loans
+        </button>
+        <button class="tab" data-tab="roi">
+          <i class="fas fa-chart-line"></i> ROI
+        </button>
+        <button class="tab" data-tab="referrals">
+          <i class="fas fa-gift"></i> Referrals
+        </button>
+      </div>
+
+      <div class="tab-content active" id="tab-all">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading transactions...</div>
+      </div>
+
+      <div class="tab-content" id="tab-deposits">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading deposits...</div>
+      </div>
+
+      <div class="tab-content" id="tab-withdrawals">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading withdrawals...</div>
+      </div>
+
+      <div class="tab-content" id="tab-loans">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading loans...</div>
+      </div>
+
+      <div class="tab-content" id="tab-roi">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading ROI...</div>
+      </div>
+
+      <div class="tab-content" id="tab-referrals">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading referral bonuses...</div>
+      </div>
+    </div>
+
+    <div class="card support-card">
+      <h2 class="card-title">
+        <i class="fas fa-headset"></i> Need Help?
+      </h2>
+      <p style="color:var(--text-light); margin-bottom:2rem;">
+        Our support team is available 24/7 via WhatsApp
+      </p>
+      <a href="https://wa.me/2347018051146" class="whatsapp-btn" target="_blank">
+        <i class="fab fa-whatsapp"></i> Support Line 1
+      </a>
+      <a href="https://wa.me/2349167378733" class="whatsapp-btn" target="_blank">
+        <i class="fab fa-whatsapp"></i> Support Line 2
+      </a>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="plans.html" class="nav-item">
+      <i class="fas fa-layer-group"></i>
+      <span>Plans</span>
+    </a>
+    <a href="referral.html" class="nav-item">
+      <i class="fas fa-share-nodes"></i>
+      <span>Referral</span>
+    </a>
+    <a href="dashboard.html" class="nav-item active">
+      <i class="fas fa-chart-pie"></i>
+      <span>Dashboard</span>
+    </a>
+  </nav>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const app = initializeApp({
+      apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+      authDomain: "cashbridge-a688e.firebaseapp.com",
+      projectId: "cashbridge-a688e",
+      storageBucket: "cashbridge-a688e.firebasestorage.app",
+      messagingSenderId: "345273765518",
+      appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const money = n => "₦" + Number(n || 0).toLocaleString();
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      const result = await Swal.fire({
+        title: "Logout Confirmation",
+        text: "Are you sure you want to log out?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Logout",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: '#22c55e',
+        cancelButtonColor: '#64748b'
+      });
+
+      if (result.isConfirmed) {
+        await signOut(auth);
+        Swal.fire({
+          icon: "success",
+          title: "Logged Out Successfully",
+          timer: 1500,
+          showConfirmButton: false
+        });
+        setTimeout(() => window.location.href = "login.html", 1500);
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userData = userSnap.data();
+
+      // Display user info
+      const firstName = userData.fullName?.split(' ')[0] || "Investor";
+      document.getElementById("userName").textContent = firstName;
+
+      const wallet = Number(userData.wallet || 0);
+      document.getElementById("walletBalance").textContent = money(wallet);
+      document.getElementById("totalInvested").textContent = money(userData.totalDeposits || 0);
+      document.getElementById("totalEarnings").textContent = money(userData.totalEarnings || 0);
+
+      // Calculate referral bonus earnings
+      const referralsSnap = await getDocs(collection(db, `users/${user.uid}/referrals`));
+      let totalReferralBonus = 0;
+      referralsSnap.forEach(doc => {
+        const refData = doc.data();
+        totalReferralBonus += Number(refData.totalEarned || 0);
+      });
+      document.getElementById("referralBonus").textContent = money(totalReferralBonus);
+
+      // Active plans
+      const activePlansSnap = await getDocs(collection(db, `users/${user.uid}/activePlans`));
+      let activeCount = 0;
+      activePlansSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.active !== false && data.daysLeft > 0) {
+          activeCount++;
+        }
+      });
+      document.getElementById("activePlans").textContent = activeCount;
+
+      // Total referrals count
+      document.getElementById("totalReferrals").textContent = referralsSnap.size;
+
+      // Withdraw button state
+      document.getElementById("withdrawBtn").classList.toggle("disabled", wallet < 1000);
+
+      // Load transactions
+      await loadTransactions(user.uid);
+    });
+
+    async function loadTransactions(userId) {
+      const transactions = [];
+
+      // Get deposits
+      const depositsSnap = await getDocs(collection(db, `users/${userId}/deposits`));
+      depositsSnap.forEach(doc => {
+        const data = doc.data();
+        transactions.push({
+          ...data,
+          id: doc.id,
+          type: 'Deposit',
+          typeClass: 'type-deposit',
+          category: 'deposit'
+        });
+      });
+
+      // Get withdrawals
+      const withdrawalsSnap = await getDocs(collection(db, `users/${userId}/withdrawals`));
+      withdrawalsSnap.forEach(doc => {
+        const data = doc.data();
+        transactions.push({
+          ...data,
+          id: doc.id,
+          type: 'Withdrawal',
+          typeClass: 'type-withdrawal',
+          category: 'withdrawal'
+        });
+      });
+
+      // Get loans - THIS IS THE NEW FEATURE!
+      const loansSnap = await getDocs(collection(db, `users/${userId}/loanApplications`));
+      loansSnap.forEach(doc => {
+        const data = doc.data();
+        transactions.push({
+          ...data,
+          id: doc.id,
+          type: 'Loan',
+          typeClass: 'type-loan',
+          category: 'loan',
+          loanAmount: data.loanAmount,
+          monthlyPayment: data.monthlyPayment,
+          totalRepayment: data.totalRepayment,
+          duration: data.duration,
+          purpose: data.purpose
+        });
+      });
+
+      // Get ROI from investment plans
+      const plansSnap = await getDocs(collection(db, `users/${userId}/activePlans`));
+      plansSnap.forEach(doc => {
+        const data = doc.data();
+        const claimsCount = 30 - (data.daysLeft || 30);
+        if (claimsCount > 0) {
+          transactions.push({
+            amount: data.dailyEarning * claimsCount,
+            createdAt: data.lastClaimed || data.startDate,
+            status: 'Completed',
+            type: 'Investment ROI',
+            typeClass: 'type-bonus',
+            planName: data.planName,
+            category: 'roi',
+            details: `${claimsCount}× ${money(data.dailyEarning)} daily claims`
+          });
+        }
+      });
+
+      // Get referral bonuses
+      const referralsSnap = await getDocs(collection(db, `users/${userId}/referrals`));
+      
+      for (const refDoc of referralsSnap.docs) {
+        const refData = refDoc.data();
+        const referredUserId = refData.referredUserId;
+        const referredName = refData.referredUserName || 'Unknown User';
+        const level = refData.level || 1;
+        const commission = refData.commission || 0;
+        const totalEarned = refData.totalEarned || 0;
+        
+        if (totalEarned > 0) {
+          try {
+            const refPlansSnap = await getDocs(collection(db, `users/${referredUserId}/activePlans`));
+            
+            refPlansSnap.forEach(planDoc => {
+              const planData = planDoc.data();
+              const bonus = Math.floor(planData.capital * (commission / 100));
+              
+              if (bonus > 0) {
+                transactions.push({
+                  amount: bonus,
+                  createdAt: planData.createdAt || planData.startDate,
+                  status: 'Completed',
+                  type: 'Referral Bonus',
+                  typeClass: 'type-referral',
+                  category: 'referral',
+                  referredUser: referredName,
+                  level: level,
+                  commission: commission,
+                  planName: planData.planName,
+                  investmentAmount: planData.capital,
+                  details: `Level ${level} (${commission}%) from ${referredName}'s ${planData.planName} plan`
+                });
+              }
+            });
+          } catch (e) {
+            console.error('Error loading referral investments:', e);
+          }
+        }
+      }
+
+      // Sort by date (newest first)
+      transactions.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return timeB - timeA;
+      });
+
+      // Render tables
+      renderTable('all', transactions);
+      renderTable('deposits', transactions.filter(t => t.category === 'deposit'));
+      renderTable('withdrawals', transactions.filter(t => t.category === 'withdrawal'));
+      renderTable('loans', transactions.filter(t => t.category === 'loan'));
+      renderTable('roi', transactions.filter(t => t.category === 'roi'));
+      renderTable('referrals', transactions.filter(t => t.category === 'referral'));
+    }
+
+    function renderTable(tabName, transactions) {
+      const container = document.getElementById(`tab-${tabName}`);
+      
+      if (transactions.length === 0) {
+        container.innerHTML = `
+          <div class="no-data">
+            <i class="fas fa-inbox"></i>
+            <h3>No Transactions Found</h3>
+            <p>Your ${tabName === 'all' ? 'transaction' : tabName} history will appear here</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${transactions.map(tx => {
+              let detailsHTML = '';
+              
+              // Format details based on transaction type
+              if (tx.category === 'loan') {
+                detailsHTML = `
+                  <strong>Loan Amount:</strong> ${money(tx.loanAmount || 0)}<br>
+                  <strong>Duration:</strong> ${tx.duration || 0} months<br>
+                  <strong>Monthly Payment:</strong> ${money(tx.monthlyPayment || 0)}<br>
+                  <strong>Total Repayment:</strong> ${money(tx.totalRepayment || 0)}<br>
+                  ${tx.purpose ? `<strong>Purpose:</strong> ${tx.purpose}` : ''}
+                `;
+              } else if (tx.category === 'referral') {
+                detailsHTML = `
+                  ${tx.details || ''}
+                  ${tx.referredUser ? `<br><small style="color:#a855f7">👤 ${tx.referredUser}</small>` : ''}
+                  ${tx.investmentAmount ? `<br><small style="color:#94a3b8">Investment: ${money(tx.investmentAmount)}</small>` : ''}
+                `;
+              } else {
+                detailsHTML = tx.details || tx.planName || tx.method || '—';
+              }
+
+              return `
+                <tr>
+                  <td>${tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleDateString() : '—'}</td>
+                  <td>
+                    <span class="${tx.typeClass}"><strong>${tx.type}</strong></span>
+                    ${tx.level ? `<span class="bonus-badge level-${tx.level}">L${tx.level} (${tx.commission}%)</span>` : ''}
+                  </td>
+                  <td><strong>${money(tx.amount || tx.loanAmount || 0)}</strong></td>
+                  <td><span class="status-badge status-${(tx.status || 'pending').toLowerCase()}">${tx.status || 'Pending'}</span></td>
+                  <td>${detailsHTML}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+      
+      container.innerHTML = tableHTML;
+    }
+  </script>
+</body>
+</html>
