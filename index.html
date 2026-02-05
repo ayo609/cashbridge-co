@@ -3,25 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CashBridge • Smart & Secure Investing</title>
+  <title>CashBridge • Smart & Secure Wealth Growth</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <style>
 :root {
-  --bg: #020617;
-  --card: #0f172a;
+  --bg: #02040f;
+  --card: #0a1125;
+  --border: rgba(34,197,94,0.14);
   --text: #e2e8f0;
   --text-light: #94a3b8;
   --primary: #22c55e;
   --primary-dark: #16a34a;
   --accent: #38bdf8;
-  --gradient: linear-gradient(135deg, #22c55e 0%, #38bdf8 100%);
+  --gradient: linear-gradient(135deg, #22c55e 0%, #10b981 50%, #38bdf8 100%);
+  --glass: rgba(15, 23, 42, 0.55);
 }
 
 * {
@@ -36,6 +37,10 @@ body {
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(34,197,94,0.08) 0%, transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(56,189,248,0.07) 0%, transparent 35%);
+  background-attachment: fixed;
 }
 
 /* ── Navbar ── */
@@ -45,20 +50,20 @@ body {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(2,6,23,0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(34,197,94,0.12);
-  transition: all 0.4s ease;
+  background: rgba(2,6,23,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .navbar.scrolled {
-  padding: 12px 0;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  padding: 8px 0;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .nav-container {
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0 5%;
   display: flex;
@@ -68,23 +73,26 @@ body {
 }
 
 .logo {
-  font-size: 2.1rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
   font-weight: 800;
-  color: var(--primary);
-  letter-spacing: -1px;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -1.5px;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 2.6rem;
+  gap: 2.8rem;
 }
 
 .nav-links a {
   color: var(--text-light);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
   position: relative;
 }
 
@@ -92,11 +100,12 @@ body {
   content: '';
   position: absolute;
   width: 0;
-  height: 2px;
-  bottom: -4px;
+  height: 2.5px;
+  bottom: -6px;
   left: 0;
-  background: var(--primary);
-  transition: width 0.3s ease;
+  background: var(--gradient);
+  transition: width 0.4s ease;
+  border-radius: 2px;
 }
 
 .nav-links a:hover::after,
@@ -111,19 +120,52 @@ body {
 
 .cta-btn {
   background: var(--primary);
-  color: black;
-  padding: 10px 24px;
-  border-radius: 10px;
+  color: #000;
+  padding: 10px 26px;
+  border-radius: 12px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 14px rgba(34,197,94,0.35);
+  transition: all 0.35s ease;
+  box-shadow: 0 5px 18px rgba(34,197,94,0.3);
 }
 
 .cta-btn:hover {
   background: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(56,189,248,0.4);
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 12px 32px rgba(56,189,248,0.35);
+}
+
+/* Mobile Menu */
+.hamburger {
+  display: none;
+  font-size: 1.8rem;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .hamburger { display: block; }
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(2,6,23,0.98);
+    backdrop-filter: blur(12px);
+    flex-direction: column;
+    gap: 1.8rem;
+    padding: 2rem 5%;
+    transform: translateY(-20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s ease;
+  }
+  .nav-links.active {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-links a { font-size: 1.15rem; }
 }
 
 /* ── Hero ── */
@@ -133,12 +175,20 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 140px 5% 100px;
-  background: linear-gradient(to bottom, rgba(2,6,23,0) 0%, rgba(2,6,23,0.4) 100%);
+  padding: 160px 5% 120px;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(2,6,23,0.3), rgba(2,6,23,0.7));
+  z-index: 1;
 }
 
 .hero-content {
-  max-width: 900px;
+  max-width: 980px;
   text-align: center;
   position: relative;
   z-index: 2;
@@ -146,10 +196,10 @@ body {
 
 .hero h1 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(3.2rem, 7vw, 5.2rem);
-  font-weight: 700;
-  line-height: 1.05;
-  margin-bottom: 1.4rem;
+  font-size: clamp(3.8rem, 9vw, 6.2rem);
+  font-weight: 800;
+  line-height: 1.02;
+  margin-bottom: 1.6rem;
   background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -157,40 +207,40 @@ body {
 }
 
 .hero p {
-  font-size: clamp(1.1rem, 3vw, 1.38rem);
+  font-size: clamp(1.18rem, 3.2vw, 1.48rem);
   color: var(--text-light);
-  max-width: 640px;
-  margin: 0 auto 2.5rem;
-  line-height: 1.7;
+  max-width: 720px;
+  margin: 0 auto 3rem;
+  line-height: 1.75;
 }
 
 .hero-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.2rem;
+  gap: 1.4rem;
   justify-content: center;
 }
 
 .btn {
-  padding: 14px 32px;
-  border-radius: 12px;
+  padding: 16px 38px;
+  border-radius: 14px;
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   text-decoration: none;
-  transition: all 0.35s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
 
 .btn-primary {
   background: var(--primary);
-  color: black;
-  box-shadow: 0 6px 20px rgba(34,197,94,0.4);
+  color: #000;
+  box-shadow: 0 8px 24px rgba(34,197,94,0.45);
 }
 
 .btn-primary:hover {
   background: var(--accent);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(56,189,248,0.45);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 16px 40px rgba(56,189,248,0.5);
 }
 
 .btn-outline {
@@ -200,83 +250,65 @@ body {
 
 .btn-outline:hover {
   background: var(--primary);
-  color: black;
-  transform: translateY(-3px);
+  color: #000;
+  transform: translateY(-5px) scale(1.05);
 }
 
-/* ── Stats ── */
+/* ── Stats (Glassmorphism) ── */
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
-  margin: -80px auto 100px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.2rem;
+  max-width: 1280px;
+  margin: -100px auto 140px;
   padding: 0 5%;
   position: relative;
   z-index: 10;
 }
 
 .stat-card {
-  background: var(--card);
-  border-radius: 20px;
-  padding: 3rem 2rem;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 3.2rem 2.2rem;
   text-align: center;
-  border: 1px solid rgba(34,197,94,0.12);
-  transition: all 0.4s ease;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(4px);
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--gradient);
-  opacity: 0.07;
-  z-index: 0;
-  transition: opacity 0.6s ease;
-}
-
-.stat-card:hover::before {
-  opacity: 0.14;
+  border: 1px solid var(--border);
+  transition: all 0.5s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-12px);
+  transform: translateY(-16px) scale(1.03);
   border-color: var(--primary);
-  box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+  box-shadow: 0 30px 70px rgba(0,0,0,0.5);
 }
 
 .stat-number {
-  font-size: 3.8rem;
+  font-size: 4.2rem;
   font-weight: 800;
   color: var(--primary);
   line-height: 1;
-  margin-bottom: 0.8rem;
-  position: relative;
-  z-index: 1;
+  margin-bottom: 1rem;
 }
 
 .stat-label {
   color: var(--text-light);
-  font-size: 1.15rem;
-  position: relative;
-  z-index: 1;
+  font-size: 1.2rem;
 }
 
 /* ── Sections ── */
 .section {
-  padding: 120px 5%;
-  max-width: 1400px;
+  padding: 140px 5%;
+  max-width: 1440px;
   margin: 0 auto;
 }
 
 .section-title {
   text-align: center;
-  font-size: clamp(2.4rem, 5vw, 3.6rem);
-  font-weight: 700;
-  margin-bottom: 1.2rem;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.8rem, 6vw, 4.4rem);
+  font-weight: 800;
+  margin-bottom: 1.4rem;
   background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -285,89 +317,97 @@ body {
 .section-subtitle {
   text-align: center;
   color: var(--text-light);
-  font-size: 1.25rem;
-  max-width: 720px;
-  margin: 0 auto 4rem;
-  line-height: 1.7;
+  font-size: 1.32rem;
+  max-width: 760px;
+  margin: 0 auto 5rem;
+  line-height: 1.8;
 }
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 2.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 2.4rem;
 }
 
 .feature-card {
   background: var(--card);
-  border-radius: 16px;
-  padding: 2.5rem;
-  border: 1px solid rgba(34,197,94,0.1);
-  transition: all 0.4s ease;
+  border-radius: 20px;
+  padding: 2.8rem;
+  border: 1px solid var(--border);
+  transition: all 0.5s ease;
 }
 
 .feature-card:hover {
-  transform: translateY(-12px);
+  transform: translateY(-16px);
   border-color: var(--primary);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
 }
 
 .feature-icon {
-  font-size: 2.8rem;
+  font-size: 3.2rem;
   color: var(--primary);
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.6rem;
+  background: rgba(34,197,94,0.1);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
 }
 
 .feature-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+  font-size: 1.65rem;
+  margin-bottom: 1.2rem;
   color: white;
 }
 
-/* ── CTA ── */
+/* ── Strong CTA ── */
 .cta {
-  margin: 140px 5% 0;
-  padding: 100px 5%;
-  border-radius: 32px;
+  margin: 160px 5% 0;
+  padding: 120px 5%;
+  border-radius: 40px;
   background: var(--gradient);
   text-align: center;
-  color: black;
+  color: #000;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 30px 80px rgba(34,197,94,0.35);
+  box-shadow: 0 40px 100px rgba(34,197,94,0.4);
 }
 
 .cta::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0));
-  animation: shine 8s infinite;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shine 10s infinite linear;
 }
 
 @keyframes shine {
-  0% { transform: translateX(-100%); }
+  0%   { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
 
 .cta h2 {
-  font-size: clamp(2.6rem, 6vw, 4rem);
-  margin-bottom: 1.5rem;
-  font-weight: 700;
+  font-size: clamp(3rem, 7vw, 4.8rem);
+  margin-bottom: 1.8rem;
+  font-weight: 800;
 }
 
 .cta p {
-  font-size: 1.3rem;
-  max-width: 680px;
-  margin: 0 auto 2.5rem;
+  font-size: 1.38rem;
+  max-width: 720px;
+  margin: 0 auto 3rem;
   opacity: 0.95;
 }
 
 /* ── Footer ── */
 .footer {
-  background: #0a0f1a;
-  padding: 5rem 5% 3rem;
+  background: #050b17;
+  padding: 6rem 5% 4rem;
   color: var(--text-light);
   text-align: center;
+  border-top: 1px solid var(--border);
 }
 
 .footer a {
@@ -380,42 +420,34 @@ body {
   color: var(--primary);
 }
 
-/* ── Mobile ── */
-@media (max-width: 900px) {
-  .nav-links {
-    display: none;
-  }
-  
-  .nav-container {
-    height: 70px;
-  }
-  
-  .hero {
-    padding-top: 110px;
-  }
-  
-  .hero-buttons {
-    flex-direction: column;
-  }
-  
-  .btn {
-    padding: 16px 36px;
-  }
+/* Fade-in animation */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.9s ease-out;
 }
 
-@media (max-width: 480px) {
-  .stat-number {
-    font-size: 3rem;
-  }
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 140px 5% 80px; min-height: 90vh; }
+  .stats { margin: -60px auto 100px; }
+  .section { padding: 100px 5%; }
+  .cta { padding: 90px 5%; margin: 120px 5% 0; }
 }
 </style>
 </head>
 <body>
 
-<!-- ── Navigation ── -->
+<!-- Navigation -->
 <header class="navbar">
   <div class="nav-container">
     <div class="logo">CashBridge</div>
+    
+    <div class="hamburger"><i class="fas fa-bars"></i></div>
     
     <nav class="nav-links">
       <a href="#" class="active">Home</a>
@@ -427,163 +459,191 @@ body {
   </div>
 </header>
 
-<!-- ── Hero ── -->
-<section class="hero">
+<!-- Hero -->
+<section class="hero fade-in">
   <div class="hero-content">
-    <h1>Smart Investing Made Simple & Secure</h1>
-    <p>Grow your wealth confidently with transparent plans, guaranteed returns, and institutional-grade security.</p>
+    <h1>Intelligent Investing. Secure Growth.</h1>
+    <p>Build lasting wealth with institutional-grade strategies, full transparency, guaranteed minimum returns, and bank-level protection — designed for today’s smart investor.</p>
     
     <div class="hero-buttons">
-      <a href="register.html" class="btn btn-primary">Start Investing Now</a>
-      <a href="#why" class="btn btn-outline">Learn More</a>
+      <a href="register.html" class="btn btn-primary">Start Building Wealth →</a>
+      <a href="#why" class="btn btn-outline">Discover the Difference</a>
     </div>
   </div>
 </section>
 
-<!-- ── Stats ── -->
+<!-- Stats -->
 <section class="stats">
-  <div class="stat-card">
-    <div class="stat-number" id="usersJoined">0</div>
-    <div class="stat-label">Happy Investors</div>
+  <div class="stat-card fade-in">
+    <div class="stat-number" id="usersJoined">0+</div>
+    <div class="stat-label">Active Investors</div>
   </div>
   
-  <div class="stat-card">
-    <div class="stat-number" id="totalInvested">0</div>
-    <div class="stat-label">Total Invested</div>
+  <div class="stat-card fade-in">
+    <div class="stat-number" id="totalInvested">$0M+</div>
+    <div class="stat-label">Managed Assets</div>
   </div>
   
-  <div class="stat-card">
-    <div class="stat-number">99.9%</div>
-    <div class="stat-label">Uptime & Security</div>
+  <div class="stat-card fade-in">
+    <div class="stat-number">99.98%</div>
+    <div class="stat-label">Platform Uptime</div>
   </div>
 </section>
 
-<!-- ── History ── -->
+<!-- History -->
 <section class="section" id="history">
-  <h2 class="section-title">Our History</h2>
-  <p class="section-subtitle">Founded with a vision to democratize high-quality investing</p>
+  <h2 class="section-title fade-in">Our Journey</h2>
+  <p class="section-subtitle fade-in">From a bold vision in 2020 to a trusted name in intelligent wealth creation</p>
   
   <div class="cards-grid">
-    <div class="feature-card">
-      <i class="fa-solid fa-seedling feature-icon"></i>
+    <div class="feature-card fade-in">
+      <div class="feature-icon"><i class="fa-solid fa-seedling"></i></div>
       <h3>Founded 2020</h3>
-      <p>CashBridge was born from the need for a truly transparent and investor-first platform.</p>
+      <p>Created to bring institutional-quality investing to everyday people with radical transparency.</p>
     </div>
     
-    <div class="feature-card">
-      <i class="fa-solid fa-chart-line feature-icon"></i>
-      <h3>Steady Growth</h3>
-      <p>Thousands of users have joined us on the journey to financial independence.</p>
+    <div class="feature-card fade-in">
+      <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+      <h3>Consistent Growth</h3>
+      <p>Tens of thousands of members now trust CashBridge to grow and protect their capital.</p>
     </div>
     
-    <div class="feature-card">
-      <i class="fa-solid fa-shield-halved feature-icon"></i>
-      <h3>Security First</h3>
-      <p>Enterprise-grade security and full regulatory compliance since day one.</p>
+    <div class="feature-card fade-in">
+      <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <h3>Security Obsessed</h3>
+      <p>Multi-layer protection, regular third-party audits, and full regulatory alignment from day one.</p>
     </div>
   </div>
 </section>
 
-<!-- ── Goals ── -->
+<!-- Goals -->
 <section class="section" id="goals">
-  <h2 class="section-title">Our Goals</h2>
-  <p class="section-subtitle">Building the future of accessible, high-return investing</p>
+  <h2 class="section-title fade-in">What Drives Us</h2>
+  <p class="section-subtitle fade-in">Building tomorrow’s standard for accessible, high-confidence investing</p>
   
   <div class="cards-grid">
-    <div class="feature-card">
-      <i class="fa-solid fa-handshake-angle feature-icon"></i>
-      <h3>Accessibility</h3>
-      <p>Lowering barriers so everyone can participate in wealth creation.</p>
+    <div class="feature-card fade-in">
+      <div class="feature-icon"><i class="fa-solid fa-handshake-angle"></i></div>
+      <h3>Radical Accessibility</h3>
+      <p>Removing gatekeepers so anyone can access high-quality wealth-building opportunities.</p>
     </div>
     
-    <div class="feature-card">
-      <i class="fa-solid fa-arrow-trend-up feature-icon"></i>
-      <h3>Consistent Returns</h3>
-      <p>Creating reliable strategies that deliver results through all market conditions.</p>
+    <div class="feature-card fade-in">
+      <div class="feature-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+      <h3>Reliable Performance</h3>
+      <p>Engineered strategies designed to deliver through bull, bear, and sideways markets.</p>
     </div>
     
-    <div class="feature-card">
-      <i class="fa-solid fa-users-gear feature-icon"></i>
-      <h3>Education & Support</h3>
-      <p>Empowering our community with knowledge and personal guidance.</p>
+    <div class="feature-card fade-in">
+      <div class="feature-icon"><i class="fa-solid fa-users-gear"></i></div>
+      <h3>Education & Clarity</h3>
+      <p>Equipping our community with knowledge, tools, and personalized support at every step.</p>
     </div>
   </div>
 </section>
 
-<!-- ── Why Choose Us ── -->
+<!-- Why Choose Us -->
 <section class="section" id="why">
-  <h2 class="section-title">Why Choose CashBridge</h2>
-  <p class="section-subtitle">What makes us the preferred choice for serious investors</p>
+  <h2 class="section-title fade-in">Why Serious Investors Choose CashBridge</h2>
+  <p class="section-subtitle fade-in">The combination of security, transparency, and performance that stands apart</p>
   
   <div class="cards-grid">
-    <div class="feature-card">
-      <i class="fa-solid fa-lock feature-icon"></i>
+    <div class="feature-card fade-in">
+      <div class="feature-icon"><i class="fa-solid fa-lock"></i></div>
       <h3>Institutional Security</h3>
-      <p>Bank-level encryption, cold storage, multi-signature wallets & regular audits.</p>
+      <p>Bank-grade encryption • Cold storage • Multi-sig • SOC 2 compliant • Quarterly audits.</p>
     </div>
     
-    <div class="feature-card">
-      <i class="fa-solid fa-chart-pie feature-icon"></i>
-      <h3>Transparent Performance</h3>
-      <p>Real-time tracking, full history and no hidden fees.</p>
+    <div class="feature-card fade-in">
+      <div class="feature-icon"><i class="fa-solid fa-chart-pie"></i></div>
+      <h3>Radical Transparency</h3>
+      <p>Live performance dashboards • Full audit trails • No hidden fees • Open strategy breakdowns.</p>
     </div>
     
-    <div class="feature-card">
-      <i class="fa-solid fa-medal feature-icon"></i>
-      <h3>Best Risk-Return Ratio</h3>
-      <p>Proven strategies that consistently outperform traditional investments.</p>
+    <div class="feature-card fade-in">
+      <div class="feature-icon"><i class="fa-solid fa-medal"></i></div>
+      <h3>Superior Risk-Return</h3>
+      <p>Proven frameworks that consistently deliver better-adjusted returns than traditional vehicles.</p>
     </div>
   </div>
 </section>
 
-<!-- ── Strong CTA ── -->
-<section class="cta">
-  <h2>Join Thousands of Smart Investors Today</h2>
-  <p>Experience the next generation of wealth building with the platform that puts you first.</p>
+<!-- Final CTA -->
+<section class="cta fade-in">
+  <h2>Join the Next Generation of Wealth Builders</h2>
+  <p>Experience intelligent investing that puts control, clarity, and security first — start today with zero barriers.</p>
   
-  <div style="margin-top:2.5rem">
-    <a href="register.html" class="btn btn-primary" style="font-size:1.3rem; padding:18px 48px;">Create Your Free Account →</a>
+  <div style="margin-top:3rem">
+    <a href="register.html" class="btn btn-primary" style="font-size:1.4rem; padding:20px 56px; box-shadow:0 12px 40px rgba(0,0,0,0.5);">
+      Create Free Account →
+    </a>
   </div>
 </section>
 
-<!-- ── Footer ── -->
+<!-- Footer -->
 <footer class="footer">
-  <p>© 2025 CashBridge. All rights reserved.</p>
+  <p>© 2026 CashBridge. All rights reserved. • <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a></p>
 </footer>
 
 <script>
-// Simple navbar scroll effect
+// Navbar scroll + mobile menu
+const navbar = document.querySelector('.navbar');
+const hamburger = document.querySelector('.hamburger');
+const navLinks = document.querySelector('.nav-links');
+
 window.addEventListener('scroll', () => {
-  document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 50);
+  navbar.classList.toggle('scrolled', window.scrollY > 80);
 });
 
-// Nice counter animation
-function animateCounter(el, target, duration = 2000) {
-  let start = 0;
-  const increment = target / (duration / 16);
+hamburger.addEventListener('click', () => {
+  navLinks.classList.toggle('active');
+  hamburger.querySelector('i').classList.toggle('fa-bars');
+  hamburger.querySelector('i').classList.toggle('fa-xmark');
+});
+
+// Fade-in on scroll
+const fadeElements = document.querySelectorAll('.fade-in');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+
+fadeElements.forEach(el => observer.observe(el));
+
+// Counter animation (when stats visible)
+function animateCounter(el, start, end, duration = 2200) {
+  let obj = { val: start };
+  let range = end - start;
+  let increment = range / (duration / 16);
+  let current = start;
+
   const timer = setInterval(() => {
-    start += increment;
-    if (start >= target) {
-      start = target;
+    current += increment;
+    if (current >= end) {
+      current = end;
       clearInterval(timer);
     }
-    el.textContent = Math.floor(start).toLocaleString();
+    if (el.id === 'totalInvested') {
+      el.textContent = '$' + Math.floor(current).toLocaleString() + 'M+';
+    } else {
+      el.textContent = Math.floor(current).toLocaleString() + (el.id === 'usersJoined' ? '+' : '');
+    }
   }, 16);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        animateCounter(document.getElementById('usersJoined'), 18740, 2200);
-        animateCounter(document.getElementById('totalInvested'), 20000, 2800);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.6 });
+const statsObserver = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    animateCounter(document.getElementById('usersJoined'), 0, 18740);
+    animateCounter(document.getElementById('totalInvested'), 0, 124);
+    statsObserver.disconnect();
+  }
+}, { threshold: 0.5 });
 
-  observer.observe(document.querySelector('.stats'));
-});
+statsObserver.observe(document.querySelector('.stats'));
 </script>
 </body>
 </html>
