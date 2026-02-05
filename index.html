@@ -637,8 +637,8 @@ function animateCounter(el, start, end, duration = 2200) {
 
 const statsObserver = new IntersectionObserver((entries) => {
   if (entries[0].isIntersecting) {
-    animateCounter(document.getElementById('usersJoined'), 0, 18740);
-    animateCounter(document.getElementById('totalInvested'), 0, 124);
+    animateCounter(document.getElementById('usersJoined'), 0, 1874);
+    animateCounter(document.getElementById('totalInvested'), 0, 1);
     statsObserver.disconnect();
   }
 }, { threshold: 0.5 });
