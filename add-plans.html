@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Investment Plans</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0a0e17;
+      color: #fff;
+    }
+    .btn {
+      background: #22c55e;
+      color: #000;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px;
+    }
+    .btn:hover {
+      background: #16a34a;
+    }
+    h1 { color: #22c55e; }
+  </style>
+</head>
+<body>
+  <h1>Investment Plans Setup</h1>
+  <p>Click the button below to add default investment plans to your Firestore database.</p>
+  
+  <button class="btn" onclick="addPlans()">Add Investment Plans</button>
+  
+  <div id="result"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+      authDomain: "cashbridge-a688e.firebaseapp.com",
+      projectId: "cashbridge-a688e",
+      storageBucket: "cashbridge-a688e.firebasestorage.app",
+      messagingSenderId: "345273765518",
+      appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.addPlans = async function() {
+      try {
+        Swal.fire({
+          title: 'Adding Plans...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        const plans = [
+          {
+            id: 'starter',
+            name: 'Starter Plan',
+            capital: 10000,
+            daily: 500,
+            total: 15000,
+            duration: 30,
+            roi: 50,
+            order: 1
+          },
+          {
+            id: 'bronze',
+            name: 'Bronze Plan',
+            capital: 50000,
+            daily: 3000,
+            total: 90000,
+            duration: 30,
+            roi: 80,
+            order: 2
+          },
+          {
+            id: 'silver',
+            name: 'Silver Plan',
+            capital: 100000,
+            daily: 7000,
+            total: 210000,
+            duration: 30,
+            roi: 110,
+            order: 3
+          },
+          {
+            id: 'gold',
+            name: 'Gold Plan',
+            capital: 200000,
+            daily: 15000,
+            total: 450000,
+            duration: 30,
+            roi: 125,
+            order: 4
+          },
+          {
+            id: 'platinum',
+            name: 'Platinum Plan',
+            capital: 500000,
+            daily: 40000,
+            total: 1200000,
+            duration: 30,
+            roi: 140,
+            order: 5
+          },
+          {
+            id: 'diamond',
+            name: 'Diamond Plan',
+            capital: 1000000,
+            daily: 85000,
+            total: 2550000,
+            duration: 30,
+            roi: 155,
+            order: 6
+          }
+        ];
+
+        for (const plan of plans) {
+          await setDoc(doc(db, 'plans', plan.id), {
+            ...plan,
+            createdAt: serverTimestamp(),
+            active: true
+          });
+          console.log(`✅ Added ${plan.name}`);
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          html: `<p>Added ${plans.length} investment plans to Firestore!</p>`,
+          confirmButtonColor: '#22c55e'
+        });
+
+        document.getElementById('result').innerHTML = `
+          <div style="background: #22c55e; color: #000; padding: 20px; border-radius: 8px; margin-top: 20px;">
+            <h3>✅ Successfully added ${plans.length} plans!</h3>
+            <p>You can now go to your <a href="plans.html" style="color: #000; font-weight: bold;">Plans Page</a></p>
+          </div>
+        `;
+
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message,
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    }
+  </script>
+</body>
+</html>
