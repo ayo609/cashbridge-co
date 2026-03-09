@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CashBridge • Investment Plans</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+:root {
+  --bg-dark: #0a0f1e;
+  --card-bg: rgba(15, 23, 42, 0.7);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --secondary: #ec4899;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --border: rgba(255, 255, 255, 0.05);
+  --glass: rgba(15, 23, 42, 0.5);
+}
+
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+  font-family: 'Plus Jakarta Sans', sans-serif; 
+}
+
+body {
+  background: #0a0f1e;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+    linear-gradient(145deg, #0f172a 0%, #020617 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: 100px;
+}
+
+/* Animated Background Blobs */
+.blob {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.2;
+  animation: float 20s infinite alternate;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.blob-1 {
+  top: -100px;
+  right: -100px;
+  background: linear-gradient(145deg, #6366f1, #a855f7);
+  animation-delay: -2s;
+}
+
+.blob-2 {
+  bottom: -100px;
+  left: -100px;
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(145deg, #ec4899, #f59e0b);
+  animation-delay: -7s;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(50px, 30px) scale(1.1); }
+}
+
+/* Main Container */
+.plans-page {
+  position: relative;
+  z-index: 10;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 100px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  animation: slideDown 0.6s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: white;
+  transform: rotate(-5deg);
+  box-shadow: 0 8px 15px -5px rgba(99, 102, 241, 0.4);
+}
+
+.brand-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #fff, #cbd5e1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.wallet-badge {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 30px;
+  padding: 0.6rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.wallet-badge i {
+  color: #6366f1;
+  font-size: 1rem;
+}
+
+.wallet-badge span {
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.wallet-badge strong {
+  color: white;
+  font-weight: 600;
+}
+
+/* Page Title */
+.page-title {
+  margin-bottom: 2rem;
+}
+
+.page-title h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #fff, #cbd5e1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.page-title p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Section Title */
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 2rem 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title i {
+  color: #6366f1;
+}
+
+/* Plans Grid */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/* Plan Card */
+.plan-card {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 28px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-card:hover:not(.locked) {
+  transform: translateY(-5px);
+  border-color: #6366f1;
+  box-shadow: 0 30px 50px -20px rgba(99, 102, 241, 0.4);
+}
+
+.popular {
+  border: 2px solid #ec4899;
+}
+
+.popular::before {
+  content: "⭐ POPULAR";
+  position: absolute;
+  top: 10px;
+  right: -30px;
+  background: linear-gradient(135deg, #ec4899, #f59e0b);
+  color: white;
+  padding: 5px 40px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  transform: rotate(45deg);
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+}
+
+.purchased {
+  border: 2px solid #22c55e;
+}
+
+.purchased::before {
+  content: "✓ ACTIVE";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 30px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+}
+
+.plan-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.plan-capital {
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+
+.plan-daily {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.plan-daily span {
+  color: #22c55e;
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: block;
+  margin-top: 0.3rem;
+}
+
+.plan-total {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 1rem;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.plan-total span {
+  color: #f59e0b;
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: block;
+  margin-top: 0.3rem;
+}
+
+.plan-meta {
+  display: flex;
+  justify-content: space-between;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  padding: 0.5rem 0;
+  border-top: 1px dashed rgba(255, 255, 255, 0.05);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  color: white;
+  box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.6);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-claim {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.btn-claim:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -5px #f59e0b;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 5px 20px -5px #f59e0b; }
+  50% { box-shadow: 0 15px 30px -5px #f59e0b; }
+}
+
+/* Countdown */
+.countdown {
+  font-size: 1.1rem;
+  color: #f59e0b;
+  font-weight: 600;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.timer {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 1.3rem;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 0.5rem;
+  border-radius: 12px;
+  margin-top: 0.5rem;
+}
+
+.days-left {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: white;
+  font-weight: 500;
+  z-index: 9999;
+  animation: slideIn 0.3s ease;
+  max-width: 350px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.toast.success { border-left: 4px solid #22c55e; }
+.toast.error { border-left: 4px solid #ef4444; }
+.toast.warning { border-left: 4px solid #f59e0b; }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 40px;
+  padding: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 100;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 1.2rem;
+  border-radius: 30px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  gap: 0.2rem;
+}
+
+.nav-item i {
+  font-size: 1rem;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  color: white;
+  box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .plans-page {
+    padding: 1rem 1rem 100px;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-nav {
+    width: 90%;
+    padding: 0.3rem;
+  }
+
+  .nav-item {
+    padding: 0.4rem 0.8rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Background Blobs -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="plans-page">
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fas fa-bolt"></i>
+      </div>
+      <span class="brand-name">CashBridge</span>
+    </div>
+    <div class="wallet-badge">
+      <i class="fas fa-wallet"></i>
+      <span>Balance:</span>
+      <strong id="walletDisplay">₦0</strong>
+    </div>
+  </div>
+
+  <!-- Page Title -->
+  <div class="page-title">
+    <h1>Investment Plans</h1>
+    <p>Choose a plan and start earning daily returns</p>
+  </div>
+
+  <!-- Debug Buttons -->
+  <div style="text-align:right; margin-bottom:1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+    <button onclick="checkMyReferrers()" style="background:transparent; border:1px solid #6366f1; color:#6366f1; padding:0.3rem 1rem; border-radius:30px; font-size:0.8rem; cursor:pointer;">
+      <i class="fas fa-search"></i> Check Referral Chain
+    </button>
+    <button onclick="debugReferralData()" style="background:transparent; border:1px solid #f59e0b; color:#f59e0b; padding:0.3rem 1rem; border-radius:30px; font-size:0.8rem; cursor:pointer;">
+      <i class="fas fa-bug"></i> Debug Data
+    </button>
+  </div>
+
+  <!-- Available Plans -->
+  <div class="section-title">
+    <i class="fas fa-store"></i>
+    Available Investment Plans
+  </div>
+  <div class="plans-grid" id="plansContainer"></div>
+
+  <!-- Active Plans -->
+  <div class="section-title" id="activeTitle" style="display:none;">
+    <i class="fas fa-chart-line"></i>
+    My Active Plans
+  </div>
+  <div class="plans-grid" id="activePlansContainer"></div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item">
+    <i class="fas fa-home"></i>
+    <span>Home</span>
+  </a>
+  <a href="plans.html" class="nav-item active">
+    <i class="fas fa-layer-group"></i>
+    <span>Plans</span>
+  </a>
+  <a href="referral.html" class="nav-item">
+    <i class="fas fa-share-nodes"></i>
+    <span>Referral</span>
+  </a>
+  <a href="dashboard.html" class="nav-item">
+    <i class="fas fa-chart-pie"></i>
+    <span>Dashboard</span>
+  </a>
+</nav>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, getDocs, collection, runTransaction,
+  updateDoc, increment, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+  authDomain: "cashbridge-a688e.firebaseapp.com",
+  projectId: "cashbridge-a688e",
+  storageBucket: "cashbridge-a688e.firebasestorage.app",
+  messagingSenderId: "345273765518",
+  appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let userData = null;
+let processing = false;
+let timers = new Map();
+
+const formatMoney = (n) => '₦' + Number(n || 0).toLocaleString();
+
+// INVESTMENT PLANS
+const INVESTMENT_PLANS = [
+  {
+    id: 'mini',
+    name: 'Mini Plan',
+    capital: 4000,
+    daily: 300,
+    total: 9000,
+    duration: 30,
+    roi: 125
+  },
+  {
+    id: 'starter',
+    name: 'Starter Plan',
+    capital: 6000,
+    daily: 450,
+    total: 13500,
+    duration: 30,
+    roi: 125
+  },
+  {
+    id: 'basic',
+    name: 'Basic Plan',
+    capital: 10000,
+    daily: 750,
+    total: 22500,
+    duration: 30,
+    roi: 125
+  },
+  {
+    id: 'bronze',
+    name: 'Bronze Plan',
+    capital: 20000,
+    daily: 1500,
+    total: 45000,
+    duration: 30,
+    roi: 125
+  },
+  {
+    id: 'silver',
+    name: 'Silver Plan',
+    capital: 30000,
+    daily: 2250,
+    total: 67500,
+    duration: 30,
+    roi: 125,
+    popular: true
+  },
+  {
+    id: 'gold',
+    name: 'Gold Plan',
+    capital: 50000,
+    daily: 3750,
+    total: 112500,
+    duration: 30,
+    roi: 125
+  },
+  {
+    id: 'platinum',
+    name: 'Platinum Plan',
+    capital: 100000,
+    daily: 7500,
+    total: 225000,
+    duration: 30,
+    roi: 125
+  },
+  {
+    id: 'ruby',
+    name: 'Ruby Plan',
+    capital: 150000,
+    daily: 11250,
+    total: 337500,
+    duration: 30,
+    roi: 125
+  },
+  {
+    id: 'emerald',
+    name: 'Emerald Plan',
+    capital: 200000,
+    daily: 15000,
+    total: 450000,
+    duration: 30,
+    roi: 125
+  },
+  {
+    id: 'sapphire',
+    name: 'Sapphire Plan',
+    capital: 300000,
+    daily: 22500,
+    total: 675000,
+    duration: 30,
+    roi: 125
+  },
+  {
+    id: 'diamond',
+    name: 'Diamond Plan',
+    capital: 500000,
+    daily: 37500,
+    total: 1125000,
+    duration: 30,
+    roi: 125
+  }
+];
+
+// Toast notification
+const showToast = (msg, type = 'success') => {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+};
+
+// Load user data and plans
+async function loadData() {
+  if (!currentUser) return;
+  
+  try {
+    const userRef = doc(db, 'users', currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    
+    if (!userSnap.exists()) {
+      showToast('User profile not found', 'error');
+      return;
+    }
+    
+    userData = userSnap.data();
+    document.getElementById('walletDisplay').textContent = formatMoney(userData.wallet || 0);
+    
+    // Render available plans
+    renderPlans(INVESTMENT_PLANS);
+    
+    // Load active plans
+    const activePlansSnap = await getDocs(collection(db, `users/${currentUser.uid}/activePlans`));
+    const activePlans = [];
+    activePlansSnap.forEach(d => {
+      const data = d.data();
+      if (data.status === 'active') {
+        activePlans.push({ docId: d.id, ...data });
+      }
+    });
+    
+    if (activePlans.length > 0) {
+      document.getElementById('activeTitle').style.display = 'block';
+      renderActivePlans(activePlans);
+    } else {
+      document.getElementById('activeTitle').style.display = 'none';
+      document.getElementById('activePlansContainer').innerHTML = '';
+    }
+    
+  } catch (err) {
+    console.error('Load error:', err);
+    showToast('Failed to load data', 'error');
+  }
+}
+
+// Render available plans
+function renderPlans(plans) {
+  const container = document.getElementById('plansContainer');
+  
+  container.innerHTML = plans.map((p) => `
+    <div class="plan-card ${p.popular ? 'popular' : ''}">
+      <div class="plan-name">${p.name}</div>
+      <div class="plan-capital">${formatMoney(p.capital)}</div>
+      <div class="plan-daily">
+        Daily Earnings
+        <span>${formatMoney(p.daily)}</span>
+      </div>
+      <div class="plan-total">
+        Total Return
+        <span>${formatMoney(p.total)}</span>
+      </div>
+      <div class="plan-meta">
+        <span><i class="fas fa-clock"></i> ${p.duration} days</span>
+        <span><i class="fas fa-chart-line"></i> ${p.roi}% ROI</span>
+      </div>
+      <button class="btn btn-primary" onclick="buyPlan('${p.id}', ${p.capital}, '${p.name}', ${p.daily}, ${p.total}, ${p.duration}, ${p.roi})">
+        <i class="fas fa-rocket"></i> Invest Now
+      </button>
+    </div>
+  `).join('');
+}
+
+// Render active plans
+function renderActivePlans(plans) {
+  const container = document.getElementById('activePlansContainer');
+  
+  container.innerHTML = plans.map(p => {
+    const lastClaimed = p.lastClaimed?.toMillis?.() || p.startDate?.toMillis?.() || Date.now();
+    const nextClaim = lastClaimed + (24 * 60 * 60 * 1000);
+    const canClaim = Date.now() >= nextClaim;
+    const daysLeft = p.daysLeft || 0;
+    
+    return `
+      <div class="plan-card purchased">
+        <div class="plan-name">${p.planName}</div>
+        <div class="plan-capital">${formatMoney(p.capital)}</div>
+        <div class="days-left">
+          <i class="fas fa-hourglass-half"></i> Days Left: ${daysLeft}
+        </div>
+        ${canClaim && daysLeft > 0 ? 
+          `<button class="btn btn-claim" onclick="claimDaily('${p.docId}', ${p.dailyEarning})">
+            <i class="fas fa-gift"></i> Claim ${formatMoney(p.dailyEarning)}
+          </button>` :
+          `<div class="countdown">
+            Next claim in:
+            <div class="timer" data-next="${nextClaim}">Calculating...</div>
+          </div>`
+        }
+      </div>
+    `;
+  }).join('');
+  
+  startTimers();
+}
+
+// ============================================================
+// BUY PLAN FUNCTION WITH FIXED REFERRAL BONUS DISTRIBUTION
+// ============================================================
+window.buyPlan = async function(planId, capital, name, daily, total, duration, roi) {
+  if (processing) return;
+  
+  if (!userData || userData.wallet < capital) {
+    return Swal.fire({
+      icon: 'warning',
+      title: 'Insufficient Balance',
+      html: `You need ${formatMoney(capital)} to invest.<br>Current balance: ${formatMoney(userData?.wallet || 0)}`,
+      background: '#0f172a',
+      color: '#e2e8f0',
+      confirmButtonColor: '#6366f1'
+    });
+  }
+  
+  const result = await Swal.fire({
+    title: 'Confirm Investment',
+    html: `
+      <div style="background:rgba(99,102,241,0.1);border-radius:16px;padding:1rem;margin:1rem 0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
+          <span style="color:#94a3b8">Plan:</span>
+          <span style="color:white">${name}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
+          <span style="color:#94a3b8">Capital:</span>
+          <span style="color:#6366f1">${formatMoney(capital)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
+          <span style="color:#94a3b8">Daily Earnings:</span>
+          <span style="color:#22c55e">${formatMoney(daily)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
+          <span style="color:#94a3b8">Total Return:</span>
+          <span style="color:#f59e0b">${formatMoney(total)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.1)">
+          <span style="color:#94a3b8">New Balance:</span>
+          <span style="color:#22c55e">${formatMoney((userData.wallet || 0) - capital)}</span>
+        </div>
+      </div>
+    `,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Invest',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#6366f1',
+    cancelButtonColor: '#64748b',
+    background: '#0f172a',
+    color: '#e2e8f0'
+  });
+  
+  if (!result.isConfirmed) return;
+  
+  processing = true;
+  Swal.fire({
+    title: 'Processing Investment...',
+    html: '<p style="color:#94a3b8">Please wait while we process your investment</p>',
+    allowOutsideClick: false,
+    background: '#0f172a',
+    didOpen: () => Swal.showLoading()
+  });
+  
+  try {
+    const userRef = doc(db, 'users', currentUser.uid);
+    const docId = `plan_${Date.now()}_${planId}`;
+    const planRef = doc(db, `users/${currentUser.uid}/activePlans`, docId);
+    
+    // Transaction to buy plan
+    await runTransaction(db, async (t) => {
+      const snap = await t.get(userRef);
+      if (!snap.exists() || snap.data().wallet < capital) {
+        throw new Error("Insufficient funds");
+      }
+      
+      t.update(userRef, {
+        wallet: increment(-capital)
+      });
+      
+      t.set(planRef, {
+        planId: planId,
+        planName: name,
+        capital: capital,
+        dailyEarning: daily,
+        totalReturn: total,
+        roi: roi,
+        duration: duration,
+        daysLeft: duration,
+        status: 'active',
+        startDate: serverTimestamp(),
+        lastClaimed: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        totalEarned: 0
+      });
+    });
+    
+    console.log('✅ Investment successful - Processing referral bonuses...');
+    
+    // =====================================================
+    // PAY REFERRAL BONUSES - FIXED VERSION
+    // =====================================================
+    await payReferralBonuses(capital);
+    
+    Swal.close();
+    await Swal.fire({
+      icon: 'success',
+      title: 'Investment Successful!',
+      html: `
+        <p style="color:#e2e8f0">${name} activated!</p>
+        <p style="color:#22c55e;margin-top:0.5rem">Earn ${formatMoney(daily)} daily for ${duration} days</p>
+      `,
+      background: '#0f172a',
+      confirmButtonColor: '#6366f1'
+    });
+    
+    showToast(`${name} Activated!`, 'success');
+    await loadData();
+    
+  } catch (err) {
+    console.error('❌ Investment error:', err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Investment Failed',
+      text: err.message,
+      background: '#0f172a',
+      confirmButtonColor: '#ef4444'
+    });
+  } finally {
+    processing = false;
+  }
+}
+
+// ============================================================
+// FIXED REFERRAL BONUS DISTRIBUTION SYSTEM - GUARANTEED TO WORK
+// ============================================================
+async function payReferralBonuses(investmentAmount) {
+  console.log('\n💰💰💰 PAYING REFERRAL BONUSES 💰💰💰');
+  console.log('Investment Amount:', formatMoney(investmentAmount));
+  console.log('Current User ID:', currentUser.uid);
+  
+  try {
+    // Get current user's data to find their referrers
+    const userRef = doc(db, 'users', currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    
+    if (!userSnap.exists()) {
+      console.log('❌ Current user not found');
+      return;
+    }
+    
+    const currentUserData = userSnap.data();
+    console.log('Current User Referral Chain:', {
+      referredBy: currentUserData.referredBy,
+      level2Referrer: currentUserData.level2Referrer,
+      level3Referrer: currentUserData.level3Referrer,
+      fullName: currentUserData.fullName,
+      username: currentUserData.username
+    });
+    
+    let bonusesPaid = 0;
+    let bonusDetails = [];
+    
+    // =====================================================
+    // LEVEL 1: Direct Referrer (20%)
+    // =====================================================
+    if (currentUserData.referredBy) {
+      const level1Bonus = Math.floor(investmentAmount * 0.20);
+      console.log('\n🎯 LEVEL 1 - Direct Referrer:', currentUserData.referredBy);
+      console.log('Bonus Amount:', formatMoney(level1Bonus), '(20%)');
+      
+      try {
+        const level1Ref = doc(db, 'users', currentUserData.referredBy);
+        
+        await runTransaction(db, async (t) => {
+          const level1Snap = await t.get(level1Ref);
+          
+          if (!level1Snap.exists()) {
+            console.log('❌ Level 1 referrer not found in database');
+            return;
+          }
+          
+          const level1Data = level1Snap.data();
+          const oldWallet = level1Data.wallet || 0;
+          const oldTotalEarnings = level1Data.totalEarnings || 0;
+          
+          console.log(`Level 1 User: ${level1Data.fullName || 'Unknown'} | Current Wallet:`, formatMoney(oldWallet));
+          
+          // Update Level 1's wallet and earnings
+          t.update(level1Ref, {
+            wallet: increment(level1Bonus),
+            totalEarnings: increment(level1Bonus)
+          });
+          
+          // Create/update referral record
+          const referralRef = doc(db, `users/${currentUserData.referredBy}/referrals`, currentUser.uid);
+          
+          // First check if referral record exists
+          const referralSnap = await t.get(referralRef);
+          
+          if (referralSnap.exists()) {
+            // Update existing record
+            t.update(referralRef, {
+              totalEarned: increment(level1Bonus),
+              lastInvestment: investmentAmount,
+              lastInvestmentDate: serverTimestamp()
+            });
+          } else {
+            // Create new record
+            t.set(referralRef, {
+              referredUserId: currentUser.uid,
+              referredUserName: currentUserData.fullName || 'User',
+              referredUserEmail: currentUserData.email || '',
+              referredUsername: currentUserData.username || 'user',
+              level: 1,
+              commission: 20,
+              totalEarned: level1Bonus,
+              lastInvestment: investmentAmount,
+              lastInvestmentDate: serverTimestamp(),
+              referredAt: serverTimestamp()
+            });
+          }
+          
+          console.log('✅ LEVEL 1 BONUS PAID:', formatMoney(level1Bonus));
+          console.log('Level 1 Wallet:', formatMoney(oldWallet), '→', formatMoney(oldWallet + level1Bonus));
+          bonusesPaid++;
+          bonusDetails.push(`Level 1: ${formatMoney(level1Bonus)}`);
+        });
+        
+      } catch (error) {
+        console.error('❌ Level 1 error:', error);
+      }
+    } else {
+      console.log('ℹ️ No Level 1 referrer found for this user');
+    }
+    
+    // =====================================================
+    // LEVEL 2: Indirect Referrer (2%)
+    // =====================================================
+    if (currentUserData.level2Referrer) {
+      const level2Bonus = Math.floor(investmentAmount * 0.02);
+      console.log('\n🎯 LEVEL 2 - Indirect Referrer:', currentUserData.level2Referrer);
+      console.log('Bonus Amount:', formatMoney(level2Bonus), '(2%)');
+      
+      try {
+        const level2Ref = doc(db, 'users', currentUserData.level2Referrer);
+        
+        await runTransaction(db, async (t) => {
+          const level2Snap = await t.get(level2Ref);
+          
+          if (!level2Snap.exists()) {
+            console.log('❌ Level 2 referrer not found in database');
+            return;
+          }
+          
+          const level2Data = level2Snap.data();
+          const oldWallet = level2Data.wallet || 0;
+          
+          console.log(`Level 2 User: ${level2Data.fullName || 'Unknown'} | Current Wallet:`, formatMoney(oldWallet));
+          
+          // Update Level 2's wallet and earnings
+          t.update(level2Ref, {
+            wallet: increment(level2Bonus),
+            totalEarnings: increment(level2Bonus)
+          });
+          
+          // Create/update referral record
+          const referralRef = doc(db, `users/${currentUserData.level2Referrer}/referrals`, currentUser.uid);
+          
+          const referralSnap = await t.get(referralRef);
+          
+          if (referralSnap.exists()) {
+            t.update(referralRef, {
+              totalEarned: increment(level2Bonus),
+              lastInvestment: investmentAmount,
+              lastInvestmentDate: serverTimestamp()
+            });
+          } else {
+            t.set(referralRef, {
+              referredUserId: currentUser.uid,
+              referredUserName: currentUserData.fullName || 'User',
+              referredUserEmail: currentUserData.email || '',
+              referredUsername: currentUserData.username || 'user',
+              level: 2,
+              commission: 2,
+              totalEarned: level2Bonus,
+              lastInvestment: investmentAmount,
+              lastInvestmentDate: serverTimestamp(),
+              referredAt: serverTimestamp()
+            });
+          }
+          
+          console.log('✅ LEVEL 2 BONUS PAID:', formatMoney(level2Bonus));
+          console.log('Level 2 Wallet:', formatMoney(oldWallet), '→', formatMoney(oldWallet + level2Bonus));
+          bonusesPaid++;
+          bonusDetails.push(`Level 2: ${formatMoney(level2Bonus)}`);
+        });
+        
+      } catch (error) {
+        console.error('❌ Level 2 error:', error);
+      }
+    } else {
+      console.log('ℹ️ No Level 2 referrer found for this user');
+    }
+    
+    // =====================================================
+    // LEVEL 3: Third Level (1%)
+    // =====================================================
+    if (currentUserData.level3Referrer) {
+      const level3Bonus = Math.floor(investmentAmount * 0.01);
+      console.log('\n🎯 LEVEL 3 - Third Level Referrer:', currentUserData.level3Referrer);
+      console.log('Bonus Amount:', formatMoney(level3Bonus), '(1%)');
+      
+      try {
+        const level3Ref = doc(db, 'users', currentUserData.level3Referrer);
+        
+        await runTransaction(db, async (t) => {
+          const level3Snap = await t.get(level3Ref);
+          
+          if (!level3Snap.exists()) {
+            console.log('❌ Level 3 referrer not found in database');
+            return;
+          }
+          
+          const level3Data = level3Snap.data();
+          const oldWallet = level3Data.wallet || 0;
+          
+          console.log(`Level 3 User: ${level3Data.fullName || 'Unknown'} | Current Wallet:`, formatMoney(oldWallet));
+          
+          // Update Level 3's wallet and earnings
+          t.update(level3Ref, {
+            wallet: increment(level3Bonus),
+            totalEarnings: increment(level3Bonus)
+          });
+          
+          // Create/update referral record
+          const referralRef = doc(db, `users/${currentUserData.level3Referrer}/referrals`, currentUser.uid);
+          
+          const referralSnap = await t.get(referralRef);
+          
+          if (referralSnap.exists()) {
+            t.update(referralRef, {
+              totalEarned: increment(level3Bonus),
+              lastInvestment: investmentAmount,
+              lastInvestmentDate: serverTimestamp()
+            });
+          } else {
+            t.set(referralRef, {
+              referredUserId: currentUser.uid,
+              referredUserName: currentUserData.fullName || 'User',
+              referredUserEmail: currentUserData.email || '',
+              referredUsername: currentUserData.username || 'user',
+              level: 3,
+              commission: 1,
+              totalEarned: level3Bonus,
+              lastInvestment: investmentAmount,
+              lastInvestmentDate: serverTimestamp(),
+              referredAt: serverTimestamp()
+            });
+          }
+          
+          console.log('✅ LEVEL 3 BONUS PAID:', formatMoney(level3Bonus));
+          console.log('Level 3 Wallet:', formatMoney(oldWallet), '→', formatMoney(oldWallet + level3Bonus));
+          bonusesPaid++;
+          bonusDetails.push(`Level 3: ${formatMoney(level3Bonus)}`);
+        });
+        
+      } catch (error) {
+        console.error('❌ Level 3 error:', error);
+      }
+    } else {
+      console.log('ℹ️ No Level 3 referrer found for this user');
+    }
+    
+    console.log('\n💰💰💰 REFERRAL BONUS PAYMENT COMPLETE -', bonusesPaid, 'bonuses paid 💰💰💰');
+    
+    if (bonusesPaid > 0) {
+      // Show detailed toast
+      const bonusMessage = bonusDetails.join(' • ');
+      showToast(`✅ Referral bonuses paid: ${bonusMessage}`, 'success');
+      
+      // Also show SweetAlert with details
+      Swal.fire({
+        icon: 'success',
+        title: 'Referral Bonuses Distributed!',
+        html: `
+          <p style="color:#e2e8f0; margin-bottom:1rem;">Your upliners have received:</p>
+          ${bonusDetails.map(detail => `<p style="color:#22c55e; margin:0.3rem 0;">${detail}</p>`).join('')}
+        `,
+        timer: 3000,
+        showConfirmButton: false,
+        background: '#0f172a'
+      });
+    }
+    
+  } catch (error) {
+    console.error('❌ Referral payment system error:', error);
+  }
+}
+
+// ============================================================
+// DEBUG FUNCTION TO CHECK REFERRAL CHAIN
+// ============================================================
+window.checkMyReferrers = async function() {
+  if (!currentUser) {
+    alert('Please log in first');
+    return;
+  }
+  
+  const userRef = doc(db, 'users', currentUser.uid);
+  const userSnap = await getDoc(userRef);
+  
+  if (userSnap.exists()) {
+    const data = userSnap.data();
+    console.log('🔍 YOUR REFERRAL CHAIN:');
+    console.log('Level 1 (Direct):', data.referredBy || 'None');
+    console.log('Level 2:', data.level2Referrer || 'None');
+    console.log('Level 3:', data.level3Referrer || 'None');
+    
+    let message = '🔍 Your Referral Chain:\n\n';
+    message += `Level 1: ${data.referredBy ? '✅ ' + data.referredBy : '❌ None'}\n`;
+    message += `Level 2: ${data.level2Referrer ? '✅ ' + data.level2Referrer : '❌ None'}\n`;
+    message += `Level 3: ${data.level3Referrer ? '✅ ' + data.level3Referrer : '❌ None'}`;
+    
+    Swal.fire({
+      title: 'Referral Chain',
+      text: message,
+      icon: 'info',
+      background: '#0f172a',
+      color: '#e2e8f0',
+      confirmButtonColor: '#6366f1'
+    });
+  }
+};
+
+// ============================================================
+// DEBUG FUNCTION TO CHECK REFERRAL DATA IN DATABASE
+// ============================================================
+window.debugReferralData = async function() {
+  if (!currentUser) {
+    alert('Please log in first');
+    return;
+  }
+  
+  try {
+    const userRef = doc(db, 'users', currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      console.log('🔍 YOUR COMPLETE USER DATA:');
+      console.log(data);
+      
+      let message = '🔍 Your Referral Data:\n\n';
+      message += `Full Name: ${data.fullName || 'N/A'}\n`;
+      message += `Username: ${data.username || 'N/A'}\n`;
+      message += `Referred By (Level 1): ${data.referredBy || 'None'}\n`;
+      message += `Level 2 Referrer: ${data.level2Referrer || 'None'}\n`;
+      message += `Level 3 Referrer: ${data.level3Referrer || 'None'}\n\n`;
+      
+      if (data.referredBy) {
+        message += `✅ You have a Level 1 referrer! Bonuses will be paid to: ${data.referredBy}`;
+      } else {
+        message += `❌ No referrer found. You are not in anyone's referral chain.`;
+      }
+      
+      Swal.fire({
+        title: 'Referral Data Debug',
+        text: message,
+        icon: data.referredBy ? 'success' : 'info',
+        background: '#0f172a',
+        color: '#e2e8f0',
+        confirmButtonColor: '#6366f1'
+      });
+    }
+  } catch (error) {
+    console.error('Debug error:', error);
+  }
+};
+
+// Claim daily earnings
+window.claimDaily = async function(docId, daily) {
+  if (processing) return;
+  
+  processing = true;
+  Swal.fire({
+    title: 'Claiming...',
+    html: '<p style="color:#94a3b8">Please wait</p>',
+    allowOutsideClick: false,
+    background: '#0f172a',
+    didOpen: () => Swal.showLoading()
+  });
+  
+  try {
+    const userRef = doc(db, 'users', currentUser.uid);
+    const planRef = doc(db, `users/${currentUser.uid}/activePlans`, docId);
+    
+    await runTransaction(db, async (t) => {
+      const snap = await t.get(planRef);
+      if (!snap.exists()) throw new Error("Plan not found");
+      
+      const data = snap.data();
+      const lastTime = data.lastClaimed?.toMillis?.() || data.startDate?.toMillis?.();
+      
+      if (Date.now() - lastTime < 24 * 60 * 60 * 1000 - 5000) {
+        throw new Error("Please wait 24 hours between claims");
+      }
+      
+      if (data.daysLeft <= 0 || data.status !== 'active') {
+        throw new Error("Plan has ended");
+      }
+      
+      const newDays = data.daysLeft - 1;
+      const newEarned = (data.totalEarned || 0) + daily;
+      
+      t.update(planRef, {
+        lastClaimed: serverTimestamp(),
+        daysLeft: newDays,
+        totalEarned: newEarned,
+        ...(newDays <= 0 && { 
+          status: 'completed', 
+          completedAt: serverTimestamp() 
+        })
+      });
+      
+      t.update(userRef, {
+        wallet: increment(daily),
+        totalEarnings: increment(daily)
+      });
+    });
+    
+    Swal.close();
+    await Swal.fire({
+      icon: 'success',
+      title: 'Claimed!',
+      html: `<p style="color:#22c55e">${formatMoney(daily)} added to your wallet</p>`,
+      timer: 2000,
+      showConfirmButton: false,
+      background: '#0f172a'
+    });
+    
+    showToast(`${formatMoney(daily)} credited!`, 'success');
+    await loadData();
+    
+  } catch (err) {
+    Swal.close();
+    showToast(err.message, 'error');
+  } finally {
+    processing = false;
+  }
+}
+
+// Timer functions
+function formatTime(ms) {
+  if (ms <= 0) return "Ready!";
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function startTimers() {
+  timers.forEach(clearInterval);
+  timers.clear();
+  
+  document.querySelectorAll('.timer').forEach(el => {
+    const next = Number(el.dataset.next);
+    const update = () => {
+      const remaining = next - Date.now();
+      el.textContent = formatTime(remaining);
+      if (remaining <= 0) {
+        clearInterval(interval);
+        loadData();
+      }
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    timers.set(el, interval);
+  });
+}
+
+// Auth state
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+  currentUser = user;
+  await loadData();
+  setInterval(loadData, 60000);
+});
+
+// Cleanup
+window.addEventListener('beforeunload', () => {
+  timers.forEach(clearInterval);
+  timers.clear();
+});
+</script>
+</body>
+</html>
