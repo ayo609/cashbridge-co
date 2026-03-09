@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forgot Password | CashBridge</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+:root {
+  --bg-dark: #0a0f1e;
+  --card-bg: rgba(15, 23, 42, 0.7);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --secondary: #ec4899;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --border: rgba(255, 255, 255, 0.05);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  background: #0a0f1e;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+    linear-gradient(145deg, #0f172a 0%, #020617 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Animated Background Blobs */
+.blob {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.2;
+  animation: float 20s infinite alternate;
+  z-index: 0;
+}
+
+.blob-1 {
+  top: -100px;
+  right: -100px;
+  background: linear-gradient(145deg, #6366f1, #a855f7);
+  animation-delay: -2s;
+}
+
+.blob-2 {
+  bottom: -100px;
+  left: -100px;
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(145deg, #ec4899, #f59e0b);
+  animation-delay: -7s;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(50px, 30px) scale(1.1); }
+}
+
+/* Main Container */
+.container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Card */
+.card {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 36px;
+  padding: 2.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Logo Section */
+.logo-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  margin: 0 auto 1rem;
+  transform: rotate(-5deg);
+  box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.4);
+}
+
+.brand-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff, #cbd5e1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.tagline {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Title */
+.title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.subtitle {
+  color: #94a3b8;
+  margin-bottom: 2rem;
+  text-align: center;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Info Box */
+.info-box {
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 20px;
+  padding: 1.2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.info-box i {
+  color: #6366f1;
+  font-size: 1.5rem;
+  margin-top: 0.2rem;
+}
+
+.info-box-content {
+  flex: 1;
+}
+
+.info-box-content h4 {
+  color: white;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+.info-box-content p {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  color: #e2e8f0;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-label i {
+  color: #6366f1;
+  margin-right: 0.5rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6366f1;
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.form-input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 2.8rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  color: white;
+  font-size: 0.95rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.form-input::placeholder {
+  color: #475569;
+  font-weight: 300;
+}
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  color: white;
+  box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.4);
+  margin-top: 1.5rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px -5px rgba(99, 102, 241, 0.6);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.btn-secondary:hover {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  transform: translateX(-3px);
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 2rem 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.divider::before {
+  margin-right: 1rem;
+}
+
+.divider::after {
+  margin-left: 1rem;
+}
+
+/* Back Link */
+.back-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.back-link a {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.back-link a:hover {
+  color: #ec4899;
+}
+
+/* Success Message */
+.success-message {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #22c55e;
+  margin: 0 auto 1.5rem;
+  border: 2px solid rgba(34, 197, 94, 0.2);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); }
+  50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(34, 197, 94, 0.4); }
+}
+
+.success-message h3 {
+  color: white;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.success-message p {
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.success-message strong {
+  color: #22c55e;
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hidden */
+.hidden {
+  display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .brand-name {
+    font-size: 1.8rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .logo-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 1.6rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Background Blobs -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="container">
+  <div class="card">
+    <!-- Logo Section -->
+    <div class="logo-section">
+      <div class="logo-icon">
+        <i class="fas fa-bolt"></i>
+      </div>
+      <h1 class="brand-name">CashBridge</h1>
+      <p class="tagline">Bridging Your Financial Future</p>
+    </div>
+
+    <!-- Step 1: Email Form -->
+    <div id="emailStep">
+      <h2 class="title">Forgot Password?</h2>
+      <p class="subtitle">Enter your email to reset your password</p>
+
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        <div class="info-box-content">
+          <h4>How it works</h4>
+          <p>We'll send a password reset link to your email. Click the link to create a new password.</p>
+        </div>
+      </div>
+
+      <form id="forgotPasswordForm">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <div class="input-wrapper">
+            <i class="input-icon fas fa-envelope"></i>
+            <input 
+              type="email" 
+              id="email" 
+              class="form-input" 
+              placeholder="Enter your email address"
+              required
+            >
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i class="fas fa-paper-plane"></i>
+          <span>Send Reset Link</span>
+        </button>
+      </form>
+
+      <div class="divider">OR</div>
+
+      <a href="login.html" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Login</span>
+      </a>
+
+      <div class="back-link">
+        Don't have an account? <a href="register.html">Sign up now</a>
+      </div>
+    </div>
+
+    <!-- Step 2: Success Message -->
+    <div id="successStep" class="hidden">
+      <div class="success-message">
+        <div class="success-icon">
+          <i class="fas fa-check"></i>
+        </div>
+        <h3>Check Your Email!</h3>
+        <p>We've sent a reset link to <strong id="sentEmail"></strong></p>
+      </div>
+
+      <div class="info-box">
+        <i class="fas fa-lightbulb"></i>
+        <div class="info-box-content">
+          <h4>Next Steps</h4>
+          <p>
+            1. Check your email inbox<br>
+            2. Click the reset link<br>
+            3. Create a new password<br>
+            4. Login with your new password
+          </p>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top: 1rem;">
+        <i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i>
+        <div class="info-box-content">
+          <h4 style="color:#f59e0b">Didn't receive the email?</h4>
+          <p>
+            • Check your spam/junk folder<br>
+            • Make sure you entered the correct email<br>
+            • The link expires in 1 hour
+          </p>
+        </div>
+      </div>
+
+      <button onclick="sendAnotherEmail()" class="btn btn-secondary" style="margin-top: 1rem;">
+        <i class="fas fa-redo"></i>
+        <span>Send Another Link</span>
+      </button>
+
+      <a href="login.html" class="btn btn-secondary" style="margin-top: 0.5rem;">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Login</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+  authDomain: "cashbridge-a688e.firebaseapp.com",
+  projectId: "cashbridge-a688e",
+  storageBucket: "cashbridge-a688e.firebasestorage.app",
+  messagingSenderId: "345273765518",
+  appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Configure action code settings
+const actionCodeSettings = {
+  url: 'https://cashbridge-co.online/login.html',
+  handleCodeInApp: false
+};
+
+let currentEmail = '';
+
+// Handle form submission
+document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('email').value.trim();
+  const submitBtn = document.getElementById('submitBtn');
+  
+  if (!email) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Email Required',
+      text: 'Please enter your email address',
+      background: '#0f172a',
+      color: '#e2e8f0',
+      confirmButtonColor: '#6366f1'
+    });
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Invalid Email',
+      text: 'Please enter a valid email address',
+      background: '#0f172a',
+      color: '#e2e8f0',
+      confirmButtonColor: '#6366f1'
+    });
+    return;
+  }
+
+  // Disable button and show loading
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<div class="spinner"></div><span>Sending...</span>';
+
+  try {
+    await sendPasswordResetEmail(auth, email, actionCodeSettings);
+    
+    currentEmail = email;
+    showSuccessStep(email);
+    
+  } catch (error) {
+    console.error('Password reset error:', error);
+    
+    let errorMessage = 'An error occurred. Please try again.';
+    let errorTitle = 'Error';
+    
+    switch (error.code) {
+      case 'auth/user-not-found':
+        errorMessage = 'No account found with this email address.';
+        errorTitle = 'Account Not Found';
+        break;
+      case 'auth/invalid-email':
+        errorMessage = 'The email address is not valid.';
+        errorTitle = 'Invalid Email';
+        break;
+      case 'auth/too-many-requests':
+        errorMessage = 'Too many requests. Please wait a few minutes.';
+        errorTitle = 'Too Many Attempts';
+        break;
+      case 'auth/network-request-failed':
+        errorMessage = 'Network error. Check your internet connection.';
+        errorTitle = 'Connection Error';
+        break;
+    }
+    
+    Swal.fire({
+      icon: 'error',
+      title: errorTitle,
+      text: errorMessage,
+      background: '#0f172a',
+      color: '#e2e8f0',
+      confirmButtonColor: '#6366f1',
+      footer: error.code === 'auth/user-not-found' ? '<a href="register.html" style="color:#6366f1">Create an account</a>' : ''
+    });
+    
+  } finally {
+    // Re-enable button
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Send Reset Link</span>';
+  }
+});
+
+function showSuccessStep(email) {
+  document.getElementById('emailStep').classList.add('hidden');
+  document.getElementById('successStep').classList.remove('hidden');
+  document.getElementById('sentEmail').textContent = email;
+  
+  // Clear the form
+  document.getElementById('email').value = '';
+}
+
+// Function to send another email
+window.sendAnotherEmail = function() {
+  document.getElementById('successStep').classList.add('hidden');
+  document.getElementById('emailStep').classList.remove('hidden');
+  
+  // Pre-fill with the previous email
+  document.getElementById('email').value = currentEmail;
+  document.getElementById('email').focus();
+};
+
+// Auto-focus email input on page load
+window.addEventListener('load', () => {
+  document.getElementById('email').focus();
+});
+
+// Handle Enter key
+document.getElementById('email').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('forgotPasswordForm').dispatchEvent(new Event('submit'));
+  }
+});
+</script>
+</body>
+</html>
