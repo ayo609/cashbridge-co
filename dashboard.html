@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CashBridge • Dashboard</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #0a0f1e;
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+        linear-gradient(145deg, #0f172a 0%, #020617 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+
+    /* Animated Background Blobs */
+    .blob {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.2;
+      animation: float 20s infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .blob-1 {
+      top: -100px;
+      right: -100px;
+      background: linear-gradient(145deg, #6366f1, #a855f7);
+      animation-delay: -2s;
+    }
+
+    .blob-2 {
+      bottom: -100px;
+      left: -100px;
+      width: 500px;
+      height: 500px;
+      background: linear-gradient(145deg, #ec4899, #f59e0b);
+      animation-delay: -7s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, 30px) scale(1.1); }
+    }
+
+    /* Main Container */
+    .dashboard {
+      position: relative;
+      z-index: 10;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 100px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: white;
+      transform: rotate(-5deg);
+      box-shadow: 0 8px 15px -5px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 30px;
+      padding: 0.6rem 1.2rem;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+    }
+
+    .logout-btn:hover {
+      background: #ef4444;
+      color: white;
+      border-color: #ef4444;
+    }
+
+    /* Welcome Card */
+    .welcome-card {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 24px;
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .welcome-text h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .welcome-text h2 span {
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-text p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .wallet-badge {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+
+    .wallet-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.3rem;
+    }
+
+    .wallet-amount {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 1.3rem;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: #6366f1;
+      box-shadow: 0 15px 30px -15px rgba(99, 102, 241, 0.3);
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: white;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-change {
+      font-size: 0.75rem;
+      color: #22c55e;
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    /* Quick Actions */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title i {
+      color: #6366f1;
+      font-size: 1rem;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .action-btn {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      padding: 1rem;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .action-btn:hover {
+      border-color: #6366f1;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.4);
+    }
+
+    .action-btn i {
+      color: #6366f1;
+      font-size: 1rem;
+    }
+
+    .action-btn.loan-btn {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .action-btn.loan-btn i {
+      color: #ef4444;
+    }
+
+    .action-btn.loan-btn:hover {
+      border-color: #ef4444;
+      box-shadow: 0 10px 20px -10px rgba(239, 68, 68, 0.4);
+    }
+
+    .action-btn.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* Transactions Card */
+    .transactions-card {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 24px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .card-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-header h3 i {
+      color: #6366f1;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 30px;
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .tab i {
+      font-size: 0.75rem;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      color: white;
+      border-color: transparent;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 0.8rem 0.5rem;
+      color: #94a3b8;
+      font-weight: 500;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    td {
+      padding: 0.8rem 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: #e2e8f0;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .type-deposit {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+    }
+
+    .type-withdrawal {
+      background: rgba(234, 179, 8, 0.1);
+      color: #eab308;
+    }
+
+    .type-loan {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+
+    .type-bonus {
+      background: rgba(99, 102, 241, 0.1);
+      color: #6366f1;
+    }
+
+    .type-referral {
+      background: rgba(168, 85, 247, 0.1);
+      color: #a855f7;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .status-completed, .status-approved, .status-paid {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+    }
+
+    .status-pending {
+      background: rgba(234, 179, 8, 0.1);
+      color: #eab308;
+    }
+
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+
+    .level-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 30px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-left: 0.3rem;
+    }
+
+    .level-1 {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+    }
+
+    .level-2 {
+      background: rgba(56, 189, 248, 0.1);
+      color: #38bdf8;
+    }
+
+    .level-3 {
+      background: rgba(234, 179, 8, 0.1);
+      color: #eab308;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 3rem;
+      color: #94a3b8;
+    }
+
+    .no-data i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #6366f1;
+    }
+
+    /* Support Card */
+    .support-card {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 24px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .support-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .support-card p {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .support-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .support-btn {
+      background: rgba(37, 211, 102, 0.1);
+      border: 1px solid rgba(37, 211, 102, 0.2);
+      border-radius: 30px;
+      padding: 0.7rem 1.5rem;
+      color: #25D366;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .support-btn:hover {
+      background: #25D366;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 40px;
+      padding: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 100;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.7rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      gap: 0.2rem;
+    }
+
+    .nav-item i {
+      font-size: 1rem;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      color: white;
+      box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard {
+        padding: 1rem 1rem 100px;
+      }
+
+      .welcome-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .wallet-badge {
+        width: 100%;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .tabs {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 0.3rem;
+      }
+
+      .tab {
+        white-space: nowrap;
+      }
+
+      .bottom-nav {
+        width: 90%;
+        padding: 0.3rem;
+      }
+
+      .nav-item {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.65rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="dashboard">
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <span class="brand-name">CashBridge</span>
+      </div>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </button>
+    </div>
+
+    <!-- Welcome Card -->
+    <div class="welcome-card">
+      <div class="welcome-text">
+        <h2>Welcome back, <span id="userName">Investor</span> 👋</h2>
+        <p>Track your investments and earnings at a glance</p>
+      </div>
+      <div class="wallet-badge">
+        <div class="wallet-label">Wallet Balance</div>
+        <div class="wallet-amount" id="walletBalance">₦0</div>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <span class="stat-label">Total Invested</span>
+        </div>
+        <div class="stat-value" id="totalInvested">₦0</div>
+        <div class="stat-change">
+          <i class="fas fa-arrow-up"></i> Lifetime
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-coins"></i>
+          </div>
+          <span class="stat-label">Total Earnings</span>
+        </div>
+        <div class="stat-value" id="totalEarnings">₦0</div>
+        <div class="stat-change">
+          <i class="fas fa-arrow-up"></i> All time
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-gift"></i>
+          </div>
+          <span class="stat-label">Referral Bonus</span>
+        </div>
+        <div class="stat-value" id="referralBonus">₦0</div>
+        <div class="stat-change">
+          <i class="fas fa-arrow-up"></i> Earned
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-briefcase"></i>
+          </div>
+          <span class="stat-label">Active Plans</span>
+        </div>
+        <div class="stat-value" id="activePlans">0</div>
+        <div class="stat-change">
+          <i class="fas fa-clock"></i> Running
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <span class="stat-label">Referrals</span>
+        </div>
+        <div class="stat-value" id="totalReferrals">0</div>
+        <div class="stat-change">
+          <i class="fas fa-arrow-up"></i> Total
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section-title">
+      <i class="fas fa-bolt"></i>
+      Quick Actions
+    </div>
+
+    <div class="actions-grid">
+      <a href="deposit.html" class="action-btn">
+        <i class="fas fa-plus-circle"></i>
+        Deposit
+      </a>
+      <a href="withdrawal.html" id="withdrawBtn" class="action-btn">
+        <i class="fas fa-money-bill-wave"></i>
+        Withdraw
+      </a>
+      <a href="plans.html" class="action-btn">
+        <i class="fas fa-rocket"></i>
+        Invest
+      </a>
+      <a href="referral.html" class="action-btn">
+        <i class="fas fa-share-nodes"></i>
+        Refer
+      </a>
+      <a href="loan.html" class="action-btn loan-btn">
+        <i class="fas fa-hand-holding-usd"></i>
+        Loan
+      </a>
+    </div>
+
+    <!-- Transactions -->
+    <div class="transactions-card">
+      <div class="card-header">
+        <h3>
+          <i class="fas fa-history"></i>
+          Transaction History
+        </h3>
+        <div class="tabs">
+          <button class="tab active" data-tab="all">
+            <i class="fas fa-list"></i> All
+          </button>
+          <button class="tab" data-tab="deposits">
+            <i class="fas fa-arrow-down"></i> Deposits
+          </button>
+          <button class="tab" data-tab="withdrawals">
+            <i class="fas fa-arrow-up"></i> Withdrawals
+          </button>
+          <button class="tab" data-tab="loans">
+            <i class="fas fa-hand-holding-usd"></i> Loans
+          </button>
+          <button class="tab" data-tab="roi">
+            <i class="fas fa-chart-line"></i> ROI
+          </button>
+          <button class="tab" data-tab="referrals">
+            <i class="fas fa-gift"></i> Referrals
+          </button>
+        </div>
+      </div>
+
+      <div class="tab-content active" id="tab-all">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+      </div>
+
+      <div class="tab-content" id="tab-deposits">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+      </div>
+
+      <div class="tab-content" id="tab-withdrawals">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+      </div>
+
+      <div class="tab-content" id="tab-loans">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+      </div>
+
+      <div class="tab-content" id="tab-roi">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+      </div>
+
+      <div class="tab-content" id="tab-referrals">
+        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+      </div>
+    </div>
+
+    <!-- Support -->
+    <div class="support-card">
+      <h3>
+        <i class="fas fa-headset"></i>
+        Need Assistance?
+      </h3>
+      <p>Our support team is available 24/7</p>
+      <div class="support-buttons">
+        <a href="https://wa.me/2347018051146" class="support-btn" target="_blank">
+          <i class="fab fa-whatsapp"></i> Support 1
+        </a>
+        <a href="https://wa.me/2349167378733" class="support-btn" target="_blank">
+          <i class="fab fa-whatsapp"></i> Support 2
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="plans.html" class="nav-item">
+      <i class="fas fa-layer-group"></i>
+      <span>Plans</span>
+    </a>
+    <a href="referral.html" class="nav-item">
+      <i class="fas fa-share-nodes"></i>
+      <span>Referral</span>
+    </a>
+    <a href="dashboard.html" class="nav-item active">
+      <i class="fas fa-chart-pie"></i>
+      <span>Dashboard</span>
+    </a>
+  </nav>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+      authDomain: "cashbridge-a688e.firebaseapp.com",
+      projectId: "cashbridge-a688e",
+      storageBucket: "cashbridge-a688e.firebasestorage.app",
+      messagingSenderId: "345273765518",
+      appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const formatMoney = (amount) => "₦" + Number(amount || 0).toLocaleString();
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      const result = await Swal.fire({
+        title: "Logout",
+        text: "Are you sure you want to log out?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: '#6366f1',
+        cancelButtonColor: '#64748b',
+        background: '#0f172a',
+        color: '#e2e8f0'
+      });
+
+      if (result.isConfirmed) {
+        await signOut(auth);
+        Swal.fire({
+          icon: "success",
+          title: "Logged Out",
+          timer: 1500,
+          showConfirmButton: false,
+          background: '#0f172a',
+          color: '#e2e8f0'
+        });
+        setTimeout(() => window.location.href = "login.html", 1500);
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userData = userSnap.data();
+
+      // Display user info
+      const firstName = userData.fullName?.split(' ')[0] || "Investor";
+      document.getElementById("userName").textContent = firstName;
+
+      const wallet = Number(userData.wallet || 0);
+      document.getElementById("walletBalance").textContent = formatMoney(wallet);
+      document.getElementById("totalInvested").textContent = formatMoney(userData.totalDeposits || 0);
+      document.getElementById("totalEarnings").textContent = formatMoney(userData.totalEarnings || 0);
+
+      // Calculate referral bonus
+      const referralsSnap = await getDocs(collection(db, `users/${user.uid}/referrals`));
+      let totalReferralBonus = 0;
+      referralsSnap.forEach(doc => {
+        totalReferralBonus += Number(doc.data().totalEarned || 0);
+      });
+      document.getElementById("referralBonus").textContent = formatMoney(totalReferralBonus);
+
+      // Active plans count
+      const activePlansSnap = await getDocs(collection(db, `users/${user.uid}/activePlans`));
+      let activeCount = 0;
+      activePlansSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.active !== false && data.daysLeft > 0) activeCount++;
+      });
+      document.getElementById("activePlans").textContent = activeCount;
+
+      // Total referrals
+      document.getElementById("totalReferrals").textContent = referralsSnap.size;
+
+      // Withdraw button state
+      document.getElementById("withdrawBtn").classList.toggle("disabled", wallet < 1000);
+
+      // Load transactions
+      await loadTransactions(user.uid);
+    });
+
+    async function loadTransactions(userId) {
+      const transactions = [];
+
+      // Get deposits
+      const depositsSnap = await getDocs(collection(db, `users/${userId}/deposits`));
+      depositsSnap.forEach(doc => {
+        const data = doc.data();
+        transactions.push({
+          ...data,
+          id: doc.id,
+          type: 'Deposit',
+          typeClass: 'type-deposit',
+          category: 'deposit'
+        });
+      });
+
+      // Get withdrawals
+      const withdrawalsSnap = await getDocs(collection(db, `users/${userId}/withdrawals`));
+      withdrawalsSnap.forEach(doc => {
+        const data = doc.data();
+        transactions.push({
+          ...data,
+          id: doc.id,
+          type: 'Withdrawal',
+          typeClass: 'type-withdrawal',
+          category: 'withdrawal'
+        });
+      });
+
+      // Get loans
+      const loansSnap = await getDocs(collection(db, `users/${userId}/loanApplications`));
+      loansSnap.forEach(doc => {
+        const data = doc.data();
+        transactions.push({
+          ...data,
+          id: doc.id,
+          type: 'Loan',
+          typeClass: 'type-loan',
+          category: 'loan',
+          amount: data.loanAmount
+        });
+      });
+
+      // Get ROI from plans
+      const plansSnap = await getDocs(collection(db, `users/${userId}/activePlans`));
+      plansSnap.forEach(doc => {
+        const data = doc.data();
+        const claimsCount = 30 - (data.daysLeft || 30);
+        if (claimsCount > 0) {
+          transactions.push({
+            amount: data.dailyEarning * claimsCount,
+            createdAt: data.lastClaimed || data.startDate,
+            status: 'Completed',
+            type: 'Investment ROI',
+            typeClass: 'type-bonus',
+            category: 'roi',
+            details: `${data.planName}`
+          });
+        }
+      });
+
+      // Get referral bonuses
+      const referralsSnap = await getDocs(collection(db, `users/${userId}/referrals`));
+      for (const refDoc of referralsSnap.docs) {
+        const refData = refDoc.data();
+        if (refData.totalEarned > 0) {
+          transactions.push({
+            amount: refData.totalEarned,
+            createdAt: refData.referredAt,
+            status: 'Completed',
+            type: 'Referral Bonus',
+            typeClass: 'type-referral',
+            category: 'referral',
+            level: refData.level,
+            commission: refData.commission,
+            details: `Level ${refData.level} - ${refData.referredUserName}`
+          });
+        }
+      }
+
+      // Sort by date (newest first)
+      transactions.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return timeB - timeA;
+      });
+
+      // Render tables
+      renderTable('all', transactions);
+      renderTable('deposits', transactions.filter(t => t.category === 'deposit'));
+      renderTable('withdrawals', transactions.filter(t => t.category === 'withdrawal'));
+      renderTable('loans', transactions.filter(t => t.category === 'loan'));
+      renderTable('roi', transactions.filter(t => t.category === 'roi'));
+      renderTable('referrals', transactions.filter(t => t.category === 'referral'));
+    }
+
+    function renderTable(tabName, transactions) {
+      const container = document.getElementById(`tab-${tabName}`);
+      
+      if (transactions.length === 0) {
+        container.innerHTML = `
+          <div class="no-data">
+            <i class="fas fa-inbox"></i>
+            <p>No transactions found</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = `
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${transactions.slice(0, 10).map(tx => {
+                let detailsHTML = tx.details || tx.planName || tx.method || '—';
+                
+                if (tx.level) {
+                  detailsHTML += ` <span class="level-badge level-${tx.level}">L${tx.level}</span>`;
+                }
+
+                return `
+                  <tr>
+                    <td>${tx.createdAt ? new Date(tx.createdAt.toMillis()).toLocaleDateString() : '—'}</td>
+                    <td>
+                      <span class="type-badge ${tx.typeClass}">
+                        <i class="fas ${tx.typeClass === 'type-deposit' ? 'fa-arrow-down' : 
+                                      tx.typeClass === 'type-withdrawal' ? 'fa-arrow-up' : 
+                                      tx.typeClass === 'type-loan' ? 'fa-hand-holding-usd' : 
+                                      tx.typeClass === 'type-bonus' ? 'fa-chart-line' : 'fa-gift'}"></i>
+                        ${tx.type}
+                      </span>
+                    </td>
+                    <td><strong>${formatMoney(tx.amount || tx.loanAmount || 0)}</strong></td>
+                    <td><span class="status-badge status-${(tx.status || 'pending').toLowerCase()}">${tx.status || 'Pending'}</span></td>
+                    <td>${detailsHTML}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      container.innerHTML = tableHTML;
+    }
+  </script>
+</body>
+</html>
