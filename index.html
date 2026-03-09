@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CashBridge • Where Money Works Smarter</title>
+  
+  <!-- Fonts - completely new combination -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Satoshi:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+/* === RESET & BASE - completely fresh aesthetic === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Satoshi', sans-serif;
+  background: #fcf9f2;  /* Warm off-white */
+  color: #1a1e2b;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* === TYPOGRAPHY - bold and distinctive === */
+h1, h2, h3, h4 {
+  font-family: 'Clash Display', sans-serif;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+/* === ANNOUNCEMENT BAR - high-impact === */
+.announcement {
+  background: #1a1e2b;
+  color: #fcf9f2;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 100;
+}
+
+.announcement span {
+  background: #ffd166;
+  color: #1a1e2b;
+  padding: 0.25rem 1rem;
+  border-radius: 100px;
+  font-weight: 700;
+  margin-left: 0.75rem;
+  display: inline-block;
+}
+
+/* === HEADER - brutalist/minimal === */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: #fcf9f2;
+  border-bottom: 3px solid #1a1e2b;
+  padding: 1rem 5%;
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a1e2b;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.logo-mark {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  background: #ff4d6d;
+  margin-right: 8px;
+  border-radius: 12px 0 12px 0;
+  vertical-align: middle;
+}
+
+.nav {
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+}
+
+.nav a {
+  color: #1a1e2b;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.1rem;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: #ff4d6d;
+  transition: width 0.2s ease;
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+.nav-btn {
+  background: #1a1e2b;
+  color: #fcf9f2 !important;
+  padding: 0.75rem 2rem !important;
+  border-radius: 40px;
+  font-weight: 700 !important;
+  border: 3px solid #1a1e2b;
+  transition: all 0.2s !important;
+}
+
+.nav-btn:hover {
+  background: #ff4d6d;
+  border-color: #ff4d6d;
+  color: #1a1e2b !important;
+}
+
+.nav-btn::after {
+  display: none !important;
+}
+
+/* Mobile menu */
+.menu-toggle {
+  display: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #1a1e2b;
+}
+
+@media (max-width: 900px) {
+  .nav {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 400px;
+    height: 100vh;
+    background: #1a1e2b;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem;
+    transition: right 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .nav.active {
+    right: 0;
+  }
+  
+  .nav a {
+    color: #fcf9f2;
+    font-size: 1.5rem;
+  }
+  
+  .nav-btn {
+    background: #ff4d6d;
+    color: #1a1e2b !important;
+    border-color: #ff4d6d;
+  }
+  
+  .menu-toggle {
+    display: block;
+    z-index: 1001;
+  }
+  
+  .close-menu {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    color: #fcf9f2;
+    font-size: 2rem;
+    cursor: pointer;
+  }
+}
+
+/* === HERO - bold shapes + typography === */
+.hero {
+  padding: 4rem 5% 6rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.hero-left {
+  position: relative;
+}
+
+.hero-tag {
+  background: #ffd166;
+  color: #1a1e2b;
+  padding: 0.5rem 1.5rem;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-block;
+  margin-bottom: 2rem;
+  border: 2px solid #1a1e2b;
+}
+
+.hero-title {
+  font-size: clamp(3.5rem, 8vw, 5.5rem);
+  margin-bottom: 1.5rem;
+  line-height: 1;
+}
+
+.hero-title span {
+  color: #ff4d6d;
+  display: block;
+  font-size: clamp(4rem, 9vw, 6.5rem);
+  border-bottom: 4px solid #1a1e2b;
+  display: inline-block;
+  padding-bottom: 0.2rem;
+}
+
+.hero-text {
+  font-size: 1.3rem;
+  color: #4a4f62;
+  margin-bottom: 2.5rem;
+  max-width: 90%;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 1.2rem 2.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: 3px solid #1a1e2b;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: #ff4d6d;
+  color: #1a1e2b;
+  box-shadow: 8px 8px 0 #1a1e2b;
+}
+
+.btn-primary:hover {
+  transform: translate(4px, 4px);
+  box-shadow: 4px 4px 0 #1a1e2b;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #1a1e2b;
+  box-shadow: 8px 8px 0 #1a1e2b;
+}
+
+.btn-secondary:hover {
+  background: #1a1e2b;
+  color: #fcf9f2;
+  transform: translate(4px, 4px);
+  box-shadow: 4px 4px 0 #1a1e2b;
+}
+
+.hero-right {
+  position: relative;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  position: relative;
+}
+
+.hero-grid-item {
+  background: white;
+  border: 3px solid #1a1e2b;
+  padding: 2rem;
+  box-shadow: 12px 12px 0 #1a1e2b;
+}
+
+.hero-grid-item.large {
+  grid-column: span 2;
+  background: #ffd166;
+}
+
+.hero-grid-item .number {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.hero-grid-item .label {
+  font-weight: 500;
+  color: #4a4f62;
+}
+
+/* === MARQUEE - dynamic element === */
+.marquee {
+  background: #1a1e2b;
+  padding: 1.5rem 0;
+  border-top: 3px solid #ff4d6d;
+  border-bottom: 3px solid #ff4d6d;
+  margin: 3rem 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-track {
+  display: inline-block;
+  animation: scroll 25s linear infinite;
+}
+
+.marquee-item {
+  display: inline-block;
+  margin: 0 2rem;
+  color: #fcf9f2;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.marquee-item i {
+  color: #ffd166;
+  margin-right: 1rem;
+}
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* === FEATURES - bold cards === */
+.features {
+  padding: 6rem 5%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section-header {
+  margin-bottom: 4rem;
+}
+
+.section-eyebrow {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ff4d6d;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.section-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  max-width: 800px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.feature-item {
+  border: 3px solid #1a1e2b;
+  background: white;
+  padding: 2.5rem;
+  box-shadow: 12px 12px 0 #1a1e2b;
+  transition: all 0.2s;
+}
+
+.feature-item:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 16px 16px 0 #1a1e2b;
+}
+
+.feature-icon {
+  width: 60px;
+  height: 60px;
+  background: #ffd166;
+  border: 3px solid #1a1e2b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.feature-item h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.feature-item p {
+  color: #4a4f62;
+}
+
+/* === STATS - minimalist === */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin: 4rem 0;
+  padding: 2rem 5%;
+  background: #ff4d6d;
+  border-top: 3px solid #1a1e2b;
+  border-bottom: 3px solid #1a1e2b;
+}
+
+.stat-block {
+  text-align: center;
+}
+
+.stat-block .number {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1a1e2b;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.stat-block .label {
+  font-weight: 500;
+  color: #1a1e2b;
+  opacity: 0.8;
+}
+
+/* === HOW IT WORKS - stepped === */
+.how-it-works {
+  padding: 6rem 5%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  margin-top: 4rem;
+}
+
+.step {
+  position: relative;
+  counter-increment: step-counter;
+}
+
+.step::before {
+  content: counter(step-counter);
+  position: absolute;
+  top: -1rem;
+  left: -1rem;
+  font-family: 'Clash Display', sans-serif;
+  font-size: 8rem;
+  font-weight: 700;
+  color: #ffd166;
+  -webkit-text-stroke: 3px #1a1e2b;
+  color: transparent;
+  z-index: -1;
+}
+
+.step h3 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  padding-top: 2rem;
+}
+
+.step p {
+  color: #4a4f62;
+}
+
+/* === TESTIMONIALS - rotated cards === */
+.testimonials {
+  padding: 6rem 5%;
+  background: #1a1e2b;
+  color: #fcf9f2;
+  border-top: 3px solid #ff4d6d;
+  border-bottom: 3px solid #ff4d6d;
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 4rem auto 0;
+}
+
+.testimonial-card {
+  background: #fcf9f2;
+  border: 3px solid #ff4d6d;
+  padding: 2.5rem;
+  transform: rotate(-2deg);
+  transition: transform 0.2s;
+}
+
+.testimonial-card:nth-child(even) {
+  transform: rotate(2deg);
+  background: #ffd166;
+}
+
+.testimonial-card:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+.testimonial-card p {
+  color: #1a1e2b;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-top: 2px solid #1a1e2b;
+  padding-top: 1.5rem;
+}
+
+.author-avatar {
+  width: 50px;
+  height: 50px;
+  background: #ff4d6d;
+  border: 2px solid #1a1e2b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #1a1e2b;
+}
+
+.author-info h4 {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+  color: #1a1e2b;
+}
+
+.author-info p {
+  color: #4a4f62;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* === CTA - maximalist === */
+.cta-block {
+  padding: 6rem 5%;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.cta-card {
+  background: #ffd166;
+  border: 4px solid #1a1e2b;
+  padding: 5rem 3rem;
+  box-shadow: 20px 20px 0 #ff4d6d;
+  position: relative;
+}
+
+.cta-card h2 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  margin-bottom: 1.5rem;
+  color: #1a1e2b;
+}
+
+.cta-card p {
+  font-size: 1.3rem;
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  color: #4a4f62;
+}
+
+.cta-btn-large {
+  background: #1a1e2b;
+  color: #fcf9f2;
+  font-size: 1.5rem;
+  padding: 1.5rem 4rem;
+  border: 3px solid #1a1e2b;
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-block;
+  transition: all 0.2s;
+  box-shadow: 10px 10px 0 #ff4d6d;
+}
+
+.cta-btn-large:hover {
+  transform: translate(5px, 5px);
+  box-shadow: 5px 5px 0 #ff4d6d;
+  background: #ff4d6d;
+  color: #1a1e2b;
+}
+
+/* === FOOTER - simple === */
+.footer {
+  background: #1a1e2b;
+  color: #fcf9f2;
+  padding: 4rem 5% 2rem;
+  border-top: 3px solid #ff4d6d;
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+.footer-logo {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.footer-links {
+  display: flex;
+  gap: 4rem;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: #fcf9f2;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: #ff4d6d;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+}
+
+/* === MOBILE === */
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .steps {
+    grid-template-columns: 1fr;
+  }
+  
+  .cta-card {
+    padding: 3rem 1.5rem;
+    box-shadow: 10px 10px 0 #ff4d6d;
+  }
+  
+  .cta-btn-large {
+    font-size: 1.2rem;
+    padding: 1.2rem 2rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Announcement bar -->
+<div class="announcement">
+  🚀 Nigeria's fastest-growing investment platform
+  <span>NEW: 15% bonus on first deposit</span>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-container">
+    <a href="#" class="logo">
+      <span class="logo-mark"></span>
+      CashBridge
+    </a>
+    
+    <div class="menu-toggle">
+      <i class="fas fa-bars"></i>
+    </div>
+    
+    <nav class="nav">
+      <a href="#">Home</a>
+      <a href="#">About</a>
+      <a href="#">Plans</a>
+      <a href="#">Blog</a>
+      <a href="login.html" class="nav-btn">Sign In</a>
+      <div class="close-menu"><i class="fas fa-times"></i></div>
+    </nav>
+  </div>
+</header>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">⚡️ NO HIDDEN FEES</div>
+    <h1 class="hero-title">
+      Make your money
+      <span>work harder</span>
+    </h1>
+    <p class="hero-text">Smart investing with guaranteed returns. Join thousands of Nigerians building real wealth with CashBridge.</p>
+    <div class="hero-cta">
+      <a href="register.html" class="btn btn-primary">
+        Start Investing <i class="fas fa-arrow-right"></i>
+      </a>
+      <a href="#" class="btn btn-secondary">
+        Watch Demo <i class="fas fa-play"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="hero-right">
+    <div class="hero-grid">
+      <div class="hero-grid-item">
+        <span class="number">₦2.4B+</span>
+        <span class="label">Paid out</span>
+      </div>
+      <div class="hero-grid-item">
+        <span class="number">15-25%</span>
+        <span class="label">Annual returns</span>
+      </div>
+      <div class="hero-grid-item large">
+        <span class="number">50,000+</span>
+        <span class="label">Active investors</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> SEC Licensed</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Insured up to ₦10M</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Daily Payouts</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> 24/7 Support</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> 8% Referral Bonus</span>
+    <!-- Duplicate for seamless scroll -->
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> SEC Licensed</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Insured up to ₦10M</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Daily Payouts</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> 24/7 Support</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> 8% Referral Bonus</span>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="features">
+  <div class="section-header">
+    <span class="section-eyebrow">Why investors choose us</span>
+    <h2 class="section-title">Built different. Built for you.</h2>
+  </div>
+  
+  <div class="features-grid">
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-bolt"></i>
+      </div>
+      <h3>Lightning fast</h3>
+      <p>Instant deposits and withdrawals. No waiting days for your money.</p>
+    </div>
+    
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-shield"></i>
+      </div>
+      <h3>Bank-grade security</h3>
+      <p>Your money is protected with 256-bit encryption and insurance.</p>
+    </div>
+    
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-chart-simple"></i>
+      </div>
+      <h3>Guaranteed returns</h3>
+      <p>No market volatility. Fixed returns you can count on.</p>
+    </div>
+    
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <h3>Refer & earn</h3>
+      <p>Get 8% commission on every investment your referrals make.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Stats row -->
+<div class="stats-row">
+  <div class="stat-block">
+    <span class="number">₦2.4B</span>
+    <span class="label">Total paid</span>
+  </div>
+  <div class="stat-block">
+    <span class="number">50k+</span>
+    <span class="label">Investors</span>
+  </div>
+  <div class="stat-block">
+    <span class="number">3+</span>
+    <span class="label">Years live</span>
+  </div>
+  <div class="stat-block">
+    <span class="number">15%</span>
+    <span class="label">Min return</span>
+  </div>
+</div>
+
+<!-- How it works -->
+<section class="how-it-works">
+  <div class="section-header">
+    <span class="section-eyebrow">Simple 3-step process</span>
+    <h2 class="section-title">Start earning in minutes</h2>
+  </div>
+  
+  <div class="steps">
+    <div class="step">
+      <h3>Create account</h3>
+      <p>Sign up for free. No documents needed to start.</p>
+    </div>
+    
+    <div class="step">
+      <h3>Add funds</h3>
+      <p>Deposit via bank transfer, card, or USDT. Min ₦3,000.</p>
+    </div>
+    
+    <div class="step">
+      <h3>Watch it grow</h3>
+      <p>Get daily returns paid automatically to your wallet.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials">
+  <div class="section-header" style="color: #fcf9f2;">
+    <span class="section-eyebrow" style="color: #ffd166;">Real stories</span>
+    <h2 class="section-title" style="color: #fcf9f2;">Trusted by thousands</h2>
+  </div>
+  
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <p>"I've tried multiple platforms. CashBridge is the only one that actually pays when they say they will. My family is finally financially free."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">C</div>
+        <div class="author-info">
+          <h4>Chioma Okafor</h4>
+          <p>Lagos • Investor since 2023</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="testimonial-card">
+      <p>"The referral program is insane. I earn more from my referrals than my day job. Thank you CashBridge for changing my life."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">M</div>
+        <div class="author-info">
+          <h4>Michael Adebayo</h4>
+          <p>Abuja • Top referrer</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="testimonial-card">
+      <p>"Customer support is incredible. They walk you through everything. Made my first ₦100k in 3 months. I'm never looking back."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">F</div>
+        <div class="author-info">
+          <h4>Fatima Yusuf</h4>
+          <p>Kano • New investor</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Block -->
+<section class="cta-block">
+  <div class="cta-card">
+    <h2>Ready to build wealth?</h2>
+    <p>Join 50,000+ Nigerians already earning daily returns with CashBridge</p>
+    <a href="register.html" class="cta-btn-large">
+      Create free account <i class="fas fa-arrow-right"></i>
+    </a>
+    <p style="margin-top: 2rem; font-size: 0.9rem; opacity: 0.7;">No credit card required • Takes 2 minutes</p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-logo">
+      <span class="logo-mark"></span>
+      CashBridge
+    </div>
+    
+    <div class="footer-links">
+      <a href="#">About</a>
+      <a href="#">Plans</a>
+      <a href="#">Blog</a>
+      <a href="#">FAQ</a>
+      <a href="#">Contact</a>
+      <a href="#">Terms</a>
+      <a href="#">Privacy</a>
+    </div>
+  </div>
+  
+  <div class="footer-bottom">
+    <p>© 2026 CashBridge. All rights reserved. Licensed by the SEC Nigeria.</p>
+  </div>
+</footer>
+
+<script>
+// Mobile menu
+const menuToggle = document.querySelector('.menu-toggle');
+const closeMenu = document.querySelector('.close-menu');
+const nav = document.querySelector('.nav');
+
+menuToggle.addEventListener('click', () => {
+  nav.classList.add('active');
+});
+
+closeMenu.addEventListener('click', () => {
+  nav.classList.remove('active');
+});
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+  if (!nav.contains(e.target) && !menuToggle.contains(e.target) && nav.classList.contains('active')) {
+    nav.classList.remove('active');
+  }
+});
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.querySelector(this.getAttribute('href')).scrollIntoView({
+      behavior: 'smooth'
+    });
+  });
+});
+
+// Counter animation
+function animateValue(element, start, end, duration, prefix = '', suffix = '') {
+  let startTimestamp = null;
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    const value = Math.floor(progress * (end - start) + start);
+    element.textContent = prefix + value.toLocaleString() + suffix;
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    }
+  };
+  window.requestAnimationFrame(step);
+}
+
+// Intersection Observer for stats
+const statsObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const stats = document.querySelectorAll('.stat-block .number');
+      animateValue(stats[0], 0, 2.4, 2000, '₦', 'B');
+      animateValue(stats[1], 0, 50, 2000, '', 'k+');
+      animateValue(stats[2], 0, 3, 2000, '', '+');
+      animateValue(stats[3], 0, 15, 2000, '', '%');
+      statsObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+statsObserver.observe(document.querySelector('.stats-row'));
+</script>
+</body>
+</html>
