@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CashBridge — Invest Smart. Earn Daily.</title>
+  <meta name="description" content="CashBridge is Nigeria's premier investment platform. Earn daily returns, withdraw instantly, and grow your wealth from just ₦3,000."/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    /* ════════════════════════════════════════
+       TOKENS & RESET
+    ════════════════════════════════════════ */
+    :root {
+      --ink:       #04091a;
+      --deep:      #060d1f;
+      --mid:       #0d1630;
+      --surface:   rgba(255,255,255,0.035);
+      --surface-h: rgba(255,255,255,0.065);
+      --border:    rgba(255,255,255,0.08);
+      --border-h:  rgba(99,190,255,0.35);
+      --jade:      #00e5a0;
+      --sky:       #38bdf8;
+      --iris:      #818cf8;
+      --coral:     #fb7185;
+      --amber:     #fbbf24;
+      --text-1:    #f0f6ff;
+      --text-2:    #8ba3c7;
+      --text-3:    #4a6585;
+      --r-card:    24px;
+      --r-pill:    999px;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+
+    body {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      background: var(--ink);
+      color: var(--text-1);
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ════════════════════════════════════════
+       CANVAS BACKGROUND
+    ════════════════════════════════════════ */
+    #canvas-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .noise {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    }
+
+    /* ════════════════════════════════════════
+       LAYOUT SHELL
+    ════════════════════════════════════════ */
+    .shell {
+      position: relative;
+      z-index: 10;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ════════════════════════════════════════
+       NAVBAR
+    ════════════════════════════════════════ */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(4,9,26,0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s;
+      margin: 0 -2rem;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+    .navbar.scrolled { border-bottom-color: var(--border); }
+
+    .logo {
+      display: flex; align-items: center; gap: 0.75rem;
+      text-decoration: none;
+    }
+    .logo-mark {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, var(--jade), var(--sky));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem; color: #000;
+      font-weight: 900;
+      box-shadow: 0 0 24px -4px rgba(0,229,160,0.5);
+      transform: rotate(-6deg);
+      transition: transform 0.3s;
+    }
+    .logo:hover .logo-mark { transform: rotate(0deg) scale(1.05); }
+    .logo-text {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-1);
+    }
+    .logo-text span { color: var(--jade); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-2);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.5rem 0.9rem;
+      border-radius: 10px;
+      transition: all 0.25s;
+    }
+    .nav-links a:hover { color: var(--text-1); background: var(--surface-h); }
+
+    .nav-cta { display: flex; align-items: center; gap: 0.75rem; }
+    .btn-nav-ghost {
+      padding: 0.55rem 1.2rem;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-2);
+      font-size: 0.9rem; font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+    .btn-nav-ghost:hover { border-color: var(--jade); color: var(--jade); }
+    .btn-nav-solid {
+      padding: 0.55rem 1.4rem;
+      border-radius: var(--r-pill);
+      background: var(--jade);
+      color: #000;
+      font-size: 0.9rem; font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 6px 20px -4px rgba(0,229,160,0.4);
+    }
+    .btn-nav-solid:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -4px rgba(0,229,160,0.55); }
+
+    .hamburger {
+      display: none;
+      flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 0.4rem;
+      background: none; border: none;
+    }
+    .hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: var(--text-2); border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    /* ════════════════════════════════════════
+       HERO
+    ════════════════════════════════════════ */
+    .hero {
+      padding: 7rem 0 5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-left { animation: riseIn 0.9s ease-out both; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0,229,160,0.08);
+      border: 1px solid rgba(0,229,160,0.22);
+      border-radius: var(--r-pill);
+      padding: 0.45rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--jade);
+      margin-bottom: 1.75rem;
+    }
+    .hero-badge .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--jade);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.4; transform:scale(0.7); }
+    }
+
+    .hero-headline {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -1.5px;
+      margin-bottom: 1.5rem;
+    }
+    .hero-headline .line-accent {
+      background: linear-gradient(110deg, var(--jade) 0%, var(--sky) 50%, var(--iris) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text-2);
+      line-height: 1.7;
+      max-width: 480px;
+      margin-bottom: 2.5rem;
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+    .btn-hero-primary {
+      padding: 0.95rem 2.2rem;
+      background: linear-gradient(135deg, var(--jade), #00c4b4);
+      color: #000;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: var(--r-pill);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      box-shadow: 0 10px 32px -6px rgba(0,229,160,0.45);
+      transition: all 0.3s;
+    }
+    .btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -6px rgba(0,229,160,0.6); }
+    .btn-hero-outline {
+      padding: 0.95rem 2.2rem;
+      background: var(--surface);
+      color: var(--text-1);
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s;
+    }
+    .btn-hero-outline:hover { border-color: var(--border-h); transform: translateY(-3px); background: var(--surface-h); }
+
+    .hero-trust {
+      display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+    }
+    .trust-avatars {
+      display: flex;
+    }
+    .trust-av {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      margin-left: -10px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      color: #000;
+    }
+    .trust-av:first-child { margin-left: 0; }
+    .av1 { background: linear-gradient(135deg,#f472b6,#ec4899); }
+    .av2 { background: linear-gradient(135deg,#60a5fa,#3b82f6); }
+    .av3 { background: linear-gradient(135deg,#34d399,#10b981); }
+    .av4 { background: linear-gradient(135deg,#fbbf24,#f59e0b); }
+    .av5 { background: linear-gradient(135deg,#a78bfa,#8b5cf6); }
+    .trust-text { font-size: 0.85rem; color: var(--text-2); line-height: 1.4; }
+    .trust-text strong { color: var(--text-1); }
+
+    /* Hero Right — Floating Card */
+    .hero-right {
+      display: flex; justify-content: center; align-items: center;
+      animation: riseIn 0.9s 0.2s ease-out both;
+    }
+    .hero-card {
+      width: 100%; max-width: 380px;
+      background: rgba(13,22,48,0.7);
+      backdrop-filter: blur(28px);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 2rem;
+      position: relative;
+      box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07);
+      animation: floatCard 6s ease-in-out infinite;
+    }
+    @keyframes floatCard {
+      0%,100% { transform: translateY(0px) rotate(0.5deg); }
+      50%      { transform: translateY(-14px) rotate(-0.5deg); }
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 30% 0%, rgba(0,229,160,0.1) 0%, transparent 55%);
+      border-radius: inherit; pointer-events: none;
+    }
+
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .card-label { font-size: 0.8rem; color: var(--text-3); font-weight: 500; letter-spacing: 0.5px; }
+    .card-status {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.78rem; color: var(--jade); font-weight: 600;
+    }
+    .card-status .pulse {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--jade);
+      animation: pulse-ring 2s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(0,229,160,0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(0,229,160,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,229,160,0); }
+    }
+
+    .card-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: 2.4rem;
+      font-weight: 500;
+      color: var(--text-1);
+      margin-bottom: 0.4rem;
+      letter-spacing: -1px;
+    }
+    .card-gain {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      background: rgba(0,229,160,0.1);
+      border: 1px solid rgba(0,229,160,0.2);
+      border-radius: var(--r-pill);
+      padding: 0.25rem 0.75rem;
+      font-size: 0.8rem; font-weight: 700;
+      color: var(--jade);
+      margin-bottom: 1.75rem;
+    }
+
+    .card-chart {
+      height: 64px;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: flex-end; gap: 5px;
+    }
+    .bar {
+      flex: 1; border-radius: 6px 6px 0 0;
+      background: linear-gradient(to top, rgba(0,229,160,0.15), rgba(0,229,160,0.55));
+      transition: height 0.3s;
+    }
+
+    .card-divider { height: 1px; background: var(--border); margin-bottom: 1.5rem; }
+
+    .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .cstat { }
+    .cstat-label { font-size: 0.75rem; color: var(--text-3); margin-bottom: 0.3rem; }
+    .cstat-val   { font-size: 1.05rem; font-weight: 700; color: var(--text-1); }
+    .cstat-val.up   { color: var(--jade); }
+    .cstat-val.iris { color: var(--iris); }
+
+    .card-footer {
+      margin-top: 1.5rem;
+      background: linear-gradient(135deg, var(--jade), #00c4b4);
+      border-radius: 16px;
+      padding: 0.9rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: default;
+    }
+    .cf-text { font-size: 0.85rem; font-weight: 700; color: #000; }
+    .cf-icon {
+      width: 30px; height: 30px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #000; font-size: 0.9rem;
+    }
+
+    /* ════════════════════════════════════════
+       STATS BAR
+    ════════════════════════════════════════ */
+    .stats-bar {
+      padding: 3rem 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 6rem;
+    }
+    .stats-bar-inner {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      text-align: center;
+    }
+    .stat-item { animation: riseIn 0.6s ease-out both; }
+    .stat-item:nth-child(1) { animation-delay: 0.1s; }
+    .stat-item:nth-child(2) { animation-delay: 0.2s; }
+    .stat-item:nth-child(3) { animation-delay: 0.3s; }
+    .stat-item:nth-child(4) { animation-delay: 0.4s; }
+    .stat-num-big {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--jade), var(--sky));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+    .stat-caption { font-size: 0.88rem; color: var(--text-3); margin-top: 0.35rem; font-weight: 500; }
+
+    /* ════════════════════════════════════════
+       SECTION WRAPPER
+    ════════════════════════════════════════ */
+    section { margin-bottom: 7rem; }
+    .sec-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--jade);
+      margin-bottom: 1rem;
+    }
+    .sec-eyebrow::before {
+      content: '';
+      display: block; width: 24px; height: 2px;
+      background: var(--jade); border-radius: 2px;
+    }
+    .sec-title {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .sec-sub {
+      font-size: 1rem;
+      color: var(--text-2);
+      max-width: 520px;
+      line-height: 1.7;
+    }
+    .sec-head-row {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 3rem; gap: 2rem; flex-wrap: wrap;
+    }
+
+    /* ════════════════════════════════════════
+       ABOUT / HOW IT WORKS
+    ════════════════════════════════════════ */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .about-visual {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .about-glow {
+      width: 340px; height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,160,0.12) 0%, transparent 70%);
+      position: absolute;
+    }
+    .step-flow { display: flex; flex-direction: column; gap: 0; position: relative; z-index: 1; }
+    .step-item {
+      display: flex; align-items: flex-start; gap: 1.25rem;
+      padding: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      margin-bottom: 0.75rem;
+      backdrop-filter: blur(14px);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .step-item::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(to bottom, var(--jade), var(--sky));
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .step-item:hover { border-color: rgba(0,229,160,0.25); transform: translateX(6px); }
+    .step-item:hover::before { opacity: 1; }
+    .step-num {
+      width: 40px; height: 40px; flex-shrink: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--jade), var(--sky));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem; font-weight: 500; color: #000;
+    }
+    .step-content h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .step-content p  { font-size: 0.87rem; color: var(--text-2); line-height: 1.55; }
+
+    /* ════════════════════════════════════════
+       FEATURES
+    ════════════════════════════════════════ */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    .feat {
+      background: var(--surface);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: var(--r-card);
+      padding: 2rem;
+      position: relative; overflow: hidden;
+      transition: all 0.35s ease;
+    }
+    .feat::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,229,160,0.08) 0%, transparent 65%);
+      opacity: 0; transition: opacity 0.35s;
+    }
+    .feat:hover { transform: translateY(-6px); border-color: rgba(0,229,160,0.25); box-shadow: 0 28px 56px -18px rgba(0,0,0,0.5); }
+    .feat:hover::after { opacity: 1; }
+
+    .feat-icon {
+      width: 54px; height: 54px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; color: #000;
+      margin-bottom: 1.5rem;
+      position: relative; z-index: 1;
+    }
+    .fi-jade  { background: linear-gradient(135deg, #00e5a0, #00c4b4); box-shadow: 0 8px 20px -6px rgba(0,229,160,0.5); }
+    .fi-sky   { background: linear-gradient(135deg, #38bdf8, #0ea5e9); box-shadow: 0 8px 20px -6px rgba(56,189,248,0.5); }
+    .fi-iris  { background: linear-gradient(135deg, #818cf8, #6366f1); box-shadow: 0 8px 20px -6px rgba(129,140,248,0.5); color: #fff; }
+    .fi-coral { background: linear-gradient(135deg, #fb7185, #f43f5e); box-shadow: 0 8px 20px -6px rgba(251,113,133,0.5); color: #fff; }
+    .fi-amber { background: linear-gradient(135deg, #fbbf24, #f59e0b); box-shadow: 0 8px 20px -6px rgba(251,191,36,0.45); }
+    .fi-teal  { background: linear-gradient(135deg, #2dd4bf, #14b8a6); box-shadow: 0 8px 20px -6px rgba(45,212,191,0.5); }
+
+    .feat-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem; position: relative; z-index: 1; }
+    .feat-desc  { font-size: 0.88rem; color: var(--text-2); line-height: 1.65; position: relative; z-index: 1; }
+
+    /* ════════════════════════════════════════
+       INVESTMENT PLANS PREVIEW
+    ════════════════════════════════════════ */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .plan-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 2rem;
+      backdrop-filter: blur(18px);
+      position: relative; overflow: hidden;
+      transition: all 0.35s;
+    }
+    .plan-card.featured {
+      background: linear-gradient(145deg, rgba(0,229,160,0.1), rgba(56,189,248,0.08));
+      border-color: rgba(0,229,160,0.3);
+      box-shadow: 0 0 40px -10px rgba(0,229,160,0.2);
+    }
+    .plan-card:hover { transform: translateY(-8px); box-shadow: 0 32px 64px -20px rgba(0,0,0,0.5); }
+
+    .plan-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: rgba(0,229,160,0.12);
+      border: 1px solid rgba(0,229,160,0.25);
+      border-radius: var(--r-pill);
+      padding: 0.3rem 0.8rem;
+      font-size: 0.73rem; font-weight: 700;
+      color: var(--jade); letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .plan-badge.amber { background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.25); color: var(--amber); }
+    .plan-badge.iris  { background: rgba(129,140,248,0.1); border-color: rgba(129,140,248,0.25); color: var(--iris); }
+
+    .plan-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .plan-roi {
+      font-family: 'DM Mono', monospace;
+      font-size: 2.8rem; font-weight: 500;
+      line-height: 1; margin-bottom: 0.5rem;
+      background: linear-gradient(120deg, var(--jade), var(--sky));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .plan-roi-label { font-size: 0.82rem; color: var(--text-3); margin-bottom: 1.5rem; }
+
+    .plan-divider { height: 1px; background: var(--border); margin-bottom: 1.5rem; }
+
+    .plan-perks { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 2rem; }
+    .plan-perks li {
+      display: flex; align-items: center; gap: 0.65rem;
+      font-size: 0.88rem; color: var(--text-2);
+    }
+    .plan-perks li i { color: var(--jade); font-size: 0.8rem; flex-shrink: 0; }
+
+    .plan-min {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .pm-label { font-size: 0.78rem; color: var(--text-3); }
+    .pm-val   { font-weight: 700; font-size: 1rem; color: var(--text-1); }
+
+    .btn-plan {
+      width: 100%;
+      padding: 0.9rem;
+      border-radius: var(--r-pill);
+      font-weight: 700; font-size: 0.95rem;
+      text-align: center; text-decoration: none;
+      display: block;
+      transition: all 0.3s;
+    }
+    .btn-plan.primary {
+      background: linear-gradient(135deg, var(--jade), #00c4b4);
+      color: #000;
+      box-shadow: 0 8px 24px -6px rgba(0,229,160,0.4);
+    }
+    .btn-plan.primary:hover { transform: translateY(-2px); box-shadow: 0 14px 32px -6px rgba(0,229,160,0.55); }
+    .btn-plan.outline {
+      border: 1px solid var(--border);
+      color: var(--text-2);
+    }
+    .btn-plan.outline:hover { border-color: var(--jade); color: var(--jade); }
+
+    /* ════════════════════════════════════════
+       TESTIMONIALS
+    ════════════════════════════════════════ */
+    .t-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    .t-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-card);
+      padding: 2rem;
+      backdrop-filter: blur(16px);
+      transition: all 0.3s;
+    }
+    .t-card:hover { transform: translateY(-5px); border-color: rgba(0,229,160,0.2); box-shadow: 0 20px 40px -14px rgba(0,0,0,0.4); }
+    .t-stars { font-size: 0.85rem; color: var(--amber); letter-spacing: 2px; margin-bottom: 1rem; }
+    .t-text  { font-size: 0.9rem; color: var(--text-2); line-height: 1.7; font-style: italic; margin-bottom: 1.5rem; }
+    .t-author { display: flex; align-items: center; gap: 0.75rem; }
+    .t-av {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.82rem; color: #000; flex-shrink: 0;
+    }
+    .t-av.g1 { background: linear-gradient(135deg,#00e5a0,#00c4b4); }
+    .t-av.g2 { background: linear-gradient(135deg,#38bdf8,#6366f1); }
+    .t-av.g3 { background: linear-gradient(135deg,#fb7185,#f97316); }
+    .t-av.g4 { background: linear-gradient(135deg,#fbbf24,#f59e0b); }
+    .t-av.g5 { background: linear-gradient(135deg,#a78bfa,#8b5cf6); color:#fff; }
+    .t-av.g6 { background: linear-gradient(135deg,#2dd4bf,#0ea5e9); }
+    .t-name  { font-size: 0.95rem; font-weight: 700; }
+    .t-loc   { font-size: 0.78rem; color: var(--text-3); margin-top: 0.15rem; }
+
+    /* ════════════════════════════════════════
+       TRUST STRIP
+    ════════════════════════════════════════ */
+    .trust-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 7rem;
+    }
+    .trust-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+      transition: all 0.3s;
+    }
+    .trust-block:hover { border-color: rgba(0,229,160,0.25); }
+    .trust-icon {
+      width: 44px; height: 44px; border-radius: 14px;
+      background: rgba(0,229,160,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: var(--jade); flex-shrink: 0;
+    }
+    .tb-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.15rem; }
+    .tb-sub   { font-size: 0.78rem; color: var(--text-3); }
+
+    /* ════════════════════════════════════════
+       CTA FINAL
+    ════════════════════════════════════════ */
+    .cta-final {
+      border-radius: 40px;
+      padding: 5rem 3rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg,
+        rgba(0,229,160,0.09) 0%,
+        rgba(56,189,248,0.07) 50%,
+        rgba(129,140,248,0.08) 100%);
+      border: 1px solid rgba(0,229,160,0.15);
+      margin-bottom: 7rem;
+    }
+    .cta-final::before {
+      content: '';
+      position: absolute; top: -40%; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,229,160,0.14) 0%, transparent 65%);
+      animation: ctaPulse 7s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes ctaPulse {
+      0%,100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+      50%      { opacity: 1;   transform: translateX(-50%) scale(1.1); }
+    }
+    .cta-final > * { position: relative; z-index: 1; }
+    .cta-final .sec-title { font-size: clamp(2rem, 4.5vw, 3.2rem); margin-bottom: 1rem; }
+    .cta-final .sec-sub { margin: 0 auto 2.5rem; text-align: center; }
+    .cta-final-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* ════════════════════════════════════════
+       FOOTER
+    ════════════════════════════════════════ */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 0 2rem;
+    }
+    .footer-inner {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+    .footer-brand p { font-size: 0.88rem; color: var(--text-3); margin-top: 1rem; line-height: 1.65; max-width: 260px; }
+    .footer-col h5 {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-3); margin-bottom: 1rem;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+    .footer-col ul li a {
+      color: var(--text-2); text-decoration: none; font-size: 0.9rem;
+      transition: color 0.25s;
+    }
+    .footer-col ul li a:hover { color: var(--jade); }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-copy { font-size: 0.83rem; color: var(--text-3); }
+    .footer-socials { display: flex; gap: 0.75rem; }
+    .social-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-3); font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .social-icon:hover { border-color: var(--jade); color: var(--jade); transform: translateY(-2px); }
+
+    /* ════════════════════════════════════════
+       ANIMATIONS
+    ════════════════════════════════════════ */
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ════════════════════════════════════════
+       MOBILE NAV MENU
+    ════════════════════════════════════════ */
+    .mobile-menu {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(4,9,26,0.97);
+      backdrop-filter: blur(24px);
+      z-index: 300;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--text-1); text-decoration: none;
+      transition: color 0.25s;
+    }
+    .mobile-menu a:hover { color: var(--jade); }
+    .mobile-menu-close {
+      position: absolute; top: 2rem; right: 2rem;
+      background: var(--surface); border: 1px solid var(--border);
+      width: 44px; height: 44px; border-radius: 50%;
+      color: var(--text-2); font-size: 1.1rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s;
+    }
+    .mobile-menu-close:hover { background: #ef4444; color: #fff; }
+
+    /* ════════════════════════════════════════
+       RESPONSIVE
+    ════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .plans-grid    { grid-template-columns: 1fr 1fr; }
+      .t-grid        { grid-template-columns: 1fr 1fr; }
+      .trust-strip   { grid-template-columns: 1fr 1fr; }
+      .footer-inner  { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .stats-bar-inner { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+    }
+
+    @media (max-width: 768px) {
+      .shell { padding: 0 1.25rem; }
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 4rem 0 3rem;
+        gap: 3rem;
+      }
+      .hero-right { order: -1; }
+      .hero-card  { max-width: 100%; }
+      .hero-headline { font-size: 2.2rem; }
+      .hero-actions { flex-direction: column; }
+      .btn-hero-primary, .btn-hero-outline { width: 100%; justify-content: center; }
+
+      .about-grid    { grid-template-columns: 1fr; gap: 2rem; }
+      .about-visual  { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .plans-grid    { grid-template-columns: 1fr; }
+      .t-grid        { grid-template-columns: 1fr; }
+      .trust-strip   { grid-template-columns: 1fr 1fr; }
+      .footer-inner  { grid-template-columns: 1fr; gap: 2rem; }
+      .stats-bar-inner { grid-template-columns: 1fr 1fr; }
+      .cta-final     { padding: 3.5rem 1.5rem; border-radius: 28px; }
+      .cta-final-btns { flex-direction: column; }
+      .cta-final-btns a { width: 100%; justify-content: center; }
+      section { margin-bottom: 5rem; }
+    }
+
+    @media (max-width: 480px) {
+      .trust-strip { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Canvas Background -->
+<canvas id="canvas-bg"></canvas>
+<div class="noise"></div>
+
+<!-- Mobile Nav -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" id="menuClose"><i class="fas fa-times"></i></button>
+  <a href="#about">How It Works</a>
+  <a href="#features">Features</a>
+  <a href="#plans">Plans</a>
+  <a href="#testimonials">Reviews</a>
+  <a href="login.html">Login</a>
+  <a href="register.html" style="color:var(--jade)">Get Started →</a>
+</div>
+
+<div class="shell">
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="logo">
+      <div class="logo-mark"><i class="fas fa-bolt"></i></div>
+      <span class="logo-text">Cash<span>Bridge</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">How It Works</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#plans">Plans</a></li>
+      <li><a href="#testimonials">Reviews</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="login.html" class="btn-nav-ghost">Login</a>
+      <a href="register.html" class="btn-nav-solid">Get Started</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Nigeria's #1 Investment Platform
+      </div>
+      <h1 class="hero-headline">
+        Invest Smart.<br>
+        <span class="line-accent">Earn Every Day.</span><br>
+        Build Real Wealth.
+      </h1>
+      <p class="hero-sub">
+        CashBridge gives every Nigerian the power to grow their money with daily returns, instant withdrawals, and a community of 20,000+ thriving investors — starting from just ₦3,000.
+      </p>
+      <div class="hero-actions">
+        <a href="register.html" class="btn-hero-primary">
+          <i class="fas fa-rocket"></i> Start Investing Today
+        </a>
+        <a href="#plans" class="btn-hero-outline">
+          <i class="fas fa-layer-group"></i> View Plans
+        </a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-avatars">
+          <div class="trust-av av1">AS</div>
+          <div class="trust-av av2">TK</div>
+          <div class="trust-av av3">ME</div>
+          <div class="trust-av av4">JO</div>
+          <div class="trust-av av5">BF</div>
+        </div>
+        <div class="trust-text">
+          Trusted by <strong>20,000+</strong> investors<br>
+          across Nigeria
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-card">
+        <div class="card-header">
+          <div class="card-label">PORTFOLIO OVERVIEW</div>
+          <div class="card-status"><span class="pulse"></span> Live</div>
+        </div>
+        <div class="card-amount">₦847,500</div>
+        <div class="card-gain"><i class="fas fa-arrow-trend-up"></i> +₦24,320 today</div>
+        <div class="card-chart" id="chartBars"></div>
+        <div class="card-divider"></div>
+        <div class="card-stats">
+          <div class="cstat">
+            <div class="cstat-label">Daily ROI</div>
+            <div class="cstat-val up">+2.5%</div>
+          </div>
+          <div class="cstat">
+            <div class="cstat-label">Active Plans</div>
+            <div class="cstat-val iris">3 Plans</div>
+          </div>
+          <div class="cstat">
+            <div class="cstat-label">Total Earned</div>
+            <div class="cstat-val up">₦312,000</div>
+          </div>
+          <div class="cstat">
+            <div class="cstat-label">Referrals</div>
+            <div class="cstat-val">12 People</div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="cf-text"><i class="fas fa-bolt"></i> Withdraw Instantly</span>
+          <span class="cf-icon"><i class="fas fa-arrow-right"></i></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar reveal">
+    <div class="stats-bar-inner">
+      <div class="stat-item">
+        <div class="stat-num-big">20,000+</div>
+        <div class="stat-caption">Active Investors</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num-big">₦2.4B+</div>
+        <div class="stat-caption">Total Paid Out</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num-big">2.5%</div>
+        <div class="stat-caption">Daily Returns</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num-big">99.8%</div>
+        <div class="stat-caption">Payout Success Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section id="about">
+    <div class="about-grid">
+      <div class="about-visual">
+        <div class="about-glow"></div>
+        <div class="step-flow">
+          <div class="step-item">
+            <div class="step-num">01</div>
+            <div class="step-content">
+              <h4>Create Your Free Account</h4>
+              <p>Sign up in under 2 minutes. No bank verification, no paperwork — just your phone number and a password.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">02</div>
+            <div class="step-content">
+              <h4>Choose an Investment Plan</h4>
+              <p>Pick a plan that fits your budget — from ₦3,000 to ₦500,000. Every plan earns daily returns automatically.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">03</div>
+            <div class="step-content">
+              <h4>Fund & Start Earning</h4>
+              <p>Make your deposit via bank transfer. Your returns start accumulating from the very next day.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">04</div>
+            <div class="step-content">
+              <h4>Withdraw Anytime</h4>
+              <p>Cash out your earnings straight to your bank account within minutes, Monday to Saturday.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-eyebrow">How It Works</div>
+        <h2 class="sec-title">Earning is as simple as 1, 2, 3.</h2>
+        <p class="sec-sub" style="margin-bottom:2.5rem">We've removed every barrier between you and financial growth. No complex charts, no confusing jargon — just simple investing that works.</p>
+
+        <div class="step-flow" style="display:none" id="mobile-steps"></div>
+
+        <a href="register.html" class="btn-hero-primary" style="display:inline-flex">
+          <i class="fas fa-user-plus"></i> Create Free Account
+        </a>
+      </div>
+    </div>
+
+    <!-- Mobile Steps (visible only on small screens via the grid collapsing) -->
+    <div style="margin-top:2rem">
+      <div class="step-flow" id="mobile-steps-visible" style="display:none">
+        <!-- rendered via media query consideration — steps are in the left col which hides on mobile, so we repeat here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="reveal">
+    <div class="sec-head-row">
+      <div>
+        <div class="sec-eyebrow">Why CashBridge</div>
+        <h2 class="sec-title">Everything you need<br>to grow your money.</h2>
+      </div>
+      <p class="sec-sub" style="max-width:360px">Built from the ground up for Nigerian investors — reliable, transparent, and always working for you.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat">
+        <div class="feat-icon fi-jade"><i class="fas fa-chart-line"></i></div>
+        <h3 class="feat-title">Daily Auto-Returns</h3>
+        <p class="feat-desc">Your earnings are automatically calculated and credited to your account every single day — no clicks required.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon fi-sky"><i class="fas fa-bolt"></i></div>
+        <h3 class="feat-title">Instant Withdrawals</h3>
+        <p class="feat-desc">Request a withdrawal and get paid straight to your Nigerian bank account within minutes, Monday through Saturday.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon fi-iris"><i class="fas fa-shield-alt"></i></div>
+        <h3 class="feat-title">Bank-Level Security</h3>
+        <p class="feat-desc">Your funds are protected with military-grade encryption. We never store payment details without your consent.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon fi-coral"><i class="fas fa-share-nodes"></i></div>
+        <h3 class="feat-title">Referral Commissions</h3>
+        <p class="feat-desc">Earn lifetime commissions every time someone you refer makes a deposit. Your network becomes your income stream.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon fi-amber"><i class="fas fa-headset"></i></div>
+        <h3 class="feat-title">24/7 Support</h3>
+        <p class="feat-desc">Our dedicated support team is always a message away on WhatsApp and Telegram to assist with any questions.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon fi-teal"><i class="fas fa-mobile-screen"></i></div>
+        <h3 class="feat-title">Works on Any Device</h3>
+        <p class="feat-desc">Manage your investments from your phone, tablet, or computer — a seamless experience on every screen size.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANS -->
+  <section id="plans" class="reveal">
+    <div class="sec-head-row">
+      <div>
+        <div class="sec-eyebrow">Investment Plans</div>
+        <h2 class="sec-title">Pick your plan.<br>Start earning today.</h2>
+      </div>
+      <p class="sec-sub" style="max-width:360px">Flexible plans for every investor — whether you're just starting out or ready to go big.</p>
+    </div>
+    <div class="plans-grid">
+      <!-- Starter -->
+      <div class="plan-card">
+        <div class="plan-badge amber"><i class="fas fa-seedling"></i> Starter</div>
+        <div class="plan-name">Starter Plan</div>
+        <div class="plan-roi">1.5%</div>
+        <div class="plan-roi-label">Daily returns on your deposit</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-perks">
+          <li><i class="fas fa-check-circle"></i> Daily automatic earnings</li>
+          <li><i class="fas fa-check-circle"></i> Instant bank withdrawals</li>
+          <li><i class="fas fa-check-circle"></i> Referral commissions</li>
+          <li><i class="fas fa-check-circle"></i> 24/7 support access</li>
+        </ul>
+        <div class="plan-min">
+          <span class="pm-label">Minimum Deposit</span>
+          <span class="pm-val">₦3,000</span>
+        </div>
+        <a href="register.html" class="btn-plan outline">Get Started</a>
+      </div>
+      <!-- Growth -->
+      <div class="plan-card featured">
+        <div class="plan-badge"><i class="fas fa-fire"></i> Most Popular</div>
+        <div class="plan-name">Growth Plan</div>
+        <div class="plan-roi">2.5%</div>
+        <div class="plan-roi-label">Daily returns on your deposit</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-perks">
+          <li><i class="fas fa-check-circle"></i> Higher daily ROI</li>
+          <li><i class="fas fa-check-circle"></i> Priority withdrawals</li>
+          <li><i class="fas fa-check-circle"></i> Double referral bonus</li>
+          <li><i class="fas fa-check-circle"></i> Dedicated account manager</li>
+        </ul>
+        <div class="plan-min">
+          <span class="pm-label">Minimum Deposit</span>
+          <span class="pm-val">₦20,000</span>
+        </div>
+        <a href="register.html" class="btn-plan primary">Start This Plan</a>
+      </div>
+      <!-- Elite -->
+      <div class="plan-card">
+        <div class="plan-badge iris"><i class="fas fa-crown"></i> Elite</div>
+        <div class="plan-name">Elite Plan</div>
+        <div class="plan-roi">3.5%</div>
+        <div class="plan-roi-label">Daily returns on your deposit</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-perks">
+          <li><i class="fas fa-check-circle"></i> Maximum daily returns</li>
+          <li><i class="fas fa-check-circle"></i> VIP instant withdrawals</li>
+          <li><i class="fas fa-check-circle"></i> Triple referral commissions</li>
+          <li><i class="fas fa-check-circle"></i> Personal investment advisor</li>
+        </ul>
+        <div class="plan-min">
+          <span class="pm-label">Minimum Deposit</span>
+          <span class="pm-val">₦100,000</span>
+        </div>
+        <a href="register.html" class="btn-plan outline">Get Started</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST BADGES -->
+  <div class="trust-strip reveal">
+    <div class="trust-block">
+      <div class="trust-icon"><i class="fas fa-lock"></i></div>
+      <div><div class="tb-title">SSL Secured</div><div class="tb-sub">256-bit encryption</div></div>
+    </div>
+    <div class="trust-block">
+      <div class="trust-icon"><i class="fas fa-clock"></i></div>
+      <div><div class="tb-title">Always Available</div><div class="tb-sub">Platform uptime 99.9%</div></div>
+    </div>
+    <div class="trust-block">
+      <div class="trust-icon"><i class="fas fa-users"></i></div>
+      <div><div class="tb-title">Verified Community</div><div class="tb-sub">20,000+ investors</div></div>
+    </div>
+    <div class="trust-block">
+      <div class="trust-icon"><i class="fas fa-headset"></i></div>
+      <div><div class="tb-title">Live Support</div><div class="tb-sub">WhatsApp & Telegram</div></div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <section id="testimonials" class="reveal">
+    <div class="sec-head-row">
+      <div>
+        <div class="sec-eyebrow">Testimonials</div>
+        <h2 class="sec-title">Real people.<br>Real returns.</h2>
+      </div>
+      <p class="sec-sub" style="max-width:360px">Don't take our word for it — hear from thousands of investors who are already earning daily with CashBridge.</p>
+    </div>
+    <div class="t-grid">
+      <div class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"CashBridge completely changed my relationship with money. I started with ₦10,000 and now I withdraw profit every week without stress. Absolutely love it!"</p>
+        <div class="t-author">
+          <div class="t-av g1">SA</div>
+          <div><div class="t-name">Samuel Adeyemi</div><div class="t-loc"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;color:var(--jade);margin-right:3px"></i>Lagos, Nigeria</div></div>
+        </div>
+      </div>
+      <div class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"I've earned over ₦500,000 in 6 months. The platform is fully transparent, withdrawals come through fast, and the support team actually responds. Highly recommended!"</p>
+        <div class="t-author">
+          <div class="t-av g2">DO</div>
+          <div><div class="t-name">Deborah Okonkwo</div><div class="t-loc"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;color:var(--jade);margin-right:3px"></i>Abuja, Nigeria</div></div>
+        </div>
+      </div>
+      <div class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"The referral program is genius! I've referred 15 friends and I earn commissions from all of them every day. It's a win-win for everyone involved."</p>
+        <div class="t-author">
+          <div class="t-av g3">MT</div>
+          <div><div class="t-name">Michael Taiwo</div><div class="t-loc"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;color:var(--jade);margin-right:3px"></i>Ibadan, Nigeria</div></div>
+        </div>
+      </div>
+      <div class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"I was skeptical at first — been burned before. But after 3 consistent months of daily earnings and smooth withdrawals, I'm a true believer. This is legit!"</p>
+        <div class="t-author">
+          <div class="t-av g4">CO</div>
+          <div><div class="t-name">Chioma Okafor</div><div class="t-loc"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;color:var(--jade);margin-right:3px"></i>Port Harcourt, Nigeria</div></div>
+        </div>
+      </div>
+      <div class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"Started investing with my salary savings. In 4 months, I was able to pay my rent entirely from CashBridge profits. This platform is genuinely life-changing."</p>
+        <div class="t-author">
+          <div class="t-av g5">HY</div>
+          <div><div class="t-name">Halima Yusuf</div><div class="t-loc"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;color:var(--jade);margin-right:3px"></i>Kaduna, Nigeria</div></div>
+        </div>
+      </div>
+      <div class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"The ROI is exactly as promised — no hidden cuts, no funny business. Just clean, honest, daily returns credited automatically. I trust this platform 100%."</p>
+        <div class="t-author">
+          <div class="t-av g6">CI</div>
+          <div><div class="t-name">Chinedu Ibeh</div><div class="t-loc"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;color:var(--jade);margin-right:3px"></i>Owerri, Nigeria</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <div class="cta-final reveal">
+    <div class="sec-eyebrow" style="justify-content:center;margin-bottom:1rem">Start Today</div>
+    <h2 class="sec-title">Your financial future<br>starts with one click.</h2>
+    <p class="sec-sub">Join 20,000+ Nigerians who are already building wealth every day. No experience needed — just ₦3,000 and the willingness to grow.</p>
+    <div class="cta-final-btns">
+      <a href="register.html" class="btn-hero-primary">
+        <i class="fas fa-rocket"></i> Create Free Account
+      </a>
+      <a href="login.html" class="btn-hero-outline">
+        <i class="fas fa-arrow-right-to-bracket"></i> Login to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="margin-bottom:0.5rem;display:inline-flex">
+          <div class="logo-mark"><i class="fas fa-bolt"></i></div>
+          <span class="logo-text">Cash<span>Bridge</span></span>
+        </a>
+        <p>Nigeria's premier daily investment platform. Earn, grow, and withdraw with confidence — backed by a community of 20,000+ investors.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <ul>
+          <li><a href="#plans">Investment Plans</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="register.html">Register</a></li>
+          <li><a href="login.html">Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">How It Works</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Risk Disclosure</a></li>
+          <li><a href="#">FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 CashBridge. All rights reserved.</div>
+      <div class="footer-socials">
+        <a href="https://chat.whatsapp.com/D5lWy3HaT7tGaOpQi3wZOe" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://t.me/+05Kwm_tmrABlMjA0" target="_blank" class="social-icon"><i class="fab fa-telegram"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /shell -->
+
+<script>
+  /* ── Canvas animated mesh background ── */
+  const canvas = document.getElementById('canvas-bg');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 1.5 + 0.5,
+      alpha: Math.random() * 0.4 + 0.1
+    });
+  }
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W;
+      if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H;
+      if (p.y > H) p.y = 0;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0,229,160,${p.alpha})`;
+      ctx.fill();
+    });
+
+    // Draw connecting lines
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 130) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(0,229,160,${0.07 * (1 - dist/130)})`;
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  /* ── Chart bars animation ── */
+  const heights = [35,55,42,70,50,85,62,90,75,95];
+  const chartEl = document.getElementById('chartBars');
+  heights.forEach((h, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = '0px';
+    bar.style.transitionDelay = (i * 0.05) + 's';
+    chartEl.appendChild(bar);
+    setTimeout(() => { bar.style.height = h + '%'; }, 300 + i * 60);
+  });
+
+  /* ── Navbar scroll shadow ── */
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  /* ── Mobile menu ── */
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.add('open');
+  });
+  document.getElementById('menuClose').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.remove('open');
+  });
+  document.querySelectorAll('.mobile-menu a').forEach(a => {
+    a.addEventListener('click', () => document.getElementById('mobileMenu').classList.remove('open'));
+  });
+
+  /* ── Scroll reveal ── */
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  /* ── About steps: repeat for mobile (left col hides on small screens) ── */
+  const stepsData = [
+    { n:'01', t:'Create Your Free Account',    d:'Sign up in under 2 minutes — just a phone number and password. No paperwork needed.' },
+    { n:'02', t:'Choose an Investment Plan',   d:'Pick a plan that fits your budget. Every plan earns daily returns automatically.' },
+    { n:'03', t:'Fund & Start Earning',        d:'Deposit via bank transfer. Returns begin accumulating from the very next day.' },
+    { n:'04', t:'Withdraw Anytime',            d:'Cash out to your bank account within minutes, Monday to Saturday.' },
+  ];
+  // Inject steps into about-right on mobile via a hidden element that CSS can show
+  // (handled natively by the about-grid collapsing the left column on mobile)
+</script>
+</body>
+</html>
