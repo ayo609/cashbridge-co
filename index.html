@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CashBridge • Home</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #0a0f1e;
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+        linear-gradient(145deg, #0f172a 0%, #020617 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background Blobs */
+    .blob {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.2;
+      animation: float 20s infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .blob-1 {
+      top: -100px;
+      right: -100px;
+      background: linear-gradient(145deg, #6366f1, #a855f7);
+      animation-delay: -2s;
+    }
+
+    .blob-2 {
+      bottom: -100px;
+      left: -100px;
+      width: 500px;
+      height: 500px;
+      background: linear-gradient(145deg, #ec4899, #f59e0b);
+      animation-delay: -7s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, 30px) scale(1.1); }
+    }
+
+    /* Main Content */
+    .main-content {
+      position: relative;
+      z-index: 10;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 150px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      color: white;
+      transform: rotate(-5deg);
+      box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .date-badge {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 30px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .date-badge i {
+      color: #6366f1;
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 40px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .welcome-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 70% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .greeting {
+      font-size: 1rem;
+      color: #6366f1;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .welcome-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .welcome-title span {
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+    }
+
+    .welcome-text {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      max-width: 600px;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 24px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      border-color: #6366f1;
+      box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.3);
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.4);
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1.2;
+    }
+
+    .stat-change {
+      font-size: 0.85rem;
+      color: #22c55e;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Section Titles */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-link {
+      color: #6366f1;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: gap 0.3s;
+    }
+
+    .section-link:hover {
+      gap: 0.75rem;
+      color: #ec4899;
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .feature-card {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 28px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 70% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: #6366f1;
+      box-shadow: 0 30px 50px -20px rgba(99, 102, 241, 0.4);
+    }
+
+    .feature-card:hover::after {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: white;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 25px -8px #6366f1;
+    }
+
+    .feature-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: white;
+    }
+
+    .feature-desc {
+      color: #94a3b8;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 40px;
+      padding: 3.5rem;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin: 3rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .cta-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .cta-text {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      position: relative;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .btn {
+      padding: 1rem 2.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: none;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      color: white;
+      box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px -5px rgba(99, 102, 241, 0.6);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-secondary:hover {
+      border-color: #ec4899;
+      background: rgba(236, 72, 153, 0.1);
+      transform: translateY(-3px);
+    }
+
+    /* ===== NEW TESTIMONIAL CAROUSEL ===== */
+    .testimonials-container {
+      position: relative;
+      margin: 2rem 0 3rem;
+      overflow: hidden;
+      border-radius: 28px;
+    }
+
+    .testimonials-track {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+
+    .testimonial-slide {
+      flex: 0 0 100%;
+      padding: 0 0.5rem;
+    }
+
+    .testimonial-card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 28px;
+      padding: 2.5rem;
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+
+    .testimonial-card:hover {
+      transform: translateY(-5px);
+      border-color: #6366f1;
+      box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.3);
+    }
+
+    .testimonial-rating {
+      color: #fbbf24;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    .testimonial-text {
+      color: #e2e8f0;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+      font-style: italic;
+      font-size: 1.05rem;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .author-avatar {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: white;
+    }
+
+    .author-info h4 {
+      font-weight: 600;
+      color: white;
+      margin-bottom: 0.25rem;
+      font-size: 1.1rem;
+    }
+
+    .author-info p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    /* Carousel Controls */
+    .carousel-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .carousel-dot.active {
+      background: #6366f1;
+      transform: scale(1.3);
+      box-shadow: 0 0 15px #6366f1;
+    }
+
+    .carousel-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .carousel-btn:hover {
+      background: #6366f1;
+      border-color: #6366f1;
+      transform: scale(1.1);
+    }
+
+    /* Contact Developer Section */
+    .contact-dev {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 40px;
+      padding: 2rem;
+      text-align: center;
+      margin: 3rem 0 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-dev::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+      animation: rotate 20s linear infinite;
+    }
+
+    .contact-dev-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .contact-dev h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: white;
+    }
+
+    .contact-dev p {
+      color: #94a3b8;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .contact-email {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 50px;
+      padding: 0.8rem 2rem;
+      color: #6366f1;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .contact-email:hover {
+      background: #6366f1;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px #6366f1;
+    }
+
+    .contact-email i {
+      font-size: 1.2rem;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 40px;
+      padding: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 100;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: 30px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      gap: 0.25rem;
+    }
+
+    .nav-item i {
+      font-size: 1.2rem;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      color: white;
+      box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+    }
+
+    .nav-item:hover:not(.active) {
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 40px;
+      padding: 2.5rem;
+      max-width: 500px;
+      width: 100%;
+      position: relative;
+      animation: modalSlideUp 0.5s ease-out;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: #ef4444;
+      color: white;
+      transform: rotate(90deg);
+    }
+
+    .modal-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: white;
+      margin: 0 auto 1.5rem;
+      transform: rotate(-5deg);
+    }
+
+    .modal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .modal-subtitle {
+      text-align: center;
+      color: #94a3b8;
+      margin-bottom: 2rem;
+    }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .info-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6366f1;
+    }
+
+    .info-content h4 {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-content p {
+      font-weight: 600;
+      color: white;
+    }
+
+    .social-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .social-btn {
+      padding: 1rem;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .social-btn.whatsapp {
+      background: #25D366;
+      color: white;
+    }
+
+    .social-btn.whatsapp:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px -5px #25D366;
+    }
+
+    .social-btn.telegram {
+      background: #0088cc;
+      color: white;
+    }
+
+    .social-btn.telegram:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px -5px #0088cc;
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border: none;
+      border-radius: 20px;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .modal-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.5);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1.5rem 1rem 150px;
+      }
+
+      .header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .welcome-section {
+        padding: 2rem;
+      }
+
+      .welcome-title {
+        font-size: 2rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-section {
+        padding: 2rem 1.5rem;
+      }
+
+      .cta-title {
+        font-size: 1.8rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .bottom-nav {
+        width: 90%;
+        padding: 0.5rem;
+      }
+
+      .nav-item {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+      }
+
+      .modal-content {
+        padding: 2rem;
+      }
+
+      .testimonial-card {
+        padding: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <!-- Welcome Modal -->
+  <div class="modal-overlay" id="welcomeModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <div class="modal-icon">
+        <i class="fas fa-bolt"></i>
+      </div>
+
+      <h2 class="modal-title">Welcome to CashBridge</h2>
+      <p class="modal-subtitle">Your premier investment platform</p>
+
+      <div class="info-list">
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="info-content">
+            <h4>Withdrawal Hours</h4>
+            <p>Monday - Saturday: 9AM - 6PM</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-coins"></i>
+          </div>
+          <div class="info-content">
+            <h4>Minimum Withdrawal</h4>
+            <p>₦1,000 (10% processing fee)</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-rocket"></i>
+          </div>
+          <div class="info-content">
+            <h4>Minimum Deposit</h4>
+            <p>₦3,000 to start investing</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="social-links">
+        <a href="https://chat.whatsapp.com/D5lWy3HaT7tGaOpQi3wZOe?mode=gi_t" target="_blank" class="social-btn whatsapp">
+          <i class="fab fa-whatsapp"></i>
+          WhatsApp
+        </a>
+        <a href="https://t.me/+05Kwm_tmrABlMjA0" target="_blank" class="social-btn telegram">
+          <i class="fab fa-telegram"></i>
+          Telegram
+        </a>
+      </div>
+
+      <button class="modal-btn" onclick="closeModal()">
+        Get Started
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <span class="brand-name">CashBridge</span>
+      </div>
+      <div class="date-badge">
+        <i class="far fa-calendar"></i>
+        <span id="currentDate"></span>
+      </div>
+    </header>
+
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+      <div class="greeting">WELCOME BACK</div>
+      <h1 class="welcome-title">
+        Hello, <span id="userName">Investor</span>
+      </h1>
+      <p class="welcome-text">
+        Your financial growth journey continues here. Track your investments, monitor earnings, and make informed decisions.
+      </p>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div class="stat-label">Wallet Balance</div>
+          <div class="stat-value" id="walletBalance">₦0</div>
+          <div class="stat-change">
+            <i class="fas fa-arrow-up"></i>
+            Available balance
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="stat-label">Total Earnings</div>
+          <div class="stat-value" id="totalEarnings">₦0</div>
+          <div class="stat-change">
+            <i class="fas fa-arrow-up"></i>
+            Lifetime earnings
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-briefcase"></i>
+          </div>
+          <div class="stat-label">Active Plans</div>
+          <div class="stat-value" id="activeInvestments">0</div>
+          <div class="stat-change">
+            <i class="fas fa-clock"></i>
+            Currently running
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section>
+      <div class="section-header">
+        <h2 class="section-title">Why Choose Us?</h2>
+        <a href="#" class="section-link">
+          View All
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3 class="feature-title">Daily Returns</h3>
+          <p class="feature-desc">Earn consistent daily profits automatically credited to your wallet. Watch your investments grow every single day.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3 class="feature-title">Instant Withdrawals</h3>
+          <p class="feature-desc">Quick and hassle-free withdrawals. Get your money when you need it, no delays.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3 class="feature-title">100% Secure</h3>
+          <p class="feature-desc">Your funds are protected with bank-level security and encryption technology.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3 class="feature-title">Referral Program</h3>
+          <p class="feature-desc">Earn lifetime commissions from your referrals. The more you share, the more you earn.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <h2 class="cta-title">Ready to Start Earning?</h2>
+      <p class="cta-text">Join thousands of Nigerians building wealth through smart investing. Start your journey today with just ₦3,000.</p>
+      <div class="cta-buttons">
+        <a href="plans.html" class="btn btn-primary">
+          <i class="fas fa-rocket"></i>
+          View Investment Plans
+        </a>
+        <a href="dashboard.html" class="btn btn-secondary">
+          <i class="fas fa-chart-pie"></i>
+          Go to Dashboard
+        </a>
+      </div>
+    </section>
+
+    <!-- Testimonials Carousel -->
+    <section>
+      <div class="section-header">
+        <h2 class="section-title">What Investors Say</h2>
+        <a href="#" class="section-link">
+          All Reviews
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="testimonials-container" id="testimonialCarousel">
+        <div class="testimonials-track" id="testimonialTrack">
+          <!-- Testimonials will be inserted by JavaScript -->
+        </div>
+      </div>
+
+      <div class="carousel-controls">
+        <button class="carousel-btn" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+        <div id="carouselDots" style="display: flex; gap: 0.5rem;">
+          <!-- Dots will be inserted by JavaScript -->
+        </div>
+        <button class="carousel-btn" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </section>
+
+    <!-- Contact Developer Section -->
+    <div class="contact-dev">
+      <div class="contact-dev-content">
+        <h3>📱 Need Technical Support?</h3>
+        <p>For bug reports, feature requests, or technical inquiries</p>
+        <a href="mailto:taufeekmuftau2@gmail.com" class="contact-email">
+          <i class="fas fa-envelope"></i>
+          taufeekmuftau2@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item active">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="plans.html" class="nav-item">
+      <i class="fas fa-layer-group"></i>
+      <span>Plans</span>
+    </a>
+    <a href="referral.html" class="nav-item">
+      <i class="fas fa-share-nodes"></i>
+      <span>Referral</span>
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <i class="fas fa-chart-pie"></i>
+      <span>Dashboard</span>
+    </a>
+  </nav>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+      authDomain: "cashbridge-a688e.firebaseapp.com",
+      projectId: "cashbridge-a688e",
+      storageBucket: "cashbridge-a688e.firebasestorage.app",
+      messagingSenderId: "345273765518",
+      appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // =====================================================
+    // TESTIMONIALS DATA - 20 Testimonials
+    // =====================================================
+    const testimonials = [
+      {
+        name: "Samuel Adeyemi",
+        location: "Lagos, Nigeria",
+        text: "CashBridge transformed my financial life. The daily returns are consistent and withdrawals are lightning fast. Best investment decision ever!",
+        rating: 5,
+        avatar: "SA"
+      },
+      {
+        name: "Deborah Okonkwo",
+        location: "Abuja, Nigeria",
+        text: "I've earned over ₦500,000 in 6 months. The platform is transparent and the support team is incredible. Highly recommended!",
+        rating: 5,
+        avatar: "DO"
+      },
+      {
+        name: "Michael Taiwo",
+        location: "Ibadan, Nigeria",
+        text: "The referral program is amazing! I earn passive income from my friends' investments. CashBridge is the real deal.",
+        rating: 5,
+        avatar: "MT"
+      },
+    
+  {
+    name: "Emeka Nwosu",
+    location: "Onitsha, Nigeria",
+    text: "I've tried multiple platforms. CashBridge is the only one that delivers consistently without any delays.",
+    rating: 5,
+    avatar: "EN"
+  },
+  {
+    name: "Halima Yusuf",
+    location: "Kaduna, Nigeria",
+    text: "The daily returns are automatically credited. I don't have to do anything. Passive income at its best!",
+    rating: 5,
+    avatar: "HY"
+  },
+  {
+    name: "Victor Osimhen",
+    location: "Benin City, Nigeria",
+    text: "Started my investment journey 2 months ago. Already seeing great results. Thank you CashBridge!",
+    rating: 5,
+    avatar: "VO"
+  },
+  {
+    name: "Ngozi Okonkwo",
+    location: "Awka, Nigeria",
+    text: "The platform is very easy to use. Even my mom can invest without help! Highly recommended.",
+    rating: 5,
+    avatar: "NO"
+  },
+  {
+    name: "Femi Otedola",
+    location: "Lagos, Nigeria",
+    text: "Professional team, transparent operations. This is the future of investing in Nigeria.",
+    rating: 5,
+    avatar: "FO"
+  },
+  {
+    name: "Zainab Abubakar",
+    location: "Sokoto, Nigeria",
+    text: "I recommended CashBridge to all my friends. We're all earning together now!",
+    rating: 5,
+    avatar: "ZA"
+  },
+  {
+    name: "Chinedu Ibeh",
+    location: "Owerri, Nigeria",
+    text: "The ROI is exactly as promised. No hidden fees, no surprises. Just honest returns.",
+    rating: 5,
+    avatar: "CI"
+  },
+  {
+    name: "Peace Akpan",
+    location: "Calabar, Nigeria",
+    text: "Finally a platform that cares about its investors. God bless CashBridge!",
+    rating: 5,
+    avatar: "PA"
+  },
+  {
+    name: "Segun Adebayo",
+    location: "Ilorin, Nigeria",
+    text: "Best investment decision I ever made. The daily returns help me pay my bills!",
+    rating: 5,
+    avatar: "SA"
+  },
+  {
+    name: "Ruth Kalu",
+    location: "Aba, Nigeria",
+    text: "I was able to buy my first car with profits from CashBridge. Forever grateful!",
+    rating: 5,
+    avatar: "RK"
+  }
+];
+      {
+        name: "Chioma Okafor",
+        location: "Port Harcourt, Nigeria",
+        text: "Finally a platform that actually pays! I've withdrawn multiple times without issues. Thank you CashBridge!",
+        rating: 5,
+        avatar: "CO"
+      },
+      {
+        name: "Ahmed Bello",
+        location: "Kano, Nigeria",
+        text: "Started with just ₦5,000 and now I'm earning daily. The best investment platform in Nigeria!",
+        rating: 5,
+        avatar: "AB"
+      },
+      {
+        name: "Funke Akindele",
+        location: "Ibadan, Nigeria",
+        text: "The customer service is top-notch. They guide you every step of the way. Very impressed!",
+        rating: 5,
+        avatar: "FA"
+      },
+      {
+        name: "Oluwaseun Adebayo",
+        location: "Lagos, Nigeria",
+        text: "My family and I have invested over ₦500,000 here. The returns are consistent and reliable.",
+        rating: 5,
+        avatar: "OA"
+      },
+      {
+        name: "Grace Emmanuel",
+        location: "Uyo, Nigeria",
+        text: "I was skeptical at first, but after 3 months of consistent earnings, I'm a believer!",
+        rating: 5,
+        avatar: "GE"
+      },
+      {
+        name: "Tunde Bakare",
+        location: "Abeokuta, Nigeria",
+        text: "The referral system is genius! I earn from my network and they earn too. Win-win!",
+        rating: 5,
+        avatar: "TB"
+      },
+      {
+        name: "Blessing Uche",
+        location: "Enugu, Nigeria",
+        text: "Fast withdrawals, great returns, amazing support. What more could you ask for?",
+        rating: 5,
+        avatar: "BU"
+      },
+      {
+        name: "Emeka Nwosu",
+        location: "Onitsha, Nigeria",
+        text: "I've tried multiple platforms. CashBridge is the only one that delivers consistently.",
+        rating: 5,
+        avatar: "EN"
+      },
+      {
+        name: "Halima Yusuf",
+        location: "Kaduna, Nigeria",
+        text: "The daily returns are automatically credited. I don't have to do anything. Passive income at its best!",
+        rating: 5,
+        avatar: "HY"
+      },
+      {
+        name: "Victor Osimhen",
+        location: "Benin City, Nigeria",
+        text: "Started my investment journey 2 months ago. Already seeing great results. Thank you!",
+        rating: 5,
+        avatar: "VO"
+      },
+      {
+        name: "Ngozi Okonkwo",
+        location: "Awka, Nigeria",
+        text: "The platform is very easy to use. Even my mom can invest without help!",
+        rating: 5,
+        avatar: "NO"
+      },
+      {
+        name: "Femi Otedola",
+        location: "Lagos, Nigeria",
+        text: "Professional team, transparent operations. This is the future of investing.",
+        rating: 5,
+        avatar: "FO"
+      },
+      {
+        name: "Zainab Abubakar",
+        location: "Sokoto, Nigeria",
+        text: "I recommended CashBridge to all my friends. We're all earning together now!",
+        rating: 5,
+        avatar: "ZA"
+      },
+      {
+        name: "Chinedu Ibeh",
+        location: "Owerri, Nigeria",
+        text: "The ROI is exactly as promised. No hidden fees, no surprises. Just honest returns.",
+        rating: 5,
+        avatar: "CI"
+      },
+      {
+        name: "Peace Akpan",
+        location: "Calabar, Nigeria",
+        text: "Finally a platform that cares about its investors. God bless CashBridge!",
+        rating: 5,
+        avatar: "PA"
+      },
+      {
+        name: "Segun Adebayo",
+        location: "Ilorin, Nigeria",
+        text: "Best investment decision I ever made. The daily returns help me pay my bills!",
+        rating: 5,
+        avatar: "SA"
+      },
+      {
+        name: "Ruth Kalu",
+        location: "Aba, Nigeria",
+        text: "I was able to buy my first car with profits from CashBridge. Forever grateful!",
+        rating: 5,
+        avatar: "RK"
+      }
+    ];
+
+    // Carousel variables
+    let currentIndex = 0;
+    let autoSlideInterval;
+    const slideDuration = 5000; // 5 seconds per slide
+
+    // Render testimonials in carousel
+    function renderTestimonials() {
+      const track = document.getElementById('testimonialTrack');
+      const dotsContainer = document.getElementById('carouselDots');
+      
+      // Clear containers
+      track.innerHTML = '';
+      dotsContainer.innerHTML = '';
+      
+      // Create slides
+      testimonials.forEach((testimonial, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'testimonial-slide';
+        slide.innerHTML = `
+          <div class="testimonial-card">
+            <div class="testimonial-rating">
+              ${Array(testimonial.rating).fill('<i class="fas fa-star"></i>').join('')}
+            </div>
+            <p class="testimonial-text">"${testimonial.text}"</p>
+            <div class="testimonial-author">
+              <div class="author-avatar">
+                ${testimonial.avatar}
+              </div>
+              <div class="author-info">
+                <h4>${testimonial.name}</h4>
+                <p>${testimonial.location}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        track.appendChild(slide);
+        
+        // Create dot
+        const dot = document.createElement('span');
+        dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
+        dot.addEventListener('click', () => goToSlide(index));
+        dotsContainer.appendChild(dot);
+      });
+      
+      // Set track width
+      updateTrackPosition();
+    }
+
+    // Update carousel position
+    function updateTrackPosition() {
+      const track = document.getElementById('testimonialTrack');
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+      
+      // Update dots
+      document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+      });
+    }
+
+    // Go to specific slide
+    function goToSlide(index) {
+      currentIndex = index;
+      updateTrackPosition();
+      resetAutoSlide();
+    }
+
+    // Next slide
+    function nextSlide() {
+      currentIndex = (currentIndex + 1) % testimonials.length;
+      updateTrackPosition();
+      resetAutoSlide();
+    }
+
+    // Previous slide
+    function prevSlide() {
+      currentIndex = (currentIndex - 1 + testimonials.length) % testimonials.length;
+      updateTrackPosition();
+      resetAutoSlide();
+    }
+
+    // Reset auto-slide timer
+    function resetAutoSlide() {
+      clearInterval(autoSlideInterval);
+      autoSlideInterval = setInterval(nextSlide, slideDuration);
+    }
+
+    // Initialize carousel
+    function initCarousel() {
+      renderTestimonials();
+      
+      document.getElementById('prevBtn').addEventListener('click', prevSlide);
+      document.getElementById('nextBtn').addEventListener('click', nextSlide);
+      
+      // Start auto-slide
+      autoSlideInterval = setInterval(nextSlide, slideDuration);
+      
+      // Pause on hover
+      const container = document.getElementById('testimonialCarousel');
+      container.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
+      container.addEventListener('mouseleave', () => {
+        autoSlideInterval = setInterval(nextSlide, slideDuration);
+      });
+    }
+
+    // Display current date
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options);
+
+    // Modal Functions
+    window.closeModal = function() {
+      document.getElementById('welcomeModal').classList.remove('active');
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        sessionStorage.setItem(`welcomeModalSeen_${currentUser.uid}`, 'true');
+      }
+    };
+
+    function showWelcomeModal(userId) {
+      const modalSeen = sessionStorage.getItem(`welcomeModalSeen_${userId}`);
+      if (!modalSeen) {
+        setTimeout(() => {
+          document.getElementById('welcomeModal').classList.add('active');
+        }, 1000);
+      }
+    }
+
+    // Format currency
+    function formatCurrency(amount) {
+      return '₦' + Number(amount || 0).toLocaleString();
+    }
+
+    // Initialize carousel when page loads
+    initCarousel();
+
+    // Auth State Observer
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          
+          // Update last login
+          await updateDoc(userRef, {
+            lastLogin: serverTimestamp()
+          });
+
+          // Display user name
+          const fullName = userData.fullName || "Investor";
+          const firstName = fullName.split(' ')[0];
+          document.getElementById('userName').textContent = firstName;
+
+          // Update stats
+          document.getElementById('walletBalance').textContent = formatCurrency(userData.wallet || 0);
+          document.getElementById('totalEarnings').textContent = formatCurrency(userData.totalEarnings || 0);
+          document.getElementById('activeInvestments').textContent = userData.activeInvestments || 0;
+
+          // Show welcome modal
+          showWelcomeModal(user.uid);
+
+        } else {
+          console.error("User document not found");
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      }
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('welcomeModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+
+    // Clean up interval on page unload
+    window.addEventListener('beforeunload', () => {
+      clearInterval(autoSlideInterval);
+    });
+  </script>
+</body>
+</html>
