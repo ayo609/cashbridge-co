@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CashBridge • Referral Program</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #0a0f1e;
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+        linear-gradient(145deg, #0f172a 0%, #020617 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+
+    /* Animated Background Blobs */
+    .blob {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.2;
+      animation: float 20s infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .blob-1 {
+      top: -100px;
+      right: -100px;
+      background: linear-gradient(145deg, #6366f1, #a855f7);
+      animation-delay: -2s;
+    }
+
+    .blob-2 {
+      bottom: -100px;
+      left: -100px;
+      width: 500px;
+      height: 500px;
+      background: linear-gradient(145deg, #ec4899, #f59e0b);
+      animation-delay: -7s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, 30px) scale(1.1); }
+    }
+
+    /* Main Container */
+    .referral-page {
+      position: relative;
+      z-index: 10;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 100px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: white;
+      transform: rotate(-5deg);
+      box-shadow: 0 8px 15px -5px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .wallet-badge {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 30px;
+      padding: 0.6rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .wallet-badge i {
+      color: #6366f1;
+      font-size: 1rem;
+    }
+
+    .wallet-badge span {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    .wallet-badge strong {
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Page Title */
+    .page-title {
+      margin-bottom: 2rem;
+    }
+
+    .page-title h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-title p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 24px;
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: #6366f1;
+      box-shadow: 0 20px 40px -20px rgba(99, 102, 241, 0.3);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #e2e8f0;
+    }
+
+    .card-title i {
+      color: #6366f1;
+    }
+
+    /* Referral Code Section */
+    .code-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .code-box {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .code-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.8rem;
+    }
+
+    .code-value {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      word-break: break-all;
+    }
+
+    .link-value {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 12px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      word-break: break-all;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 30px;
+      padding: 0.6rem 1.5rem;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .copy-btn:hover {
+      background: #6366f1;
+      color: white;
+      border-color: #6366f1;
+    }
+
+    /* Commission Info */
+    .commission-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .commission-card {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      padding: 1.2rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .commission-level {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+
+    .commission-percent {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .level-1 .commission-percent { color: #6366f1; }
+    .level-2 .commission-percent { color: #ec4899; }
+    .level-3 .commission-percent { color: #f59e0b; }
+
+    .commission-desc {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 0.5rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 1.3rem;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: #6366f1;
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: white;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 1rem 0.5rem;
+      color: #94a3b8;
+      font-weight: 500;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    td {
+      padding: 1rem 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: #e2e8f0;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .level-badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .level-1-badge {
+      background: rgba(99, 102, 241, 0.1);
+      color: #6366f1;
+    }
+
+    .level-2-badge {
+      background: rgba(236, 72, 153, 0.1);
+      color: #ec4899;
+    }
+
+    .level-3-badge {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .username-tag {
+      font-family: monospace;
+      color: #6366f1;
+    }
+
+    .amount-positive {
+      color: #22c55e;
+      font-weight: 600;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #94a3b8;
+    }
+
+    .no-data i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #6366f1;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 40px;
+      padding: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 100;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.7rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      gap: 0.2rem;
+    }
+
+    .nav-item i {
+      font-size: 1rem;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      color: white;
+      box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .referral-page {
+        padding: 1rem 1rem 100px;
+      }
+
+      .code-section {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .commission-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .bottom-nav {
+        width: 90%;
+        padding: 0.3rem;
+      }
+
+      .nav-item {
+        padding: 0.4rem 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="referral-page">
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <span class="brand-name">CashBridge</span>
+      </div>
+      <div class="wallet-badge" id="walletDisplay">
+        <i class="fas fa-wallet"></i>
+        <span>Wallet:</span>
+        <strong id="walletBalance">₦0</strong>
+      </div>
+    </div>
+
+    <!-- Page Title -->
+    <div class="page-title">
+      <h1>Referral Program</h1>
+      <p>Invite friends and earn lifetime commissions</p>
+    </div>
+
+    <!-- Referral Code Card -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fas fa-share-nodes"></i>
+        Your Referral Details
+      </div>
+
+      <div class="code-section">
+        <div class="code-box">
+          <div class="code-label">Your Referral Code</div>
+          <div class="code-value" id="referralCode">Loading...</div>
+          <button class="copy-btn" onclick="copyCode()">
+            <i class="fas fa-copy"></i> Copy Code
+          </button>
+        </div>
+
+        <div class="code-box">
+          <div class="code-label">Your Referral Link</div>
+          <div class="link-value" id="referralLink">Loading your link...</div>
+          <button class="copy-btn" onclick="copyLink()">
+            <i class="fas fa-link"></i> Copy Link
+          </button>
+        </div>
+      </div>
+
+      <!-- Commission Structure -->
+      <div class="commission-grid">
+        <div class="commission-card level-1">
+          <div class="commission-level">Level 1</div>
+          <div class="commission-percent">20%</div>
+          <div class="commission-desc">Direct referrals</div>
+        </div>
+        <div class="commission-card level-2">
+          <div class="commission-level">Level 2</div>
+          <div class="commission-percent">2%</div>
+          <div class="commission-desc">Their referrals</div>
+        </div>
+        <div class="commission-card level-3">
+          <div class="commission-level">Level 3</div>
+          <div class="commission-percent">1%</div>
+          <div class="commission-desc">Third level</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <span class="stat-label">Total Referrals</span>
+        </div>
+        <div class="stat-value" id="totalReferrals">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <span class="stat-label">Invested by Network</span>
+        </div>
+        <div class="stat-value" id="totalInvested">₦0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-coins"></i>
+          </div>
+          <span class="stat-label">Total Earned</span>
+        </div>
+        <div class="stat-value" id="totalBonus">₦0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <span class="stat-label">Active Referrals</span>
+        </div>
+        <div class="stat-value" id="activeReferrals">0</div>
+      </div>
+    </div>
+
+    <!-- Referrals Table -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fas fa-network-wired"></i>
+        Your Referral Network
+      </div>
+
+      <div class="table-container">
+        <div id="loadingReferrals" class="loading">
+          <i class="fas fa-spinner fa-spin"></i> Loading your network...
+        </div>
+        
+        <table id="referralTable" style="display:none;">
+          <thead>
+            <tr>
+              <th>Level</th>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Joined</th>
+              <th>Invested</th>
+              <th>Your Earnings</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        
+        <div class="no-data" id="noReferrals" style="display:none;">
+          <i class="fas fa-users-slash"></i>
+          <h3>No Referrals Yet</h3>
+          <p>Share your referral code above to start earning!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="plans.html" class="nav-item">
+      <i class="fas fa-layer-group"></i>
+      <span>Plans</span>
+    </a>
+    <a href="referral.html" class="nav-item active">
+      <i class="fas fa-share-nodes"></i>
+      <span>Referral</span>
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <i class="fas fa-chart-pie"></i>
+      <span>Dashboard</span>
+    </a>
+  </nav>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, getDocs, collection, runTransaction, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+      authDomain: "cashbridge-a688e.firebaseapp.com",
+      projectId: "cashbridge-a688e",
+      storageBucket: "cashbridge-a688e.firebasestorage.app",
+      messagingSenderId: "345273765518",
+      appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const formatMoney = (amount) => "₦" + Number(amount || 0).toLocaleString();
+
+    let referralCode = '';
+    let referralLink = '';
+
+    // Copy functions
+    window.copyCode = async () => {
+      try {
+        await navigator.clipboard.writeText(referralCode);
+        Swal.fire({
+          icon: "success",
+          title: "Copied!",
+          text: "Referral code copied",
+          timer: 1500,
+          showConfirmButton: false,
+          background: '#0f172a',
+          color: '#e2e8f0'
+        });
+      } catch (err) {
+        const input = document.createElement("input");
+        input.value = referralCode;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        document.body.removeChild(input);
+        Swal.fire({
+          icon: "success",
+          title: "Copied!",
+          timer: 1500,
+          showConfirmButton: false,
+          background: '#0f172a',
+          color: '#e2e8f0'
+        });
+      }
+    };
+
+    window.copyLink = async () => {
+      try {
+        await navigator.clipboard.writeText(referralLink);
+        Swal.fire({
+          icon: "success",
+          title: "Copied!",
+          text: "Referral link copied",
+          timer: 1500,
+          showConfirmButton: false,
+          background: '#0f172a',
+          color: '#e2e8f0'
+        });
+      } catch (err) {
+        const input = document.createElement("input");
+        input.value = referralLink;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        document.body.removeChild(input);
+        Swal.fire({
+          icon: "success",
+          title: "Copied!",
+          timer: 1500,
+          showConfirmButton: false,
+          background: '#0f172a',
+          color: '#e2e8f0'
+        });
+      }
+    };
+
+    // Auth state
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        const userData = userSnap.data();
+
+        // Update wallet display
+        document.getElementById("walletBalance").textContent = formatMoney(userData.wallet || 0);
+
+        // Set referral info
+        referralCode = userData.username || 'user';
+        referralLink = `https://cashbridge-co.online/register.html?ref=${referralCode}`;
+        
+        document.getElementById("referralCode").textContent = referralCode;
+        document.getElementById("referralLink").textContent = referralLink;
+
+        // Load referrals
+        await loadReferrals(user.uid);
+
+      } catch (error) {
+        console.error("Error loading user:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load your data",
+          background: '#0f172a',
+          color: '#e2e8f0'
+        });
+      }
+    });
+
+    // ============================================================
+    // LOAD REFERRALS — reads real paid bonuses only, and pays
+    // any bonuses that were missed (e.g. from before the fix)
+    // ============================================================
+    async function loadReferrals(userId) {
+      const tbody  = document.querySelector("#referralTable tbody");
+      const loading = document.getElementById("loadingReferrals");
+      const table   = document.getElementById("referralTable");
+      const noRef   = document.getElementById("noReferrals");
+
+      tbody.innerHTML = "";
+
+      let totalReferrals = 0;
+      let totalInvested  = 0;
+      let totalBonus     = 0;
+      let activeReferrals = 0;
+
+      try {
+        console.log("🔍 Loading referrals for user:", userId);
+
+        // ── 1. Find every user who has userId anywhere in their referral chain ──
+        const usersSnap = await getDocs(collection(db, "users"));
+        const myReferrals = [];
+
+        usersSnap.forEach(d => {
+          const u = d.data();
+          if (u.referredBy      === userId) myReferrals.push({ id: d.id, ...u, level: 1 });
+          else if (u.level2Referrer === userId) myReferrals.push({ id: d.id, ...u, level: 2 });
+          else if (u.level3Referrer === userId) myReferrals.push({ id: d.id, ...u, level: 3 });
+        });
+
+        console.log(`🎯 Total referrals found: ${myReferrals.length}`);
+
+        if (myReferrals.length === 0) {
+          loading.style.display = "none";
+          noRef.style.display   = "block";
+          table.style.display   = "none";
+          updateStats(0, 0, 0, 0);
+          return;
+        }
+
+        // ── 2. Process each referral ──
+        for (const referral of myReferrals) {
+          totalReferrals++;
+          const level = referral.level || 1;
+          const commissionRate = level === 1 ? 0.20 : level === 2 ? 0.02 : 0.01;
+          const commissionPercent = commissionRate * 100;
+
+          // Get their active plans
+          const plansSnap = await getDocs(collection(db, `users/${referral.id}/activePlans`));
+          let userTotalInvested = 0;
+          let userActivePlans   = 0;
+
+          plansSnap.forEach(planDoc => {
+            const p = planDoc.data();
+            userTotalInvested += Number(p.capital || 0);
+            if (p.status === 'active' && p.daysLeft > 0) userActivePlans++;
+          });
+
+          totalInvested += userTotalInvested;
+          if (userActivePlans > 0) activeReferrals++;
+
+          // ── 3. Read the ACTUAL paid bonus record from Firestore ──
+          const referralDocRef = doc(db, `users/${userId}/referrals`, referral.id);
+          const referralDocSnap = await getDoc(referralDocRef);
+
+          let referralEarned = 0;
+
+          if (referralDocSnap.exists()) {
+            // Bonus was already recorded — use the real paid amount
+            referralEarned = referralDocSnap.data().totalEarned || 0;
+          } else if (userTotalInvested > 0) {
+            // ── 4. RECOVERY: Bonus was never paid (old accounts / bug) ──
+            // Calculate what should have been paid and credit it NOW
+            const bonusToPay = Math.floor(userTotalInvested * commissionRate);
+
+            if (bonusToPay > 0) {
+              try {
+                const uplinerRef = doc(db, 'users', userId);
+                await runTransaction(db, async (t) => {
+                  const uplinerSnap = await t.get(uplinerRef);
+                  if (!uplinerSnap.exists()) return;
+
+                  // Credit the upliner's wallet
+                  t.update(uplinerRef, {
+                    wallet:        increment(bonusToPay),
+                    totalEarnings: increment(bonusToPay)
+                  });
+
+                  // Create the referral earnings record
+                  t.set(referralDocRef, {
+                    referredUserId:   referral.id,
+                    referredUserName: referral.fullName  || 'User',
+                    referredUserEmail:referral.email     || '',
+                    referredUsername: referral.username  || 'user',
+                    level:            level,
+                    commission:       commissionPercent,
+                    totalEarned:      bonusToPay,
+                    lastInvestment:   userTotalInvested,
+                    lastInvestmentDate: serverTimestamp(),
+                    updatedAt:        serverTimestamp(),
+                    recoveredAt:      serverTimestamp()   // marks it as a recovery credit
+                  });
+                });
+
+                referralEarned = bonusToPay;
+                console.log(`✅ Recovery credit: ₦${bonusToPay.toLocaleString()} paid to ${userId} for referral ${referral.id}`);
+
+                // Refresh displayed wallet balance
+                const freshSnap = await getDoc(doc(db, 'users', userId));
+                if (freshSnap.exists()) {
+                  document.getElementById("walletBalance").textContent = formatMoney(freshSnap.data().wallet || 0);
+                }
+
+              } catch (txErr) {
+                console.error("❌ Recovery credit failed:", txErr.message);
+                referralEarned = 0; // don't show unearned amount if payment failed
+              }
+            }
+          }
+
+          totalBonus += referralEarned;
+
+          // ── 5. Build table row ──
+          let joinDate = "—";
+          if (referral.createdAt) {
+            try { joinDate = new Date(referral.createdAt.toMillis()).toLocaleDateString(); } catch (_) {}
+          }
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td><span class="level-badge level-${level}-badge">Level ${level}</span></td>
+            <td><strong>${referral.fullName || "—"}</strong></td>
+            <td><span class="username-tag">@${referral.username || "—"}</span></td>
+            <td>${joinDate}</td>
+            <td><span class="amount-positive">${formatMoney(userTotalInvested)}</span></td>
+            <td>
+              <span class="amount-positive">${formatMoney(referralEarned)}</span>
+              <span style="color:#94a3b8; font-size:0.7rem;">(${commissionPercent}%)</span>
+            </td>
+          `;
+          tbody.appendChild(row);
+        }
+
+        updateStats(totalReferrals, totalInvested, totalBonus, activeReferrals);
+        loading.style.display = "none";
+        table.style.display   = "table";
+        noRef.style.display   = "none";
+
+      } catch (error) {
+        console.error("❌ Error loading referrals:", error);
+        loading.innerHTML = `<p style="color:#ef4444;">Failed to load referrals. Please refresh.</p>`;
+      }
+    }
+
+    function updateStats(total, invested, bonus, active) {
+      document.getElementById("totalReferrals").textContent = total;
+      document.getElementById("totalInvested").textContent = formatMoney(invested);
+      document.getElementById("totalBonus").textContent = formatMoney(bonus);
+      document.getElementById("activeReferrals").textContent = active;
+    }
+  </script>
+</body>
+</html>
