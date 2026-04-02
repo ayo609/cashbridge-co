@@ -164,7 +164,7 @@
       grid-column: span 2;
     }
 
-    label {
+label {
       display: block;
       margin-bottom: 0.4rem;
       color: #e2e8f0;
@@ -368,7 +368,7 @@
       font-size: 0.85rem;
     }
 
-    .login-link a {
+.login-link a {
       color: #6366f1;
       text-decoration: none;
       font-weight: 600;
@@ -449,6 +449,40 @@
       <p class="subtitle">Join thousands of smart investors</p>
     </div>
 
+    <!-- Welcome Bonus Banner -->
+    <div style="
+      background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(99,102,241,0.1));
+      border: 1px solid rgba(34,197,94,0.35);
+      border-radius: 18px;
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      animation: pulse 2s infinite;
+    ">
+      <div style="
+        width: 42px; height: 42px; flex-shrink: 0;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        border-radius: 12px; display: flex; align-items: center;
+        justify-content: center; font-size: 1.3rem;
+      ">🎁</div>
+      <div>
+        <div style="font-weight: 700; color: #22c55e; font-size: 0.92rem; margin-bottom: 0.1rem;">
+          ₦500 Welcome Bonus — Just for Signing Up!
+        </div>
+        <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4;">
+          Create your account today and get <strong style="color:#e2e8f0">₦500</strong> credited to your wallet instantly. No deposit needed.
+        </div>
+      </div>
+    </div>
+    <style>
+      @keyframes pulse {
+        0%, 100% { border-color: rgba(34,197,94,0.35); }
+        50%       { border-color: rgba(34,197,94,0.7); box-shadow: 0 0 12px rgba(34,197,94,0.15); }
+      }
+    </style>
+
     <!-- Progress indicator -->
     <div class="progress-steps">
       <div class="step active"></div>
@@ -515,7 +549,7 @@
           </div>
         </div>
 
-        <!-- Referral Code -->
+<!-- Referral Code -->
         <div class="form-group full-width">
           <label>
             Referral Code 
@@ -560,7 +594,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
     import {
-      getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, serverTimestamp
+      getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, serverTimestamp, increment
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -585,7 +619,7 @@
       document.getElementById('referral').value = refParam;
     }
 
-    // Username availability check
+// Username availability check
     document.getElementById('username').addEventListener('input', (e) => {
       const username = e.target.value.toLowerCase().trim();
       const feedback = document.getElementById('usernameFeedback');
@@ -657,7 +691,7 @@
           const referrer = await findUserByUsername(referralCode);
           
           if (referrer) {
-            referralFeedback.innerHTML = `<i class="fas fa-check-circle"></i> Valid! Referred by ${referrer.fullName || referrer.username}`;
+            referralFeedback.innerHTML = <i class="fas fa-check-circle"></i> Valid! Referred by ${referrer.fullName || referrer.username};
             referralFeedback.className = 'input-feedback show success';
             e.target.classList.add('success');
             e.target.classList.remove('error');
@@ -687,7 +721,7 @@
       }
     }
 
-    // Password strength
+// Password strength
     document.getElementById('password').addEventListener('input', (e) => {
       const password = e.target.value;
       const strengthBar = document.getElementById('strengthBar');
@@ -795,7 +829,7 @@
       submitBtn.disabled = true;
       submitBtn.innerHTML = 'Creating Account <i class="fas fa-spinner fa-spin"></i>';
 
-      try {
+try {
         // Double-check username availability
         const usernameExists = await findUserByUsername(username);
         if (usernameExists) {
@@ -849,7 +883,7 @@
             const result = await Swal.fire({
               icon: 'warning',
               title: 'Invalid Referral Code',
-              text: `Username "${referralCode}" not found. Continue without referral?`,
+              text: Username "${referralCode}" not found. Continue without referral?,
               showCancelButton: true,
               confirmButtonText: 'Continue Anyway',
               cancelButtonText: 'Fix Referral Code',
@@ -873,7 +907,8 @@
 
         await updateProfile(userCredential.user, { displayName: name });
 
-        // Create user document with COMPLETE referral chain
+        // Create user document with COMPLETE referral chain + ₦500 welcome bonus
+        const WELCOME_BONUS = 500;
         const userData = {
           uid: newUserId,
           fullName: name,
@@ -884,10 +919,10 @@
           referredBy: level1Referrer,
           level2Referrer: level2Referrer,
           level3Referrer: level3Referrer,
-          wallet: 0,
+          wallet: WELCOME_BONUS,       // ← ₦500 credited immediately
           totalDeposits: 0,
           totalWithdrawals: 0,
-          totalEarnings: 0,
+          totalEarnings: WELCOME_BONUS, // counts toward lifetime earnings
           activeInvestments: 0,
           emailVerified: false,
           createdAt: serverTimestamp(),
@@ -903,13 +938,30 @@
         });
 
         // =====================================================
+        // CREDIT ₦500 WELCOME BONUS TRANSACTION RECORD
+        // =====================================================
+        try {
+          const bonusTxRef = doc(collection(db, `users/${newUserId}/transactions`));
+          await setDoc(bonusTxRef, {
+            type:        'welcome_bonus',
+            amount:      WELCOME_BONUS,
+            status:      'completed',
+            description: '🎁 Welcome Bonus — Thank you for joining CashBridge!',
+            createdAt:   serverTimestamp()
+          });
+          console.log('✅ Welcome bonus transaction record created');
+        } catch (txErr) {
+          console.error('Welcome bonus tx record failed (non-critical):', txErr.message);
+        }
+
+// =====================================================
         // CREATE REFERRAL RECORDS FOR ALL LEVELS
         // =====================================================
         
         // Level 1 referral record
         if (level1Referrer) {
           try {
-            await setDoc(doc(db, `users/${level1Referrer}/referrals`, newUserId), {
+            await setDoc(doc(db, users/${level1Referrer}/referrals, newUserId), {
               referredUserId: newUserId,
               referredUserName: name,
               referredUserEmail: email,
@@ -929,7 +981,7 @@
         // Level 2 referral record
         if (level2Referrer) {
           try {
-            await setDoc(doc(db, `users/${level2Referrer}/referrals`, newUserId), {
+            await setDoc(doc(db, users/${level2Referrer}/referrals, newUserId), {
               referredUserId: newUserId,
               referredUserName: name,
               referredUserEmail: email,
@@ -948,7 +1000,7 @@
         // Level 3 referral record
         if (level3Referrer) {
           try {
-            await setDoc(doc(db, `users/${level3Referrer}/referrals`, newUserId), {
+            await setDoc(doc(db, users/${level3Referrer}/referrals, newUserId), {
               referredUserId: newUserId,
               referredUserName: name,
               referredUserEmail: email,
@@ -966,10 +1018,29 @@
 
         await Swal.fire({
           icon: 'success',
-          title: 'Welcome to Tesla!',
-          html: `<p style="color:#e2e8f0">Your account has been created successfully</p>
-                 <p style="color:#6366f1;margin-top:0.5rem">@${username}</p>`,
-          timer: 3000,
+          title: '🎉 Welcome to CashBridge!',
+          html: `
+            <p style="color:#e2e8f0;margin-bottom:0.8rem">Your account has been created successfully!</p>
+            <div style="
+              background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(99,102,241,0.12));
+              border: 1px solid rgba(34,197,94,0.4);
+              border-radius: 16px;
+              padding: 1rem 1.2rem;
+              margin: 0.5rem 0 0.8rem;
+              display: flex;
+              align-items: center;
+              gap: 0.8rem;
+              text-align: left;
+            ">
+              <span style="font-size:1.8rem">🎁</span>
+              <div>
+                <div style="color:#22c55e;font-weight:700;font-size:1rem">₦500 Welcome Bonus Credited!</div>
+                <div style="color:#94a3b8;font-size:0.82rem;margin-top:0.2rem">Check your wallet — it's already in there.</div>
+              </div>
+            </div>
+            <p style="color:#6366f1;font-size:0.9rem">@${username}</p>
+          `,
+          timer: 4000,
           showConfirmButton: false,
           background: '#0f172a'
         });
