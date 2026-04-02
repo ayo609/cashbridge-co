@@ -3,33 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tesla • Create Account</title>
+  <title>CashBridge • Create Account</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-  <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
       font-family: 'Plus Jakarta Sans', sans-serif;
       background: #0a0f1e;
-      background-image: 
-        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(99,102,241,0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(236,72,153,0.1) 0%, transparent 40%),
         linear-gradient(145deg, #0f172a 0%, #020617 100%);
       display: flex;
       align-items: center;
@@ -38,419 +29,60 @@
       position: relative;
     }
 
-    /* Animated Background Blobs */
     .blob {
       position: fixed;
-      width: 400px;
-      height: 400px;
       border-radius: 50%;
       filter: blur(80px);
       opacity: 0.2;
       animation: float 20s infinite alternate;
       z-index: 0;
     }
+    .blob-1 { width:400px; height:400px; top:-100px; right:-100px; background:linear-gradient(145deg,#6366f1,#a855f7); }
+    .blob-2 { width:500px; height:500px; bottom:-100px; left:-100px; background:linear-gradient(145deg,#ec4899,#f59e0b); animation-delay:-5s; }
+    @keyframes float { 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(50px,30px) scale(1.1);} }
 
-    .blob-1 {
-      top: -100px;
-      right: -100px;
-      background: linear-gradient(145deg, #6366f1, #a855f7);
-    }
-
-    .blob-2 {
-      bottom: -100px;
-      left: -100px;
-      width: 500px;
-      height: 500px;
-      background: linear-gradient(145deg, #ec4899, #f59e0b);
-      animation-delay: -5s;
-    }
-
-    @keyframes float {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(50px, 30px) scale(1.1); }
-    }
-
-    /* Main Container */
     .glass-card {
       position: relative;
       z-index: 10;
       width: 100%;
       max-width: 600px;
-      background: rgba(15, 23, 42, 0.7);
+      background: rgba(15,23,42,0.7);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255,255,255,0.05);
       border-radius: 36px;
       padding: 2.5rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
       animation: slideUp 0.8s ease-out;
     }
+    @keyframes slideUp { from{opacity:0;transform:translateY(40px);} to{opacity:1;transform:translateY(0);} }
 
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(40px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Header */
     .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
-      transition: color 0.3s;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      color: #94a3b8; text-decoration: none; font-size: 0.9rem;
+      margin-bottom: 1.5rem; transition: color 0.3s;
     }
+    .back-link:hover { color: #6366f1; }
 
-    .back-link:hover {
-      color: #6366f1;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
+    .header { text-align: center; margin-bottom: 1.5rem; }
     .header-icon {
-      width: 64px;
-      height: 64px;
-      background: linear-gradient(135deg, #6366f1, #ec4899);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-      font-size: 2rem;
-      color: white;
-      transform: rotate(-5deg);
-      box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.4);
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg,#6366f1,#ec4899);
+      border-radius: 20px; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 1rem;
+      font-size: 2rem; color: white; transform: rotate(-5deg);
+      box-shadow: 0 15px 30px -10px rgba(99,102,241,0.4);
     }
-
     h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 2.2rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #fff, #cbd5e1);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; font-weight: 700;
+      background: linear-gradient(135deg,#fff,#cbd5e1);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       margin-bottom: 0.5rem;
     }
+    .subtitle { color: #94a3b8; font-size: 0.95rem; }
 
-    .subtitle {
-      color: #94a3b8;
-      font-size: 0.95rem;
-    }
-
-    /* Form */
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .form-group.full-width {
-      grid-column: span 2;
-    }
-
-label {
-      display: block;
-      margin-bottom: 0.4rem;
-      color: #e2e8f0;
-      font-weight: 500;
-      font-size: 0.85rem;
-    }
-
-    .label-hint {
-      color: #94a3b8;
-      font-weight: 400;
-      font-size: 0.75rem;
-      margin-left: 0.3rem;
-    }
-
-    .input-wrapper {
-      position: relative;
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6366f1;
-      font-size: 0.9rem;
-      opacity: 0.7;
-      z-index: 1;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.8rem 1rem 0.8rem 2.5rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1.5px solid rgba(255, 255, 255, 0.05);
-      border-radius: 14px;
-      color: white;
-      font-size: 0.9rem;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      transition: all 0.3s;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: #6366f1;
-      background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-    }
-
-    input::placeholder {
-      color: #475569;
-      font-weight: 300;
-    }
-
-    input.error {
-      border-color: #ef4444;
-    }
-
-    input.success {
-      border-color: #22c55e;
-    }
-
-    .username-input {
-      font-family: 'Space Grotesk', monospace;
-      letter-spacing: 0.5px;
-    }
-
-    .input-feedback {
-      font-size: 0.75rem;
-      margin-top: 0.4rem;
-      display: none;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .input-feedback.show {
-      display: flex;
-    }
-
-    .input-feedback.error {
-      color: #ef4444;
-    }
-
-    .input-feedback.success {
-      color: #22c55e;
-    }
-
-    .input-feedback.checking {
-      color: #f59e0b;
-    }
-
-    /* Password strength */
-    .password-strength {
-      margin-top: 0.4rem;
-      height: 4px;
-      background: rgba(148, 163, 184, 0.1);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .password-strength-bar {
-      height: 100%;
-      width: 0%;
-      transition: all 0.3s ease;
-      border-radius: 10px;
-    }
-
-    .strength-weak { 
-      background: #ef4444; 
-      width: 33.33%;
-    }
-    .strength-medium { 
-      background: #f59e0b; 
-      width: 66.66%;
-    }
-    .strength-strong { 
-      background: #22c55e; 
-      width: 100%;
-    }
-
-    .password-hint {
-      font-size: 0.75rem;
-      color: #94a3b8;
-      margin-top: 0.3rem;
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    /* Terms */
-    .terms-wrapper {
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 14px;
-      padding: 1rem;
-      margin: 1.2rem 0 1.5rem;
-      border: 1px solid rgba(255, 255, 255, 0.03);
-    }
-
-    .terms-label {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      color: #cbd5e1;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-
-    .terms-label input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      accent-color: #6366f1;
-      border-radius: 4px;
-    }
-
-    .terms-link {
-      color: #6366f1;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s;
-    }
-
-    .terms-link:hover {
-      color: #ec4899;
-    }
-
-    /* Submit button */
-    .btn {
-      width: 100%;
-      padding: 0.9rem;
-      background: linear-gradient(135deg, #6366f1, #ec4899);
-      border: none;
-      border-radius: 16px;
-      color: white;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.6);
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Login link */
-    .login-link {
-      text-align: center;
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      color: #94a3b8;
-      font-size: 0.85rem;
-    }
-
-.login-link a {
-      color: #6366f1;
-      text-decoration: none;
-      font-weight: 600;
-      margin-left: 0.3rem;
-      transition: color 0.3s;
-    }
-
-    .login-link a:hover {
-      color: #ec4899;
-    }
-
-    /* Progress steps */
-    .progress-steps {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .step {
-      width: 6px;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      transition: all 0.3s;
-    }
-
-    .step.active {
-      width: 20px;
-      background: linear-gradient(90deg, #6366f1, #ec4899);
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      .glass-card {
-        padding: 1.8rem;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .form-group.full-width {
-        grid-column: span 1;
-      }
-
-      h1 {
-        font-size: 1.8rem;
-      }
-
-      .header-icon {
-        width: 56px;
-        height: 56px;
-        font-size: 1.6rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Background blobs -->
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-
-  <div class="glass-card">
-    <!-- Back link -->
-    <a href="login.html" class="back-link">
-      <i class="fas fa-arrow-left"></i>
-      Back to sign in
-    </a>
-
-    <!-- Header -->
-    <div class="header">
-      <div class="header-icon">
-        <i class="fas fa-user-plus"></i>
-      </div>
-      <h1>Create Account</h1>
-      <p class="subtitle">Join thousands of smart investors</p>
-    </div>
-
-    <!-- Welcome Bonus Banner -->
-    <div style="
+    /* Welcome Bonus Banner */
+    .welcome-bonus-banner {
       background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(99,102,241,0.1));
       border: 1px solid rgba(34,197,94,0.35);
       border-radius: 18px;
@@ -459,31 +91,124 @@ label {
       display: flex;
       align-items: center;
       gap: 0.9rem;
-      animation: pulse 2s infinite;
-    ">
-      <div style="
-        width: 42px; height: 42px; flex-shrink: 0;
-        background: linear-gradient(135deg, #22c55e, #16a34a);
-        border-radius: 12px; display: flex; align-items: center;
-        justify-content: center; font-size: 1.3rem;
-      ">🎁</div>
+      animation: bonusPulse 2s infinite;
+    }
+    .bonus-icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-radius: 12px; display: flex; align-items: center;
+      justify-content: center; font-size: 1.4rem;
+    }
+    .bonus-title { font-weight: 700; color: #22c55e; font-size: 0.92rem; margin-bottom: 0.15rem; }
+    .bonus-desc  { font-size: 0.78rem; color: #94a3b8; line-height: 1.4; }
+    .bonus-desc strong { color: #e2e8f0; }
+    @keyframes bonusPulse {
+      0%,100% { border-color: rgba(34,197,94,0.35); }
+      50%      { border-color: rgba(34,197,94,0.7); box-shadow: 0 0 14px rgba(34,197,94,0.15); }
+    }
+
+    /* Progress steps */
+    .progress-steps { display:flex; align-items:center; justify-content:center; gap:0.5rem; margin-bottom:1.5rem; }
+    .step { width:6px; height:6px; background:rgba(255,255,255,0.1); border-radius:10px; transition:all 0.3s; }
+    .step.active { width:20px; background:linear-gradient(90deg,#6366f1,#ec4899); }
+
+    /* Form */
+    .form-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; margin-bottom:1rem; }
+    .form-group { margin-bottom:1rem; }
+    .form-group.full-width { grid-column:span 2; }
+
+    label { display:block; margin-bottom:0.4rem; color:#e2e8f0; font-weight:500; font-size:0.85rem; }
+    .label-hint { color:#94a3b8; font-weight:400; font-size:0.75rem; margin-left:0.3rem; }
+
+    .input-wrapper { position:relative; }
+    .input-icon {
+      position:absolute; left:1rem; top:50%; transform:translateY(-50%);
+      color:#6366f1; font-size:0.9rem; opacity:0.7; z-index:1;
+    }
+    input {
+      width:100%; padding:0.8rem 1rem 0.8rem 2.5rem;
+      background:rgba(255,255,255,0.03); border:1.5px solid rgba(255,255,255,0.05);
+      border-radius:14px; color:white; font-size:0.9rem;
+      font-family:'Plus Jakarta Sans',sans-serif; transition:all 0.3s;
+    }
+    input:focus { outline:none; border-color:#6366f1; background:rgba(255,255,255,0.05); box-shadow:0 0 0 4px rgba(99,102,241,0.15); }
+    input::placeholder { color:#475569; font-weight:300; }
+    input.error   { border-color:#ef4444; }
+    input.success { border-color:#22c55e; }
+    .username-input { font-family:'Space Grotesk',monospace; letter-spacing:0.5px; }
+
+    .input-feedback { font-size:0.75rem; margin-top:0.4rem; display:none; align-items:center; gap:0.3rem; }
+    .input-feedback.show    { display:flex; }
+    .input-feedback.error   { color:#ef4444; }
+    .input-feedback.success { color:#22c55e; }
+    .input-feedback.checking{ color:#f59e0b; }
+
+    .password-strength { margin-top:0.4rem; height:4px; background:rgba(148,163,184,0.1); border-radius:10px; overflow:hidden; }
+    .password-strength-bar { height:100%; width:0%; transition:all 0.3s ease; border-radius:10px; }
+    .strength-weak   { background:#ef4444; width:33.33%; }
+    .strength-medium { background:#f59e0b; width:66.66%; }
+    .strength-strong { background:#22c55e; width:100%; }
+    .password-hint { font-size:0.75rem; color:#94a3b8; margin-top:0.3rem; display:flex; align-items:center; gap:0.3rem; }
+
+    .terms-wrapper { background:rgba(255,255,255,0.02); border-radius:14px; padding:1rem; margin:1.2rem 0 1.5rem; border:1px solid rgba(255,255,255,0.03); }
+    .terms-label { display:flex; align-items:center; gap:0.8rem; color:#cbd5e1; font-size:0.85rem; cursor:pointer; }
+    .terms-label input[type="checkbox"] { width:16px; height:16px; accent-color:#6366f1; border-radius:4px; }
+    .terms-link { color:#6366f1; text-decoration:none; font-weight:500; transition:color 0.3s; }
+    .terms-link:hover { color:#ec4899; }
+
+    .btn {
+      width:100%; padding:0.9rem;
+      background:linear-gradient(135deg,#6366f1,#ec4899);
+      border:none; border-radius:16px; color:white;
+      font-size:0.95rem; font-weight:600; cursor:pointer; transition:all 0.3s;
+      box-shadow:0 8px 20px -5px rgba(99,102,241,0.4);
+      display:flex; align-items:center; justify-content:center; gap:0.5rem;
+      font-family:'Plus Jakarta Sans',sans-serif;
+    }
+    .btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 15px 30px -5px rgba(99,102,241,0.6); }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+    .login-link { text-align:center; margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.05); color:#94a3b8; font-size:0.85rem; }
+    .login-link a { color:#6366f1; text-decoration:none; font-weight:600; margin-left:0.3rem; transition:color 0.3s; }
+    .login-link a:hover { color:#ec4899; }
+
+    @media (max-width:600px) {
+      .glass-card { padding:1.8rem; }
+      .form-grid { grid-template-columns:1fr; }
+      .form-group.full-width { grid-column:span 1; }
+      h1 { font-size:1.8rem; }
+      .header-icon { width:56px; height:56px; font-size:1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="glass-card">
+    <a href="login.html" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to sign in
+    </a>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-icon"><i class="fas fa-user-plus"></i></div>
+      <h1>Create Account</h1>
+      <p class="subtitle">Join thousands of smart investors</p>
+    </div>
+
+    <!-- ₦500 Welcome Bonus Banner -->
+    <div class="welcome-bonus-banner">
+      <div class="bonus-icon">🎁</div>
       <div>
-        <div style="font-weight: 700; color: #22c55e; font-size: 0.92rem; margin-bottom: 0.1rem;">
-          ₦500 Welcome Bonus — Just for Signing Up!
-        </div>
-        <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4;">
-          Create your account today and get <strong style="color:#e2e8f0">₦500</strong> credited to your wallet instantly. No deposit needed.
+        <div class="bonus-title">₦500 Welcome Bonus — Just for Signing Up!</div>
+        <div class="bonus-desc">
+          Create your account and get <strong>₦500</strong> credited to your wallet instantly. No deposit needed.
         </div>
       </div>
     </div>
-    <style>
-      @keyframes pulse {
-        0%, 100% { border-color: rgba(34,197,94,0.35); }
-        50%       { border-color: rgba(34,197,94,0.7); box-shadow: 0 0 12px rgba(34,197,94,0.15); }
-      }
-    </style>
 
-    <!-- Progress indicator -->
+    <!-- Progress dots -->
     <div class="progress-steps">
       <div class="step active"></div>
       <div class="step"></div>
@@ -493,6 +218,7 @@ label {
     <!-- Form -->
     <form id="registerForm">
       <div class="form-grid">
+
         <!-- Full Name -->
         <div class="form-group full-width">
           <label>Full Name</label>
@@ -504,13 +230,11 @@ label {
 
         <!-- Username -->
         <div class="form-group full-width">
-          <label>
-            Username 
-            <span class="label-hint">(your referral code)</span>
-          </label>
+          <label>Username <span class="label-hint">(your referral code)</span></label>
           <div class="input-wrapper">
             <i class="fas fa-at input-icon"></i>
-            <input type="text" id="username" class="username-input" placeholder="johndoe123" required minlength="3" maxlength="20" pattern="[a-z0-9]+">
+            <input type="text" id="username" class="username-input"
+              placeholder="johndoe123" required minlength="3" maxlength="20" pattern="[a-z0-9]+">
           </div>
           <div class="input-feedback" id="usernameFeedback"></div>
         </div>
@@ -535,57 +259,51 @@ label {
             <div class="password-strength-bar" id="strengthBar"></div>
           </div>
           <div class="password-hint" id="passwordHint">
-            <i class="fas fa-info-circle"></i>
-            Enter a strong password
+            <i class="fas fa-info-circle"></i> Enter a strong password
           </div>
         </div>
 
         <!-- Confirm Password -->
         <div class="form-group">
-          <label>Confirm</label>
+          <label>Confirm Password</label>
           <div class="input-wrapper">
             <i class="fas fa-lock input-icon"></i>
             <input type="password" id="confirmPassword" placeholder="Confirm password" required>
           </div>
         </div>
 
-<!-- Referral Code -->
+        <!-- Referral Code -->
         <div class="form-group full-width">
-          <label>
-            Referral Code 
-            <span class="label-hint">(optional - from your referrer)</span>
-          </label>
+          <label>Referral Code <span class="label-hint">(optional)</span></label>
           <div class="input-wrapper">
             <i class="fas fa-gift input-icon"></i>
-            <input type="text" id="referral" class="username-input" placeholder="Enter referrer's username" value="">
+            <input type="text" id="referral" class="username-input"
+              placeholder="Enter referrer's username">
           </div>
           <div class="input-feedback" id="referralFeedback"></div>
         </div>
+
       </div>
 
-      <!-- Terms and Conditions -->
+      <!-- Terms -->
       <div class="terms-wrapper">
         <label class="terms-label">
           <input type="checkbox" id="terms" required>
           <span>
-            I agree to the 
-            <a href="#" class="terms-link">Terms</a> 
-            and 
+            I agree to the
+            <a href="#" class="terms-link">Terms</a> and
             <a href="#" class="terms-link">Privacy Policy</a>
           </span>
         </label>
       </div>
 
-      <!-- Submit Button -->
+      <!-- Submit -->
       <button type="submit" class="btn" id="submitBtn">
-        Create Account
-        <i class="fas fa-arrow-right"></i>
+        Create Account <i class="fas fa-arrow-right"></i>
       </button>
 
-      <!-- Login Link -->
       <div class="login-link">
-        Already have an account?
-        <a href="login.html">Sign in</a>
+        Already have an account? <a href="login.html">Sign in</a>
       </div>
     </form>
   </div>
@@ -594,306 +312,199 @@ label {
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
     import {
-      getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, serverTimestamp, increment
+      getFirestore, doc, setDoc, getDoc, getDocs,
+      collection, query, where, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
-      authDomain: "cashbridge-a688e.firebaseapp.com",
-      projectId: "cashbridge-a688e",
-      storageBucket: "cashbridge-a688e.firebasestorage.app",
+      apiKey:            "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+      authDomain:        "cashbridge-a688e.firebaseapp.com",
+      projectId:         "cashbridge-a688e",
+      storageBucket:     "cashbridge-a688e.firebasestorage.app",
       messagingSenderId: "345273765518",
-      appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+      appId:             "1:345273765518:web:29ee0b8f9717cdb50203df"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    const db   = getFirestore(app);
 
-    let usernameCheckTimeout;
+    const WELCOME_BONUS = 500;
 
-    // Get referral from URL if exists
+    // Pre-fill referral code from URL param
     const urlParams = new URLSearchParams(window.location.search);
-    const refParam = urlParams.get('ref');
-    if (refParam) {
-      document.getElementById('referral').value = refParam;
+    const refParam  = urlParams.get('ref');
+    if (refParam) document.getElementById('referral').value = refParam;
+
+    // ── Find user by username ─────────────────────────────
+    async function findUserByUsername(username) {
+      const q    = query(collection(db, 'users'), where('username', '==', username.toLowerCase()));
+      const snap = await getDocs(q);
+      return snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
     }
 
-// Username availability check
+    // ── Username live check ───────────────────────────────
+    let checkTimeout;
     document.getElementById('username').addEventListener('input', (e) => {
-      const username = e.target.value.toLowerCase().trim();
+      const val      = e.target.value.toLowerCase().trim();
       const feedback = document.getElementById('usernameFeedback');
-      
-      clearTimeout(usernameCheckTimeout);
-      
-      if (username.length < 3) {
+      clearTimeout(checkTimeout);
+
+      if (val.length < 3) {
         feedback.className = 'input-feedback';
         e.target.classList.remove('success', 'error');
         return;
       }
-      
-      if (!/^[a-z0-9]+$/.test(username)) {
-        feedback.innerHTML = '<i class="fas fa-times-circle"></i> Only lowercase letters and numbers allowed';
-        feedback.className = 'input-feedback show error';
-        e.target.classList.add('error');
-        e.target.classList.remove('success');
+      if (!/^[a-z0-9]+$/.test(val)) {
+        feedback.innerHTML  = '<i class="fas fa-times-circle"></i> Only lowercase letters and numbers allowed';
+        feedback.className  = 'input-feedback show error';
+        e.target.classList.add('error'); e.target.classList.remove('success');
         return;
       }
-      
-      feedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking availability...';
-      feedback.className = 'input-feedback show checking';
-      
-      usernameCheckTimeout = setTimeout(async () => {
+      feedback.innerHTML  = '<i class="fas fa-spinner fa-spin"></i> Checking availability...';
+      feedback.className  = 'input-feedback show checking';
+      checkTimeout = setTimeout(async () => {
         try {
-          const exists = await findUserByUsername(username);
-          
+          const exists = await findUserByUsername(val);
           if (exists) {
             feedback.innerHTML = '<i class="fas fa-times-circle"></i> Username already taken';
             feedback.className = 'input-feedback show error';
-            e.target.classList.add('error');
-            e.target.classList.remove('success');
+            e.target.classList.add('error'); e.target.classList.remove('success');
           } else {
             feedback.innerHTML = '<i class="fas fa-check-circle"></i> Username available!';
             feedback.className = 'input-feedback show success';
-            e.target.classList.add('success');
-            e.target.classList.remove('error');
+            e.target.classList.add('success'); e.target.classList.remove('error');
           }
-        } catch (error) {
-          console.error('Username check error:', error);
-          feedback.className = 'input-feedback';
-        }
+        } catch (_) { feedback.className = 'input-feedback'; }
       }, 600);
     });
 
-    // Referral code validation
+    // ── Referral code live check ──────────────────────────
     document.getElementById('referral').addEventListener('input', (e) => {
-      const referralCode = e.target.value.toLowerCase().trim();
-      const referralFeedback = document.getElementById('referralFeedback');
-      
-      clearTimeout(usernameCheckTimeout);
-      
-      if (!referralCode) {
-        referralFeedback.className = 'input-feedback';
+      const code     = e.target.value.toLowerCase().trim();
+      const feedback = document.getElementById('referralFeedback');
+      clearTimeout(checkTimeout);
+
+      if (!code || code.length < 3) {
+        feedback.className = 'input-feedback';
         e.target.classList.remove('success', 'error');
         return;
       }
-      
-      if (referralCode.length < 3) {
-        referralFeedback.className = 'input-feedback';
-        return;
-      }
-      
-      referralFeedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying code...';
-      referralFeedback.className = 'input-feedback show checking';
-      
-      usernameCheckTimeout = setTimeout(async () => {
+      feedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying code...';
+      feedback.className = 'input-feedback show checking';
+      checkTimeout = setTimeout(async () => {
         try {
-          const referrer = await findUserByUsername(referralCode);
-          
+          const referrer = await findUserByUsername(code);
           if (referrer) {
-            referralFeedback.innerHTML = <i class="fas fa-check-circle"></i> Valid! Referred by ${referrer.fullName || referrer.username};
-            referralFeedback.className = 'input-feedback show success';
-            e.target.classList.add('success');
-            e.target.classList.remove('error');
+            feedback.innerHTML = `<i class="fas fa-check-circle"></i> Valid! Referred by ${referrer.fullName || referrer.username}`;
+            feedback.className = 'input-feedback show success';
+            e.target.classList.add('success'); e.target.classList.remove('error');
           } else {
-            referralFeedback.innerHTML = '<i class="fas fa-times-circle"></i> Invalid referral code';
-            referralFeedback.className = 'input-feedback show error';
-            e.target.classList.add('error');
-            e.target.classList.remove('success');
+            feedback.innerHTML = '<i class="fas fa-times-circle"></i> Invalid referral code';
+            feedback.className = 'input-feedback show error';
+            e.target.classList.add('error'); e.target.classList.remove('success');
           }
-        } catch (error) {
-          console.error('Referral check error:', error);
-          referralFeedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Unable to verify code';
-          referralFeedback.className = 'input-feedback show';
+        } catch (_) {
+          feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> Unable to verify code';
+          feedback.className = 'input-feedback show';
         }
       }, 600);
     });
 
-    // Find user by username
-    async function findUserByUsername(username) {
-      try {
-        const q = query(collection(db, "users"), where("username", "==", username.toLowerCase()));
-        const snapshot = await getDocs(q);
-        return snapshot.empty ? null : { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
-      } catch (error) {
-        console.error('Error finding user:', error);
-        throw error;
-      }
-    }
-
-// Password strength
+    // ── Password strength ─────────────────────────────────
     document.getElementById('password').addEventListener('input', (e) => {
-      const password = e.target.value;
-      const strengthBar = document.getElementById('strengthBar');
-      const hint = document.getElementById('passwordHint');
-      
-      let strength = 0;
-      if (password.length >= 8) strength++;
-      if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
-      if (password.match(/[0-9]/)) strength++;
-      if (password.match(/[^a-zA-Z0-9]/)) strength++;
-      
-      strengthBar.className = 'password-strength-bar';
-      if (strength <= 1) {
-        strengthBar.classList.add('strength-weak');
-        hint.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Weak password';
-      } else if (strength <= 2) {
-        strengthBar.classList.add('strength-medium');
-        hint.innerHTML = '<i class="fas fa-chart-line"></i> Medium strength';
-      } else {
-        strengthBar.classList.add('strength-strong');
-        hint.innerHTML = '<i class="fas fa-shield-alt"></i> Strong password!';
-      }
+      const pw  = e.target.value;
+      const bar = document.getElementById('strengthBar');
+      const hint= document.getElementById('passwordHint');
+      let s = 0;
+      if (pw.length >= 8)                          s++;
+      if (pw.match(/[a-z]/) && pw.match(/[A-Z]/)) s++;
+      if (pw.match(/[0-9]/))                       s++;
+      if (pw.match(/[^a-zA-Z0-9]/))               s++;
+      bar.className = 'password-strength-bar';
+      if      (s <= 1) { bar.classList.add('strength-weak');   hint.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Weak password'; }
+      else if (s <= 2) { bar.classList.add('strength-medium'); hint.innerHTML = '<i class="fas fa-chart-line"></i> Medium strength'; }
+      else             { bar.classList.add('strength-strong'); hint.innerHTML = '<i class="fas fa-shield-alt"></i> Strong password!'; }
     });
 
-    // Password match
+    // ── Password match ────────────────────────────────────
     document.getElementById('confirmPassword').addEventListener('input', (e) => {
-      const password = document.getElementById('password').value;
-      const confirmPassword = e.target.value;
-      
-      if (confirmPassword && password !== confirmPassword) {
-        e.target.classList.add('error');
-      } else {
-        e.target.classList.remove('error');
-      }
+      const match = document.getElementById('password').value === e.target.value;
+      e.target.classList.toggle('error',   !match && e.target.value.length > 0);
+      e.target.classList.toggle('success',  match && e.target.value.length > 0);
     });
 
-    // Form submission
+    // ── Form Submit ───────────────────────────────────────
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const submitBtn = document.getElementById('submitBtn');
-      const name = document.getElementById('name').value.trim();
-      const username = document.getElementById('username').value.trim().toLowerCase();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      const referralCode = document.getElementById('referral').value.trim().toLowerCase();
-      const termsChecked = document.getElementById('terms').checked;
+      const submitBtn      = document.getElementById('submitBtn');
+      const name           = document.getElementById('name').value.trim();
+      const username       = document.getElementById('username').value.trim().toLowerCase();
+      const email          = document.getElementById('email').value.trim();
+      const password       = document.getElementById('password').value;
+      const confirmPassword= document.getElementById('confirmPassword').value;
+      const referralCode   = document.getElementById('referral').value.trim().toLowerCase();
+      const termsChecked   = document.getElementById('terms').checked;
 
-      // Validation
-      if (username.length < 3) {
-        return Swal.fire({
-          icon: 'error',
-          title: 'Username too short',
-          text: 'Username must be at least 3 characters',
-          background: '#0f172a',
-          color: '#e2e8f0',
-          confirmButtonColor: '#6366f1'
-        });
-      }
+      // ── Client-side validation ────────────────────────
+      if (username.length < 3)
+        return Swal.fire({ icon:'error', title:'Username too short', text:'Must be at least 3 characters', background:'#0f172a', color:'#e2e8f0', confirmButtonColor:'#6366f1' });
 
-      if (!/^[a-z0-9]+$/.test(username)) {
-        return Swal.fire({
-          icon: 'error',
-          title: 'Invalid username',
-          text: 'Username can only contain lowercase letters and numbers',
-          background: '#0f172a',
-          color: '#e2e8f0',
-          confirmButtonColor: '#6366f1'
-        });
-      }
+      if (!/^[a-z0-9]+$/.test(username))
+        return Swal.fire({ icon:'error', title:'Invalid username', text:'Only lowercase letters and numbers', background:'#0f172a', color:'#e2e8f0', confirmButtonColor:'#6366f1' });
 
-      if (password !== confirmPassword) {
-        return Swal.fire({
-          icon: 'error',
-          title: 'Passwords do not match',
-          background: '#0f172a',
-          color: '#e2e8f0',
-          confirmButtonColor: '#6366f1'
-        });
-      }
+      if (password.length < 8)
+        return Swal.fire({ icon:'error', title:'Password too short', text:'Must be at least 8 characters', background:'#0f172a', color:'#e2e8f0', confirmButtonColor:'#6366f1' });
 
-      if (password.length < 8) {
-        return Swal.fire({
-          icon: 'error',
-          title: 'Password too short',
-          text: 'Password must be at least 8 characters',
-          background: '#0f172a',
-          color: '#e2e8f0',
-          confirmButtonColor: '#6366f1'
-        });
-      }
+      if (password !== confirmPassword)
+        return Swal.fire({ icon:'error', title:'Passwords do not match', background:'#0f172a', color:'#e2e8f0', confirmButtonColor:'#6366f1' });
 
-      if (!termsChecked) {
-        return Swal.fire({
-          icon: 'warning',
-          title: 'Terms required',
-          text: 'Please accept the terms and conditions',
-          background: '#0f172a',
-          color: '#e2e8f0',
-          confirmButtonColor: '#6366f1'
-        });
-      }
+      if (!termsChecked)
+        return Swal.fire({ icon:'warning', title:'Terms required', text:'Please accept the terms and conditions', background:'#0f172a', color:'#e2e8f0', confirmButtonColor:'#6366f1' });
 
       submitBtn.disabled = true;
       submitBtn.innerHTML = 'Creating Account <i class="fas fa-spinner fa-spin"></i>';
 
-try {
-        // Double-check username availability
+      try {
+        // ── Check username not taken ──────────────────────
         const usernameExists = await findUserByUsername(username);
         if (usernameExists) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'Create Account <i class="fas fa-arrow-right"></i>';
-          return Swal.fire({
-            icon: 'error',
-            title: 'Username taken',
-            text: 'This username is already registered. Please choose another.',
-            background: '#0f172a',
-            color: '#e2e8f0',
-            confirmButtonColor: '#6366f1'
-          });
+          return Swal.fire({ icon:'error', title:'Username taken', text:'Please choose a different username.', background:'#0f172a', color:'#e2e8f0', confirmButtonColor:'#6366f1' });
         }
 
-        // =====================================================
-        // BUILD COMPLETE REFERRAL CHAIN
-        // =====================================================
+        // ── Build referral chain ──────────────────────────
         let level1Referrer = null;
         let level2Referrer = null;
         let level3Referrer = null;
-        let referrerData = null;
 
-        // If referral code provided, find referrer
         if (referralCode) {
-          referrerData = await findUserByUsername(referralCode);
-          
+          const referrerData = await findUserByUsername(referralCode);
           if (referrerData) {
-            // Level 1: Direct referrer
             level1Referrer = referrerData.id;
-            console.log('✅ Level 1 referrer found:', level1Referrer, referrerData.fullName || referrerData.username);
-            
-            // Level 2: Referrer's referrer
             if (referrerData.referredBy) {
               level2Referrer = referrerData.referredBy;
-              console.log('✅ Level 2 referrer found:', level2Referrer);
-              
-              // Level 3: Level 2's referrer
               try {
-                const level2Doc = await getDoc(doc(db, 'users', level2Referrer));
-                if (level2Doc.exists() && level2Doc.data().referredBy) {
-                  level3Referrer = level2Doc.data().referredBy;
-                  console.log('✅ Level 3 referrer found:', level3Referrer);
+                const l2Doc = await getDoc(doc(db, 'users', level2Referrer));
+                if (l2Doc.exists() && l2Doc.data().referredBy) {
+                  level3Referrer = l2Doc.data().referredBy;
                 }
-              } catch (error) {
-                console.error('Error fetching level 3 referrer:', error);
-              }
+              } catch (_) {}
             }
           } else {
-            // Invalid referral code - ask if user wants to continue
-            const result = await Swal.fire({
+            const cont = await Swal.fire({
               icon: 'warning',
               title: 'Invalid Referral Code',
-              text: Username "${referralCode}" not found. Continue without referral?,
+              text: `Username "${referralCode}" was not found. Continue without referral?`,
               showCancelButton: true,
               confirmButtonText: 'Continue Anyway',
-              cancelButtonText: 'Fix Referral Code',
-              background: '#0f172a',
-              color: '#e2e8f0',
-              confirmButtonColor: '#6366f1',
-              cancelButtonColor: '#64748b'
+              cancelButtonText: 'Fix Code',
+              background: '#0f172a', color: '#e2e8f0',
+              confirmButtonColor: '#6366f1', cancelButtonColor: '#64748b'
             });
-            
-            if (!result.isConfirmed) {
+            if (!cont.isConfirmed) {
               submitBtn.disabled = false;
               submitBtn.innerHTML = 'Create Account <i class="fas fa-arrow-right"></i>';
               return;
@@ -901,173 +512,112 @@ try {
           }
         }
 
-        // Create Auth account
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const newUserId = userCredential.user.uid;
+        // ── Create Firebase Auth account ──────────────────
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        const newUserId  = credential.user.uid;
+        await updateProfile(credential.user, { displayName: name });
 
-        await updateProfile(userCredential.user, { displayName: name });
-
-        // Create user document with COMPLETE referral chain + ₦500 welcome bonus
-        const WELCOME_BONUS = 500;
-        const userData = {
-          uid: newUserId,
-          fullName: name,
-          username: username,
-          email: email,
-          role: "user",
-          status: "active",
-          referredBy: level1Referrer,
-          level2Referrer: level2Referrer,
-          level3Referrer: level3Referrer,
-          wallet: WELCOME_BONUS,       // ← ₦500 credited immediately
-          totalDeposits: 0,
+        // ── Save user document with ₦500 welcome bonus ────
+        await setDoc(doc(db, 'users', newUserId), {
+          uid:              newUserId,
+          fullName:         name,
+          username:         username,
+          email:            email,
+          role:             'user',
+          status:           'active',
+          referredBy:       level1Referrer,
+          level2Referrer:   level2Referrer,
+          level3Referrer:   level3Referrer,
+          wallet:           WELCOME_BONUS,   // ₦500 credited instantly
+          totalDeposits:    0,
           totalWithdrawals: 0,
-          totalEarnings: WELCOME_BONUS, // counts toward lifetime earnings
-          activeInvestments: 0,
-          emailVerified: false,
-          createdAt: serverTimestamp(),
-          lastLogin: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        };
-
-        await setDoc(doc(db, "users", newUserId), userData);
-        console.log('✅ User document created with referral chain:', {
-          level1: level1Referrer,
-          level2: level2Referrer,
-          level3: level3Referrer
+          totalEarnings:    WELCOME_BONUS,
+          activeInvestments:0,
+          emailVerified:    false,
+          createdAt:        serverTimestamp(),
+          lastLogin:        serverTimestamp(),
+          updatedAt:        serverTimestamp()
         });
 
-        // =====================================================
-        // CREDIT ₦500 WELCOME BONUS TRANSACTION RECORD
-        // =====================================================
+        // ── Welcome bonus transaction record ──────────────
         try {
-          const bonusTxRef = doc(collection(db, `users/${newUserId}/transactions`));
-          await setDoc(bonusTxRef, {
+          const txRef = doc(collection(db, `users/${newUserId}/transactions`));
+          await setDoc(txRef, {
             type:        'welcome_bonus',
             amount:      WELCOME_BONUS,
             status:      'completed',
             description: '🎁 Welcome Bonus — Thank you for joining CashBridge!',
             createdAt:   serverTimestamp()
           });
-          console.log('✅ Welcome bonus transaction record created');
         } catch (txErr) {
-          console.error('Welcome bonus tx record failed (non-critical):', txErr.message);
+          console.error('Bonus tx record error (non-critical):', txErr.message);
         }
 
-// =====================================================
-        // CREATE REFERRAL RECORDS FOR ALL LEVELS
-        // =====================================================
-        
-        // Level 1 referral record
-        if (level1Referrer) {
+        // ── Create referral records for upliners ──────────
+        const levels = [
+          { uid: level1Referrer, level: 1, commission: 20 },
+          { uid: level2Referrer, level: 2, commission: 2  },
+          { uid: level3Referrer, level: 3, commission: 1  }
+        ];
+        for (const { uid, level, commission } of levels) {
+          if (!uid) continue;
           try {
-            await setDoc(doc(db, users/${level1Referrer}/referrals, newUserId), {
-              referredUserId: newUserId,
+            await setDoc(doc(db, `users/${uid}/referrals`, newUserId), {
+              referredUserId:   newUserId,
               referredUserName: name,
-              referredUserEmail: email,
+              referredUserEmail:email,
               referredUsername: username,
-              level: 1,
-              commission: 20,
-              referredAt: serverTimestamp(),
-              totalEarned: 0,
+              level,
+              commission,
+              referredAt:   serverTimestamp(),
+              totalEarned:  0,
               lastInvestment: null
             });
-            console.log('✅ Level 1 referral record created');
-          } catch (error) {
-            console.error('Error creating level 1 referral:', error);
+          } catch (refErr) {
+            console.error(`Level ${level} referral record error:`, refErr.message);
           }
         }
 
-        // Level 2 referral record
-        if (level2Referrer) {
-          try {
-            await setDoc(doc(db, users/${level2Referrer}/referrals, newUserId), {
-              referredUserId: newUserId,
-              referredUserName: name,
-              referredUserEmail: email,
-              referredUsername: username,
-              level: 2,
-              commission: 2,
-              referredAt: serverTimestamp(),
-              totalEarned: 0
-            });
-            console.log('✅ Level 2 referral record created');
-          } catch (error) {
-            console.error('Error creating level 2 referral:', error);
-          }
-        }
-
-        // Level 3 referral record
-        if (level3Referrer) {
-          try {
-            await setDoc(doc(db, users/${level3Referrer}/referrals, newUserId), {
-              referredUserId: newUserId,
-              referredUserName: name,
-              referredUserEmail: email,
-              referredUsername: username,
-              level: 3,
-              commission: 1,
-              referredAt: serverTimestamp(),
-              totalEarned: 0
-            });
-            console.log('✅ Level 3 referral record created');
-          } catch (error) {
-            console.error('Error creating level 3 referral:', error);
-          }
-        }
-
+        // ── Success popup ─────────────────────────────────
         await Swal.fire({
           icon: 'success',
           title: '🎉 Welcome to CashBridge!',
           html: `
-            <p style="color:#e2e8f0;margin-bottom:0.8rem">Your account has been created successfully!</p>
+            <p style="color:#e2e8f0;margin-bottom:1rem">Your account has been created successfully!</p>
             <div style="
-              background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(99,102,241,0.12));
-              border: 1px solid rgba(34,197,94,0.4);
-              border-radius: 16px;
-              padding: 1rem 1.2rem;
-              margin: 0.5rem 0 0.8rem;
-              display: flex;
-              align-items: center;
-              gap: 0.8rem;
-              text-align: left;
+              background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(99,102,241,0.12));
+              border:1px solid rgba(34,197,94,0.4);
+              border-radius:16px;padding:1rem 1.2rem;
+              display:flex;align-items:center;gap:0.8rem;text-align:left;
             ">
-              <span style="font-size:1.8rem">🎁</span>
+              <span style="font-size:2rem">🎁</span>
               <div>
-                <div style="color:#22c55e;font-weight:700;font-size:1rem">₦500 Welcome Bonus Credited!</div>
-                <div style="color:#94a3b8;font-size:0.82rem;margin-top:0.2rem">Check your wallet — it's already in there.</div>
+                <div style="color:#22c55e;font-weight:700;font-size:1rem;margin-bottom:0.2rem">
+                  ₦500 Welcome Bonus Credited!
+                </div>
+                <div style="color:#94a3b8;font-size:0.82rem">
+                  Check your wallet — it's already in there.
+                </div>
               </div>
             </div>
-            <p style="color:#6366f1;font-size:0.9rem">@${username}</p>
+            <p style="color:#6366f1;margin-top:1rem;font-size:0.9rem">@${username}</p>
           `,
-          timer: 4000,
-          showConfirmButton: false,
-          background: '#0f172a'
+          confirmButtonText: 'Go to Dashboard',
+          confirmButtonColor: '#6366f1',
+          background: '#0f172a',
+          color: '#e2e8f0'
         });
 
-        window.location.href = "dashboard.html";
+        window.location.href = 'dashboard.html';
 
       } catch (error) {
-        console.error("Registration error:", error);
-        
+        console.error('Registration error:', error);
         let message = 'Registration failed. Please try again.';
-        if (error.code === 'auth/email-already-in-use') {
-          message = 'This email is already registered. Please sign in instead.';
-        } else if (error.code === 'auth/invalid-email') {
-          message = 'Invalid email address format.';
-        } else if (error.code === 'auth/weak-password') {
-          message = 'Password is too weak. Use at least 8 characters.';
-        }
+        if (error.code === 'auth/email-already-in-use') message = 'This email is already registered. Please sign in instead.';
+        else if (error.code === 'auth/invalid-email')   message = 'Invalid email address format.';
+        else if (error.code === 'auth/weak-password')   message = 'Password is too weak. Use at least 8 characters.';
 
-        Swal.fire({
-          icon: 'error',
-          title: 'Registration Failed',
-          text: message,
-          background: '#0f172a',
-          color: '#e2e8f0',
-          confirmButtonColor: '#6366f1'
-        });
-
+        Swal.fire({ icon:'error', title:'Registration Failed', text:message, background:'#0f172a', color:'#e2e8f0', confirmButtonColor:'#6366f1' });
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Create Account <i class="fas fa-arrow-right"></i>';
       }
