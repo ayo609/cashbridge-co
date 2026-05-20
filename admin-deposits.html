@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
+  <title>Texis • Deposit Management</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #00e5a0;
+      --primary-dark: #00c48a;
+      --secondary: #38bdf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      
+      --bg-dark: #0a0f1e;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-sidebar: rgba(15, 23, 42, 0.95);
+      --border: rgba(255, 255, 255, 0.05);
+      --text: #e2e8f0;
+      --text-light: #94a3b8;
+      --text-muted: #64748b;
+      --input-bg: rgba(255, 255, 255, 0.03);
+      --hover-bg: rgba(0, 229, 160, 0.1);
+    }
+
+    [data-theme="light"] {
+      --bg-dark: #f1f5f9;
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --bg-sidebar: rgba(255, 255, 255, 0.95);
+      --border: rgba(0, 0, 0, 0.1);
+      --text: #0f172a;
+      --text-light: #334155;
+      --text-muted: #64748b;
+      --input-bg: rgba(0, 0, 0, 0.03);
+      --hover-bg: rgba(0, 229, 160, 0.1);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .access-denied {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 10000;
+    }
+
+    .denied-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 3rem 2rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .denied-icon {
+      width: 80px;
+      height: 80px;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+
+    .denied-icon i {
+      font-size: 3rem;
+      color: var(--danger);
+    }
+
+    .blob {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: float 20s infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .blob-1 {
+      top: -100px;
+      right: -100px;
+      background: linear-gradient(145deg, #00e5a0, #38bdf8);
+    }
+
+    .blob-2 {
+      bottom: -100px;
+      left: -100px;
+      width: 500px;
+      height: 500px;
+      background: linear-gradient(145deg, #38bdf8, #818cf8);
+      animation-delay: -5s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, 30px) scale(1.1); }
+    }
+
+    .sidebar {
+      width: 280px;
+      background: var(--bg-sidebar);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      overflow-y: auto;
+      z-index: 50;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #00e5a0, #38bdf8);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: #000;
+      transform: rotate(-5deg);
+    }
+
+    .sidebar-logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-user {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #00e5a0, #38bdf8);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #000;
+    }
+
+    .user-info h4 {
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+      color: var(--text);
+    }
+
+    .user-info p {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      color: var(--text-light);
+      text-decoration: none;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .nav-link i {
+      width: 20px;
+      font-size: 1.1rem;
+    }
+
+    .nav-link:hover {
+      background: var(--hover-bg);
+      color: var(--text);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, #00e5a0, #38bdf8);
+      color: #000;
+      box-shadow: 0 10px 20px -5px rgba(0, 229, 160, 0.4);
+    }
+
+    .nav-link .badge {
+      margin-left: auto;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      color: white;
+    }
+
+    .nav-divider {
+      margin: 1.5rem 0 1rem;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding-left: 1rem;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      position: relative;
+      z-index: 20;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1rem 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .page-title h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .page-title p {
+      color: var(--text-light);
+      font-size: 0.85rem;
+      margin-top: 0.2rem;
+    }
+
+    .theme-toggle, .logout-btn {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 0.5rem 1rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .theme-toggle:hover, .logout-btn:hover {
+      border-color: var(--primary);
+      background: var(--hover-bg);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.2rem;
+    }
+
+    .stat-card h3 {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card .number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .filter-bar {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.8rem 1rem 0.8rem 2.8rem;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .filter-select {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 0.5rem 2rem 0.5rem 1rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .table-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 1.5rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+
+    th, td {
+      padding: 1rem 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-light);
+      font-weight: 500;
+      font-size: 0.8rem;
+    }
+
+    tr:hover td {
+      background: var(--hover-bg);
+    }
+
+    .user-info-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .user-avatar-sm {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #00e5a0, #38bdf8);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    .amount-positive {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .status-approved { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .status-rejected { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+    .action-icons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: var(--input-bg);
+      color: var(--text-light);
+    }
+
+    .action-icon:hover { background: var(--primary); color: #000; transform: scale(1.05); }
+    .action-icon.delete:hover { background: var(--danger); color: white; }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+
+    .page-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .page-btn.active {
+      background: linear-gradient(135deg, #00e5a0, #38bdf8);
+      color: #000;
+      border: none;
+    }
+
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 100;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-content {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+    }
+
+    .modal-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #00e5a0, #38bdf8);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 2rem;
+      color: #000;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .proof-image {
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      border-radius: 16px;
+      margin: 1rem 0;
+      cursor: pointer;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 1rem;
+      border-radius: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      border: none;
+    }
+
+    .modal-btn.approve { background: var(--success); color: white; }
+    .modal-btn.reject { background: var(--danger); color: white; }
+    .modal-btn.secondary { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); width: 260px; }
+      .sidebar.active { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 1rem; margin-top: 3rem; }
+      .menu-toggle { display: flex; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div style="text-align: center;">
+    <div class="loading-spinner"></div>
+    <div>Verifying admin access...</div>
+  </div>
+</div>
+
+<div class="access-denied" id="accessDenied" style="display: none;">
+  <div class="denied-card">
+    <div class="denied-icon"><i class="fas fa-shield-halved"></i></div>
+    <h2>Access Denied</h2>
+    <p>You don't have administrator privileges.</p>
+    <button class="modal-btn approve" onclick="window.location.href='admin-login.html'">Return to Login</button>
+  </div>
+</div>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo-icon"><i class="fas fa-bolt"></i></div>
+    <span class="sidebar-logo-text">Texis Admin</span>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="adminAvatar">A</div>
+    <div class="user-info">
+      <h4 id="adminName">Loading...</h4>
+      <p><i class="fas fa-circle"></i> Administrator</p>
+    </div>
+  </div>
+  <ul class="nav-menu">
+    <li class="nav-item"><a href="admin-dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a></li>
+    <li class="nav-item"><a href="admin-users.html" class="nav-link"><i class="fas fa-users"></i><span>Users</span></a></li>
+    <li class="nav-item"><a href="admin-deposits.html" class="nav-link active"><i class="fas fa-arrow-down"></i><span>Deposits</span><span class="badge" id="pendingDeposits">0</span></a></li>
+    <li class="nav-item"><a href="admin-withdrawals.html" class="nav-link"><i class="fas fa-arrow-up"></i><span>Withdrawals</span></a></li>
+    <li class="nav-item"><a href="admin-investments.html" class="nav-link"><i class="fas fa-chart-line"></i><span>Investments</span></a></li>
+  </ul>
+</div>
+
+<div class="main-content" id="mainContent" style="display: none;">
+  <div class="top-bar">
+    <div class="page-title"><h1>Deposit Management</h1><p>Review, approve, reject, or delete deposit requests</p></div>
+    <div style="display: flex; gap: 1rem;">
+      <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i><span>Dark Mode</span></button>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><h3>Total Deposits</h3><div class="number" id="totalDeposits">0</div></div>
+    <div class="stat-card"><h3>Pending</h3><div class="number" id="pendingCount">0</div></div>
+    <div class="stat-card"><h3>Total Amount</h3><div class="number" id="totalAmount">₦0</div></div>
+    <div class="stat-card"><h3>Approved</h3><div class="number" id="approvedCount">0</div></div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search by user, email, or ID..."></div>
+    <select class="filter-select" id="statusFilter"><option value="all">All Status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+    <select class="filter-select" id="sortFilter"><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="highest">Highest Amount</option></select>
+  </div>
+
+  <div class="table-card">
+    <div class="table-container">
+      <table>
+        <thead><tr><th>User</th><th>Amount</th><th>Sender Name</th><th>Bank</th><th>Screenshot</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="depositsTableBody"><tr><td colspan="8" style="text-align:center; padding:3rem;"><i class="fas fa-spinner fa-spin"></i> Loading deposits...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<!-- Deposit Details Modal -->
+<div class="modal-overlay" id="depositModal">
+  <div class="modal-content"><button class="modal-close" onclick="closeDepositModal()">✕</button><div class="modal-icon"><i class="fas fa-arrow-down"></i></div><h2 class="modal-title">Deposit Details</h2><div id="depositDetails"></div><div class="modal-actions" id="modalActions"></div></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, collection, updateDoc, deleteDoc, runTransaction, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+  authDomain: "cashbridge-a688e.firebaseapp.com",
+  projectId: "cashbridge-a688e",
+  storageBucket: "cashbridge-a688e.firebasestorage.app",
+  messagingSenderId: "345273765518",
+  appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let allDeposits = [], filteredDeposits = [], currentPage = 1, itemsPerPage = 10;
+let currentAdminData = null;
+const html = document.documentElement;
+
+async function verifyAdminAccess(user) {
+  const userDoc = await getDoc(doc(db, "users", user.uid));
+  if (!userDoc.exists()) return false;
+  const userData = userDoc.data();
+  if (userData.role === 'admin') {
+    currentAdminData = userData;
+    document.getElementById('adminName').textContent = userData.fullName || 'Admin User';
+    document.getElementById('adminAvatar').textContent = (userData.fullName || 'A').charAt(0).toUpperCase();
+    return true;
+  }
+  return false;
+}
+
+async function loadDeposits() {
+  allDeposits = [];
+  let totalApprovedAmount = 0, pendingCount = 0, approvedCount = 0;
+  
+  const usersSnapshot = await getDocs(collection(db, 'users'));
+  for (const userDoc of usersSnapshot.docs) {
+    const userId = userDoc.id;
+    const userData = userDoc.data();
+    const depositsSnapshot = await getDocs(collection(db, `users/${userId}/deposits`));
+    
+    depositsSnapshot.forEach(depositDoc => {
+      const depositData = depositDoc.data();
+      const depositDate = depositData.createdAt?.toDate?.() || new Date();
+      
+      if (depositData.status === 'approved') totalApprovedAmount += depositData.amount || 0;
+      if (depositData.status === 'pending') pendingCount++;
+      if (depositData.status === 'approved') approvedCount++;
+      
+      allDeposits.push({
+        id: depositDoc.id,
+        userId: userId,
+        userName: userData.fullName || 'Unknown',
+        userEmail: userData.email || '',
+        ...depositData,
+        date: depositDate
+      });
+    });
+  }
+  
+  allDeposits.sort((a,b) => b.date - a.date);
+  document.getElementById('totalDeposits').textContent = allDeposits.length;
+  document.getElementById('pendingCount').textContent = pendingCount;
+  document.getElementById('approvedCount').textContent = approvedCount;
+  document.getElementById('totalAmount').textContent = `₦${totalApprovedAmount.toLocaleString()}`;
+  document.getElementById('pendingDeposits').textContent = pendingCount;
+  applyFilters();
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+  const sort = document.getElementById('sortFilter').value;
+  
+  filteredDeposits = allDeposits.filter(d => {
+    return (search === '' || d.userName?.toLowerCase().includes(search) || d.userEmail?.toLowerCase().includes(search) || d.id?.toLowerCase().includes(search)) &&
+      (status === 'all' || d.status === status);
+  });
+  
+  filteredDeposits.sort((a,b) => {
+    if (sort === 'newest') return b.date - a.date;
+    if (sort === 'oldest') return a.date - b.date;
+    if (sort === 'highest') return (b.amount || 0) - (a.amount || 0);
+    return 0;
+  });
+  
+  currentPage = 1;
+  displayDeposits();
+}
+
+function displayDeposits() {
+  const start = (currentPage - 1) * itemsPerPage;
+  const pageItems = filteredDeposits.slice(start, start + itemsPerPage);
+  const tbody = document.getElementById('depositsTableBody');
+  
+  if (pageItems.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:3rem;">No deposits found</td></tr>';
+  } else {
+    tbody.innerHTML = pageItems.map(d => `
+      <tr>
+        <td><div class="user-info-cell"><div class="user-avatar-sm">${(d.userName || 'U').charAt(0)}</div><div><strong>${d.userName}</strong><br><small>${d.userEmail || ''}</small></div></div></td>
+        <td><span class="amount-positive">₦${(d.amount || 0).toLocaleString()}</span></td>
+        <td>${d.senderName || '—'}</td>
+        <td>${d.bankName || '—'}</td>
+        <td>${d.screenshotBase64 ? `<img src="${d.screenshotBase64}" style="width:48px;height:36px;object-fit:cover;border-radius:6px;cursor:pointer" onclick="viewDeposit('${d.id}','${d.userId}')">` : '—'}</td>
+        <td><span class="status-badge status-${d.status || 'pending'}">${d.status || 'pending'}</span></td>
+        <td style="font-size:0.8rem">${d.date.toLocaleDateString()}</td>
+        <td><div class="action-icons">
+          <span class="action-icon" onclick="viewDeposit('${d.id}','${d.userId}')" title="View"><i class="fas fa-eye"></i></span>
+          ${d.status === 'pending' ? `<span class="action-icon" onclick="approveDeposit('${d.id}','${d.userId}',${d.amount})" title="Approve"><i class="fas fa-check"></i></span>` : ''}
+          ${d.status === 'pending' ? `<span class="action-icon" onclick="rejectDeposit('${d.id}','${d.userId}')" title="Reject"><i class="fas fa-times"></i></span>` : ''}
+          <span class="action-icon delete" onclick="deleteDeposit('${d.id}','${d.userId}')" title="Delete"><i class="fas fa-trash-alt"></i></span>
+        </div></td>
+      </tr>
+    `).join('');
+  }
+  
+  const totalPages = Math.ceil(filteredDeposits.length / itemsPerPage);
+  const pagination = document.getElementById('pagination');
+  let buttons = '';
+  for (let i = 1; i <= totalPages; i++) buttons += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+  pagination.innerHTML = buttons;
+}
+
+window.goToPage = (page) => { currentPage = page; displayDeposits(); };
+
+window.viewDeposit = function(depositId, userId) {
+  const deposit = allDeposits.find(d => d.id === depositId && d.userId === userId);
+  if (!deposit) return;
+  
+  document.getElementById('depositDetails').innerHTML = `
+    <div class="detail-row"><span>User</span><span><strong>${deposit.userName}</strong><br><small>${deposit.userEmail}</small></span></div>
+    <div class="detail-row"><span>Amount</span><span class="amount-positive">₦${(deposit.amount || 0).toLocaleString()}</span></div>
+    <div class="detail-row"><span>Sender Name</span><span>${deposit.senderName || '—'}</span></div>
+    <div class="detail-row"><span>Bank</span><span>${deposit.bankName || '—'}</span></div>
+    <div class="detail-row"><span>Account Name</span><span>${deposit.accountName || '—'}</span></div>
+    <div class="detail-row"><span>Account Number</span><span>${deposit.accountNumber || '—'}</span></div>
+    <div class="detail-row"><span>Transaction ID</span><span style="font-family:monospace">${deposit.id}</span></div>
+    <div class="detail-row"><span>Status</span><span class="status-badge status-${deposit.status}">${deposit.status}</span></div>
+    <div class="detail-row"><span>Date</span><span>${deposit.date.toLocaleString()}</span></div>
+    ${deposit.screenshotBase64 ? `<div><img src="${deposit.screenshotBase64}" class="proof-image" onclick="window.open('${deposit.screenshotBase64}','_blank')"></div>` : '<div style="text-align:center;padding:1rem;background:var(--input-bg);border-radius:16px">No screenshot uploaded</div>'}
+  `;
+  
+  const actions = document.getElementById('modalActions');
+  if (deposit.status === 'pending') {
+    actions.innerHTML = `<button class="modal-btn approve" onclick="approveDeposit('${deposit.id}','${deposit.userId}',${deposit.amount});closeDepositModal()"><i class="fas fa-check"></i> Approve & Credit</button>
+                         <button class="modal-btn reject" onclick="rejectDeposit('${deposit.id}','${deposit.userId}');closeDepositModal()"><i class="fas fa-times"></i> Reject</button>`;
+  } else {
+    actions.innerHTML = `<button class="modal-btn secondary" onclick="closeDepositModal()">Close</button>`;
+  }
+  document.getElementById('depositModal').classList.add('active');
+};
+
+window.closeDepositModal = () => document.getElementById('depositModal').classList.remove('active');
+
+window.approveDeposit = async function(depositId, userId, amount) {
+  const confirm = await Swal.fire({ title: 'Approve Deposit?', html: `Credit ₦${amount.toLocaleString()} to user's wallet?`, icon: 'question', showCancelButton: true, confirmButtonText: 'Yes, Approve', confirmButtonColor: '#22c55e', background: '#0f172a' });
+  if (!confirm.isConfirmed) return;
+  
+  try {
+    await runTransaction(db, async (t) => {
+      const depositRef = doc(db, `users/${userId}/deposits`, depositId);
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await t.get(userRef);
+      t.update(depositRef, { status: 'approved', approvedAt: serverTimestamp(), approvedBy: currentAdminData?.fullName || 'Admin' });
+      t.update(userRef, { wallet: increment(amount), totalDeposits: increment(amount) });
+    });
+    Swal.fire({ icon: 'success', title: 'Approved!', timer: 1500, showConfirmButton: false, background: '#0f172a' });
+    await loadDeposits();
+  } catch (err) { Swal.fire({ icon: 'error', title: 'Failed', text: err.message, background: '#0f172a' }); }
+};
+
+window.rejectDeposit = async function(depositId, userId) {
+  const { value: reason } = await Swal.fire({ title: 'Reject Deposit', input: 'textarea', inputLabel: 'Reason for rejection', inputPlaceholder: 'Enter reason...', showCancelButton: true, confirmButtonText: 'Reject', confirmButtonColor: '#ef4444', background: '#0f172a' });
+  if (!reason) return;
+  try {
+    await updateDoc(doc(db, `users/${userId}/deposits`, depositId), { status: 'rejected', rejectedAt: serverTimestamp(), rejectionReason: reason, rejectedBy: currentAdminData?.fullName || 'Admin' });
+    Swal.fire({ icon: 'success', title: 'Rejected!', timer: 1500, showConfirmButton: false, background: '#0f172a' });
+    await loadDeposits();
+  } catch (err) { Swal.fire({ icon: 'error', title: 'Failed', text: err.message, background: '#0f172a' }); }
+};
+
+// DELETE DEPOSIT - Complete removal
+window.deleteDeposit = async function(depositId, userId) {
+  const confirm = await Swal.fire({
+    title: 'Delete Deposit?',
+    html: `<p style="color:var(--danger)">⚠️ This will permanently delete this deposit record.</p><p>This action cannot be undone.</p>`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Delete',
+    confirmButtonColor: '#ef4444',
+    background: '#0f172a'
+  });
+  if (!confirm.isConfirmed) return;
+  
+  try {
+    await deleteDoc(doc(db, `users/${userId}/deposits`, depositId));
+    Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Deposit record has been removed.', timer: 2000, showConfirmButton: false, background: '#0f172a' });
+    await loadDeposits();
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Delete Failed', text: err.message, background: '#0f172a' });
+  }
+};
+
+// Theme Toggle
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('adminTheme') || 'dark';
+html.setAttribute('data-theme', savedTheme);
+themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-moon"></i><span>Dark Mode</span>' : '<i class="fas fa-sun"></i><span>Light Mode</span>';
+themeToggle.addEventListener('click', () => {
+  const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('adminTheme', newTheme);
+  themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-moon"></i><span>Dark Mode</span>' : '<i class="fas fa-sun"></i><span>Light Mode</span>';
+});
+
+// Event Listeners
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+document.getElementById('sortFilter').addEventListener('change', applyFilters);
+document.getElementById('logoutBtn').addEventListener('click', async () => { await signOut(auth); window.location.href = 'admin-login.html'; });
+document.getElementById('menuToggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('active'));
+
+// Auth
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'admin-login.html'; return; }
+  const isAdmin = await verifyAdminAccess(user);
+  setTimeout(() => document.getElementById('loadingOverlay').classList.add('fade-out'), 500);
+  if (!isAdmin) {
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('accessDenied').style.display = 'flex';
+  } else {
+    document.getElementById('mainContent').style.display = 'block';
+    await loadDeposits();
+  }
+});
+</script>
+</body>
+</html>
