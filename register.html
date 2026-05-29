@@ -328,7 +328,7 @@
   </div>
   <div class="hero-title">Start Investing</div>
   <div class="hero-sub">Join thousands building wealth daily</div>
-  <div class="welcome-bonus-badge"><i class="fas fa-gift"></i> ₦1,000 Welcome Bonus — Credited Instantly</div>
+  <div class="welcome-bonus-badge"><i class="fas fa-gift"></i> ₦500 Welcome Bonus — Credited Instantly</div>
   <div class="security-strip">
     <span class="sec-chip"><i class="fas fa-shield-alt"></i> Secure Registration</span>
     <span class="sec-chip"><i class="fas fa-lock"></i> Encrypted</span>
@@ -434,7 +434,7 @@
       <!-- Submit -->
       <button class="btn-primary" id="signupBtn" onclick="doSignup()">
         <i class="fas fa-rocket"></i>
-        <span>Create Account &amp; Claim ₦1,000</span>
+        <span>Create Account &amp; Claim ₦700</span>
       </button>
     </div>
     <div class="login-footer">Already have an account? <a href="login.html">Sign In →</a></div>
@@ -463,7 +463,7 @@
 
   let verifiedReferrerUid = null;
   let pendingRefCode = '';
-  const WELCOME_BONUS = 1000;
+  const WELCOME_BONUS = 700;
 
   /* ── URL REF PARAM ── */
   window.addEventListener('DOMContentLoaded', () => {
@@ -685,7 +685,7 @@
           userName: fullName || username,
           type: 'welcome_bonus',
           amount: WELCOME_BONUS,
-          note: '₦1,000 Welcome Bonus — Credited to Wallet',
+          note: '₦700 Welcome Bonus — Credited to Wallet',
           createdAt: FV.serverTimestamp()
         });
       } catch {}
