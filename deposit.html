@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Deposit Funds</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #14b8a6;
+      --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+      --bg: #f6f8fa; --card: #ffffff; --text: #1a1a2e;
+      --sub: #5a6072; --muted: #9ca3af; --border: #e5e7eb;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; padding-bottom: 100px;
+    }
+
+    .topbar {
+      background: #fff; border-bottom: 1px solid var(--border);
+      padding: 0 20px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .topbar .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px;
+    }
+    .topbar .brand .dot {
+      width: 10px; height: 10px;
+      background: var(--teal); border-radius: 50%;
+      box-shadow: 0 0 10px var(--teal-light);
+    }
+    .topbar .balance {
+      background: #f0fdfa; border: 1px solid #99f6e4;
+      border-radius: 30px; padding: 8px 16px;
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 14px;
+    }
+    .topbar .balance i { color: var(--teal); }
+
+    .main {
+      max-width: 640px; margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .page-head {
+      text-align: center; margin-bottom: 28px;
+    }
+    .page-head h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 28px; font-weight: 800; margin-bottom: 4px;
+    }
+    .page-head p { font-size: 14px; color: var(--sub); }
+
+    /* STEPS */
+    .steps {
+      display: flex; justify-content: center;
+      gap: 12px; margin-bottom: 28px;
+    }
+    .step {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #fff; border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: var(--muted);
+      transition: all 0.3s;
+    }
+    .step.active {
+      background: var(--teal); border-color: var(--teal);
+      color: #fff; box-shadow: 0 4px 12px rgba(13,148,136,0.3);
+    }
+    .step.done {
+      background: #f0fdf4; border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* SECTION */
+    .section { display: none; }
+    .section.show { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 20px; padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .card h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 16px; font-weight: 700;
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card h3 i { color: var(--teal); }
+
+    .alert {
+      background: #f0fdfa; border: 1px solid #99f6e4;
+      border-radius: 14px; padding: 12px 16px;
+      font-size: 13px; color: var(--teal);
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    /* AMOUNT GRID */
+    .amount-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px; margin-bottom: 16px;
+    }
+    .amount-btn {
+      padding: 16px 10px; background: #fff;
+      border: 2px solid var(--border); border-radius: 14px;
+      font-weight: 700; font-size: 14px;
+      cursor: pointer; text-align: center;
+      transition: all 0.2s; color: var(--text);
+    }
+    .amount-btn:hover { border-color: var(--teal); }
+    .amount-btn.selected {
+      border-color: var(--teal); background: #f0fdfa;
+      color: var(--teal); box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
+    }
+    .custom-input {
+      width: 100%; padding: 14px 16px;
+      border: 2px solid var(--border); border-radius: 14px;
+      font-size: 15px; font-family: inherit;
+      outline: none; transition: all 0.2s;
+    }
+    .custom-input:focus { border-color: var(--teal); }
+
+    /* BANK INFO */
+    .info-row {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+    }
+    .info-row:last-child { border: none; }
+    .info-row .lbl { color: var(--sub); }
+    .info-row .val { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .copy-btn {
+      padding: 4px 12px; background: #f0fdfa;
+      border: 1px solid #99f6e4; border-radius: 8px;
+      font-size: 11px; font-weight: 700; color: var(--teal);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .copy-btn:hover { background: var(--teal); color: #fff; }
+    .big-amount {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px; font-weight: 800; color: var(--teal);
+    }
+
+    .instruction {
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: 14px; padding: 16px;
+      margin-top: 16px;
+    }
+    .instruction h4 {
+      font-size: 13px; font-weight: 700;
+      color: var(--amber); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .instruction ol {
+      margin-left: 18px; font-size: 13px;
+      color: var(--sub); line-height: 1.8;
+    }
+
+    /* FORM */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 700;
+      color: var(--sub); text-transform: uppercase;
+      letter-spacing: 0.03em; margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%; padding: 14px 16px;
+      border: 2px solid var(--border); border-radius: 14px;
+      font-size: 14px; font-family: inherit;
+      outline: none; transition: all 0.2s;
+    }
+    .form-group input:focus { border-color: var(--teal); }
+
+    /* UPLOAD */
+    .upload-zone {
+      border: 2px dashed #99f6e4; border-radius: 16px;
+      padding: 28px; text-align: center;
+      cursor: pointer; transition: all 0.2s;
+      background: #f0fdfa; position: relative;
+    }
+    .upload-zone:hover { border-color: var(--teal); background: #fff; }
+    .upload-zone.has-file { border-color: var(--green); background: #f0fdf4; }
+    .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-zone i { font-size: 32px; color: var(--teal); margin-bottom: 8px; }
+    .upload-zone p { font-size: 13px; color: var(--sub); }
+    .upload-zone .file-name { font-weight: 700; color: var(--green); margin-top: 4px; }
+    .preview-img {
+      max-width: 100%; max-height: 200px;
+      border-radius: 12px; margin-top: 12px;
+      display: none; border: 1px solid var(--border);
+    }
+
+    /* BUTTONS */
+    .btn {
+      width: 100%; padding: 16px; border: none;
+      border-radius: 14px; font-weight: 700;
+      font-size: 15px; cursor: pointer;
+      display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+      transition: all 0.2s; font-family: inherit;
+      margin-top: 12px;
+    }
+    .btn-primary {
+      background: var(--teal); color: #fff;
+      box-shadow: 0 4px 16px rgba(13,148,136,0.2);
+    }
+    .btn-primary:hover { background: var(--teal-dark); transform: translateY(-1px); }
+    .btn-primary:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
+    .btn-outline {
+      background: #fff; color: var(--sub);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* SUCCESS */
+    .success-box {
+      text-align: center; padding: 32px 16px;
+    }
+    .success-box .s-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: #f0fdf4; display: flex;
+      align-items: center; justify-content: center;
+      margin: 0 auto 20px; font-size: 32px;
+      color: var(--green);
+    }
+    .success-box h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px; margin-bottom: 8px;
+    }
+    .success-box p {
+      font-size: 14px; color: var(--sub);
+      line-height: 1.6;
+    }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed; bottom: 16px; left: 50%;
+      transform: translateX(-50%);
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 50px; padding: 6px 8px;
+      display: flex; gap: 2px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      z-index: 200;
+    }
+    .nav-item {
+      padding: 10px 16px; border-radius: 40px;
+      display: flex; align-items: center; gap: 6px;
+      color: var(--muted); text-decoration: none;
+      font-weight: 600; font-size: 12px;
+      transition: all 0.2s;
+    }
+    .nav-item.active {
+      background: var(--teal); color: #fff;
+      box-shadow: 0 4px 12px rgba(13,148,136,0.3);
+    }
+
+    @media (max-width: 500px) {
+      .amount-grid { grid-template-columns: 1fr 1fr; }
+      .nav-item span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><div class="dot"></div>TEXIS</div>
+  <div class="balance"><i class="fas fa-wallet"></i> <span id="walletDisplay">₦0</span></div>
+</div>
+
+<div class="main">
+  <div class="page-head">
+    <h1>Deposit Funds</h1>
+    <p>Add money to your TEXIS wallet securely</p>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active" id="step1">1</div>
+    <div class="step" id="step2">2</div>
+    <div class="step" id="step3">3</div>
+  </div>
+
+  <!-- STEP 1: SELECT AMOUNT -->
+  <div class="section show" id="sec1">
+    <div class="card">
+      <h3><i class="fas fa-hand-holding-usd"></i> Select Deposit Amount</h3>
+      <div class="alert"><i class="fas fa-info-circle"></i> Minimum deposit: ₦10,000</div>
+      <div class="amount-grid">
+        <div class="amount-btn" data-amount="10000">₦10,000</div>
+        <div class="amount-btn" data-amount="20000">₦20,000</div>
+        <div class="amount-btn" data-amount="30000">₦30,000</div>
+        <div class="amount-btn" data-amount="50000">₦50,000</div>
+        <div class="amount-btn" data-amount="100000">₦100,000</div>
+        <div class="amount-btn" data-amount="200000">₦200,000</div>
+      </div>
+      <input type="number" class="custom-input" id="customAmount" placeholder="Or enter custom amount (min ₦10,000)" min="10000"/>
+    </div>
+    <button class="btn btn-primary" id="nextToStep2" disabled><i class="fas fa-arrow-right"></i> Continue to Payment</button>
+  </div>
+
+  <!-- STEP 2: BANK DETAILS -->
+  <div class="section" id="sec2">
+    <div class="card">
+      <h3><i class="fas fa-university"></i> Bank Transfer Details</h3>
+      <div class="info-row"><span class="lbl">Account Name</span><span class="val">Onyinye Nwaokolo</span></div>
+      <div class="info-row">
+        <span class="lbl">Account Number</span>
+        <span class="val">8333635045 <button class="copy-btn" onclick="copyText('8333635045')"><i class="fas fa-copy"></i> Copy</button></span>
+      </div>
+      <div class="info-row"><span class="lbl">Bank</span><span class="val">Nombank MFB</span></div>
+      <div class="info-row"><span class="lbl">Amount to Pay</span><span class="big-amount" id="displayAmount">₦0</span></div>
+    </div>
+    <div class="instruction">
+      <h4><i class="fas fa-list-ol"></i> Instructions</h4>
+      <ol>
+        <li>Transfer <b id="instructionAmount">₦0</b> to the account above</li>
+        <li>Take a clear screenshot of your payment confirmation</li>
+        <li>Click below to submit your proof</li>
+      </ol>
+    </div>
+    <button class="btn btn-primary" id="nextToStep3"><i class="fas fa-arrow-right"></i> I've Made the Transfer</button>
+    <button class="btn btn-outline" onclick="goTo(1)"><i class="fas fa-arrow-left"></i> Back</button>
+  </div>
+
+  <!-- STEP 3: SUBMIT PROOF -->
+  <div class="section" id="sec3">
+    <div class="card">
+      <h3><i class="fas fa-receipt"></i> Submit Payment Proof</h3>
+      <div class="form-group">
+        <label><i class="fas fa-user"></i> Sender's Name *</label>
+        <input type="text" id="senderName" placeholder="Name on the bank account you sent from"/>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-phone"></i> Phone Number (Optional)</label>
+        <input type="tel" id="phoneNumber" placeholder="For faster verification"/>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-coins"></i> Amount Deposited</label>
+        <input type="text" id="amountReadonly" readonly style="background:#f8fafc;"/>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-camera"></i> Payment Screenshot *</label>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="screenshotFile" accept="image/*" onchange="handleFile(event)"/>
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Tap to upload screenshot</p>
+          <p class="file-name" id="fileName"></p>
+          <img class="preview-img" id="previewImg" alt="Preview"/>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="submitDeposit"><i class="fas fa-paper-plane"></i> Submit Deposit Request</button>
+    <button class="btn btn-outline" onclick="goTo(2)"><i class="fas fa-arrow-left"></i> Back</button>
+  </div>
+
+  <!-- STEP 4: SUCCESS -->
+  <div class="section" id="sec4">
+    <div class="card">
+      <div class="success-box">
+        <div class="s-icon"><i class="fas fa-check"></i></div>
+        <h2>Deposit Request Submitted!</h2>
+        <p>Your payment proof has been received and sent for review.</p>
+        <p style="margin-top:8px;">⏱️ Approval usually takes <b style="color:var(--green);">5–30 minutes</b> during business hours.</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="window.location.href='dashboard.html'"><i class="fas fa-home"></i> Back to Dashboard</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+  <a href="plans.html" class="nav-item"><i class="fas fa-layer-group"></i><span>Plans</span></a>
+  <a href="referral.html" class="nav-item"><i class="fas fa-users"></i><span>Referral</span></a>
+  <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+</div>
+
+<script>
+  // ✅ TEXIS Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+    authDomain: "cashbridge-a688e.firebaseapp.com",
+    projectId: "cashbridge-a688e",
+    storageBucket: "cashbridge-a688e.firebasestorage.app",
+    messagingSenderId: "345273765518",
+    appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+  };
+
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const FV = firebase.firestore.FieldValue;
+
+  const MIN = 10000;
+  const ACCT = { name: 'Onyinye Nwaokolo', number: '8333635045', bank: 'Nombank MFB' };
+
+  let selectedAmount = 0, currentUser = null, userData = null, screenshotFile = null;
+
+  const fmt = v => '₦' + Number(v || 0).toLocaleString();
+
+  // ── AUTH ──
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (snap.exists) {
+        userData = snap.data();
+        document.getElementById('walletDisplay').textContent = fmt(userData.wallet || 0);
+      }
+    } catch(e) { console.error(e); }
+  });
+
+  // ── AMOUNT SELECTION ──
+  const btns = document.querySelectorAll('.amount-btn');
+  const customEl = document.getElementById('customAmount');
+  const next1 = document.getElementById('nextToStep2');
+
+  btns.forEach(b => {
+    b.addEventListener('click', () => {
+      btns.forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      selectedAmount = Number(b.dataset.amount);
+      customEl.value = '';
+      next1.disabled = false;
+    });
+  });
+
+  customEl.addEventListener('input', () => {
+    btns.forEach(x => x.classList.remove('selected'));
+    selectedAmount = Number(customEl.value) || 0;
+    next1.disabled = selectedAmount < MIN;
+  });
+
+  next1.addEventListener('click', () => {
+    if (selectedAmount < MIN) {
+      return Swal.fire({ icon: 'warning', title: 'Invalid Amount', text: `Minimum deposit is ${fmt(MIN)}`, confirmButtonColor: '#0d9488' });
+    }
+    document.getElementById('displayAmount').textContent = fmt(selectedAmount);
+    document.getElementById('instructionAmount').textContent = fmt(selectedAmount);
+    document.getElementById('amountReadonly').value = fmt(selectedAmount);
+    goTo(2);
+  });
+
+  document.getElementById('nextToStep3').addEventListener('click', () => goTo(3));
+
+  // ── FILE HANDLING ──
+  window.handleFile = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      return Swal.fire({ icon: 'warning', title: 'File Too Large', text: 'Screenshot must be under 5MB.', confirmButtonColor: '#0d9488' });
+    }
+    screenshotFile = file;
+    document.getElementById('uploadZone').classList.add('has-file');
+    document.getElementById('fileName').textContent = '✓ ' + file.name;
+
+    const preview = document.getElementById('previewImg');
+    preview.style.display = 'block';
+    preview.src = URL.createObjectURL(file);
+  };
+
+  // ── COMPRESS IMAGE ──
+  function compressImage(file, maxW = 1200, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── SUBMIT ──
+  document.getElementById('submitDeposit').addEventListener('click', async () => {
+    const senderName = document.getElementById('senderName').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+
+    if (!senderName) {
+      return Swal.fire({ icon: 'warning', title: 'Sender Name Required', text: 'Enter the name on the bank account.', confirmButtonColor: '#0d9488' });
+    }
+    if (!screenshotFile) {
+      return Swal.fire({ icon: 'warning', title: 'Screenshot Required', text: 'Upload your payment screenshot.', confirmButtonColor: '#0d9488' });
+    }
+    if (!currentUser) {
+      return Swal.fire({ icon: 'error', title: 'Not Logged In', text: 'Please log in again.', confirmButtonColor: '#ef4444' });
+    }
+
+    const ok = await Swal.fire({
+      title: 'Confirm Deposit',
+      html: `<div style="text-align:left;background:#f0fdfa;border-radius:12px;padding:14px;margin:12px 0;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Amount:</span><b>${fmt(selectedAmount)}</b></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Sender:</span><b>${senderName}</b></div>
+        ${phoneNumber ? `<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Phone:</span><b>${phoneNumber}</b></div>` : ''}
+        <div style="display:flex;justify-content:space-between;"><span>Account:</span><b>${ACCT.number} (${ACCT.bank})</b></div>
+      </div>`,
+      icon: 'question', showCancelButton: true,
+      confirmButtonText: 'Submit', confirmButtonColor: '#0d9488'
+    });
+    if (!ok.isConfirmed) return;
+
+    Swal.fire({ title: 'Submitting...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+    try {
+      const depositId = 'DEP_' + Date.now();
+      const base64 = await compressImage(screenshotFile);
+
+      await db.collection('users').doc(currentUser.uid).collection('deposits').doc(depositId).set({
+        depositId,
+        userId: currentUser.uid,
+        username: userData?.fullName || 'User',
+        userEmail: userData?.email || currentUser.email || '',
+        senderName,
+        phoneNumber: phoneNumber || '',
+        amount: selectedAmount,
+        status: 'pending',
+        method: 'Bank Transfer',
+        accountName: ACCT.name,
+        accountNumber: ACCT.number,
+        bankName: ACCT.bank,
+        screenshotBase64: base64,
+        createdAt: FV.serverTimestamp()
+      });
+
+      Swal.close();
+      goTo(4);
+
+    } catch(e) {
+      console.error(e);
+      Swal.fire({ icon: 'error', title: 'Submission Failed', text: e.message, confirmButtonColor: '#ef4444' });
+    }
+  });
+
+  // ── NAVIGATION ──
+  window.goTo = function(step) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('show'));
+    document.getElementById('sec' + step).classList.add('show');
+
+    document.querySelectorAll('.step').forEach((s, i) => {
+      s.classList.remove('active', 'done');
+      if (i + 1 < step) s.classList.add('done');
+      if (i + 1 === step) s.classList.add('active');
+    });
+
+    document.querySelector('.steps').style.display = step === 4 ? 'none' : 'flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // ── COPY ──
+  window.copyText = function(text) {
+    navigator.clipboard?.writeText(text).then(() => {
+      Swal.fire({ icon: 'success', title: 'Copied!', timer: 1500, showConfirmButton: false });
+    }).catch(() => {
+      const el = document.createElement('input');
+      el.value = text; document.body.appendChild(el);
+      el.select(); document.execCommand('copy');
+      document.body.removeChild(el);
+      Swal.fire({ icon: 'success', title: 'Copied!', timer: 1500, showConfirmButton: false });
+    });
+  };
+</script>
+</body>
+</html>
