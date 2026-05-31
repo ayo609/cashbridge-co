@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Referral Network</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --teal: #0d9488; --teal-light: #14b8a6; --teal-bg: #f0fdfa;
+      --gold: #f59e0b; --gold-light: #fef3c7;
+      --pink: #ec4899; --pink-light: #fce7f3;
+      --green: #10b981; --red: #ef4444; --blue: #3b82f6;
+      --bg: #fafbfc; --card: #ffffff; --text: #1a1a2e;
+      --sub: #5a6072; --muted: #9ca3af; --border: #e8ecf1;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; padding-bottom: 100px;
+    }
+
+    .navbar {
+      background: #fff; border-bottom: 1px solid var(--border);
+      padding: 0 20px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; }
+    .nav-logo .dot { width: 10px; height: 10px; background: var(--teal); border-radius: 50%; box-shadow: 0 0 8px var(--teal-light); }
+    .nav-avatar {
+      width: 36px; height: 36px; background: linear-gradient(135deg, var(--teal), var(--teal-light));
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 14px;
+    }
+
+    .container { max-width: 680px; margin: 0 auto; padding: 20px 16px; }
+
+    .page-intro { text-align: center; margin-bottom: 24px; }
+    .page-intro h1 { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+    .page-intro h1 span { background: linear-gradient(135deg, var(--teal), var(--teal-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page-intro p { color: var(--sub); font-size: 14px; }
+
+    .invite-card {
+      background: #fff; border: 2px solid var(--teal); border-radius: 24px;
+      padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(13,148,136,0.08);
+    }
+    .invite-card .invite-label { font-size: 11px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .invite-code-box { display: flex; align-items: center; gap: 8px; background: var(--teal-bg); border-radius: 16px; padding: 6px; }
+    .invite-code-box .code { flex: 1; padding: 12px 16px; font-family: 'Sora', monospace; font-size: 20px; font-weight: 800; color: var(--teal); }
+    .invite-code-box .copy-btn { padding: 12px 20px; background: var(--teal); color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .share-icons { display: flex; gap: 8px; margin-top: 12px; }
+    .share-chip { flex: 1; padding: 12px; border-radius: 14px; border: 1.5px solid var(--border); background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; color: var(--sub); display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .share-chip:hover { border-color: var(--teal); color: var(--teal); }
+    .share-chip.wa:hover { border-color: #25D366; color: #25D366; background: #f0fdf4; }
+    .share-chip.tg:hover { border-color: #0088cc; color: #0088cc; background: #f0f9ff; }
+
+    .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+    .stat-pill { background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+    .stat-pill:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    .stat-pill.active-stat { border-color: var(--teal); background: var(--teal-bg); }
+    .stat-pill .sp-value { font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 2px; }
+    .sp-value.c-teal { color: var(--teal); } .sp-value.c-gold { color: var(--gold); } .sp-value.c-pink { color: var(--pink); }
+    .stat-pill .sp-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-pill .sp-badge { position: absolute; top: 8px; right: 8px; font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 10px; }
+    .sp-badge.b-teal { background: var(--teal-bg); color: var(--teal); }
+    .sp-badge.b-gold { background: var(--gold-light); color: #b45309; }
+    .sp-badge.b-pink { background: var(--pink-light); color: var(--pink); }
+
+    .summary-row { display: flex; gap: 10px; margin-bottom: 20px; }
+    .summary-chip { flex: 1; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 10px; }
+    .sc-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .sc-icon.teal { background: var(--teal-bg); color: var(--teal); }
+    .sc-icon.green { background: #f0fdf4; color: var(--green); }
+    .sc-icon.blue { background: #eff6ff; color: var(--blue); }
+    .sc-icon.gold { background: var(--gold-light); color: #b45309; }
+    .summary-chip .sc-val { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; }
+    .summary-chip .sc-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+
+    .section-head { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .section-head .count-chip { background: var(--teal-bg); color: var(--teal); font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+    .search-box { position: relative; margin-bottom: 14px; }
+    .search-box input { width: 100%; padding: 14px 16px 14px 44px; background: #fff; border: 1.5px solid var(--border); border-radius: 16px; font-size: 14px; font-family: inherit; outline: none; }
+    .search-box input:focus { border-color: var(--teal); box-shadow: 0 0 0 4px rgba(13,148,136,0.06); }
+    .search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; }
+
+    .member-list { display: flex; flex-direction: column; gap: 10px; }
+    .member-item { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.2s; }
+    .member-item:hover { border-color: var(--teal); }
+    .member-item .mi-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .mi-avatar {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 16px; color: #fff; flex-shrink: 0;
+    }
+    .mi-avatar.l1 { background: linear-gradient(135deg, #0d9488, #14b8a6); }
+    .mi-avatar.l2 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .mi-avatar.l3 { background: linear-gradient(135deg, #ec4899, #be185d); }
+    .mi-info { flex: 1; min-width: 0; }
+    .mi-info .mi-name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px; }
+    .mi-info .mi-email { font-size: 11px; color: var(--muted); }
+    .mi-info .mi-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+    .mi-tag { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .mi-tag.level { background: var(--teal-bg); color: var(--teal); }
+    .mi-tag.active { background: #f0fdf4; color: var(--green); }
+    .mi-tag.inactive { background: #fef2f2; color: var(--red); }
+    .mi-tag.funded { background: #eff6ff; color: var(--blue); }
+    .mi-stats {
+      display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px; background: #f8fafc; border-radius: 12px;
+      padding: 12px; font-size: 11px;
+    }
+    .mi-stat { text-align: center; }
+    .mi-stat .val { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13px; }
+    .mi-stat .val.grn { color: var(--green); }
+    .mi-stat .val.amb { color: var(--gold); }
+    .mi-stat .val.blu { color: var(--blue); }
+    .mi-stat .lbl { color: var(--muted); font-size: 9px; text-transform: uppercase; margin-top: 2px; }
+
+    .empty-list { text-align: center; padding: 48px 20px; }
+    .empty-list i { font-size: 48px; color: var(--border); margin-bottom: 12px; }
+    .empty-list h3 { font-family: 'Sora', sans-serif; font-size: 16px; color: var(--sub); margin-bottom: 4px; }
+    .empty-list p { font-size: 13px; color: var(--muted); }
+
+    .bottom-nav {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      background: #fff; border: 1px solid var(--border); border-radius: 50px;
+      padding: 6px 8px; display: flex; gap: 2px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06); z-index: 200;
+    }
+    .nav-link { padding: 10px 16px; border-radius: 40px; display: flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 12px; }
+    .nav-link.active { background: var(--teal); color: #fff; box-shadow: 0 4px 12px rgba(13,148,136,0.3); }
+
+    @media (max-width: 500px) {
+      .mi-stats { grid-template-columns: 1fr 1fr; }
+      .stats-bar { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+      .stat-pill { padding: 12px 8px; }
+      .stat-pill .sp-value { font-size: 20px; }
+      .summary-row { flex-direction: column; }
+      .nav-link span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="nav-logo"><div class="dot"></div>TEXIS</div>
+  <div class="nav-avatar" id="avatarBox">?</div>
+</div>
+
+<div class="container">
+  <div class="page-intro">
+    <h1>Your <span>Network</span></h1>
+    <p>Invite friends and earn lifetime commissions</p>
+  </div>
+
+  <!-- INVITE CARD -->
+  <div class="invite-card">
+    <div class="invite-label"><i class="fas fa-link"></i> Your Referral Link</div>
+    <div class="invite-code-box">
+      <div class="code" id="refCodeDisplay">TX------</div>
+      <button class="copy-btn" onclick="copyLink()"><i class="fas fa-copy"></i> Copy</button>
+    </div>
+    <div class="share-icons">
+      <button class="share-chip wa" onclick="shareWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+      <button class="share-chip tg" onclick="shareTelegram()"><i class="fab fa-telegram"></i> Telegram</button>
+      <button class="share-chip" onclick="shareMore()"><i class="fas fa-share-alt"></i> Share</button>
+    </div>
+  </div>
+
+  <!-- LEVEL STATS -->
+  <div class="stats-bar">
+    <div class="stat-pill active-stat" id="statL1" onclick="switchLevel(1)">
+      <span class="sp-badge b-teal">20%</span>
+      <div class="sp-value c-teal" id="l1Count">0</div>
+      <div class="sp-label">Level 1</div>
+    </div>
+    <div class="stat-pill" id="statL2" onclick="switchLevel(2)">
+      <span class="sp-badge b-gold">2%</span>
+      <div class="sp-value c-gold" id="l2Count">0</div>
+      <div class="sp-label">Level 2</div>
+    </div>
+    <div class="stat-pill" id="statL3" onclick="switchLevel(3)">
+      <span class="sp-badge b-pink">1%</span>
+      <div class="sp-value c-pink" id="l3Count">0</div>
+      <div class="sp-label">Level 3</div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary-row">
+    <div class="summary-chip"><div class="sc-icon teal"><i class="fas fa-users"></i></div><div class="sc-info"><div class="sc-val" id="totalTeam">0</div><div class="sc-lbl">Total Members</div></div></div>
+    <div class="summary-chip"><div class="sc-icon green"><i class="fas fa-chart-line"></i></div><div class="sc-info"><div class="sc-val" id="totalInvested">₦0</div><div class="sc-lbl">Team Invested</div></div></div>
+    <div class="summary-chip"><div class="sc-icon blue"><i class="fas fa-coins"></i></div><div class="sc-info"><div class="sc-val" id="totalDeposited">₦0</div><div class="sc-lbl">Team Deposits</div></div></div>
+    <div class="summary-chip"><div class="sc-icon gold"><i class="fas fa-gift"></i></div><div class="sc-info"><div class="sc-val" id="totalEarned">₦0</div><div class="sc-lbl">Total Earned</div></div></div>
+  </div>
+
+  <!-- MEMBER LIST -->
+  <div class="section-head"><i class="fas fa-list" style="color:var(--teal);"></i> Team Members <span class="count-chip" id="filteredCount">0</span></div>
+  <div class="search-box">
+    <i class="fas fa-search"></i>
+    <input type="text" id="searchInput" placeholder="Search by name or email..." oninput="filterTeam()"/>
+  </div>
+  <div class="member-list" id="memberList">
+    <div class="empty-list"><i class="fas fa-circle-notch fa-spin" style="font-size:28px;"></i><h3>Loading your team...</h3></div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+  <a href="plans.html" class="nav-link"><i class="fas fa-layer-group"></i><span>Plans</span></a>
+  <a href="referral.html" class="nav-link active"><i class="fas fa-users"></i><span>Referral</span></a>
+  <a href="dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+    authDomain: "cashbridge-a688e.firebaseapp.com",
+    projectId: "cashbridge-a688e",
+    storageBucket: "cashbridge-a688e.firebasestorage.app",
+    messagingSenderId: "345273765518",
+    appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const RATES = { 1: 0.20, 2: 0.02, 3: 0.01 };
+  const RATE_LABELS = { 1: '20%', 2: '2%', 3: '1%' };
+
+  let currentUserId = null, myReferralCode = '', myReferralLink = '';
+  let allDownlines = [], currentLevel = 1, allUsersMap = new Map();
+
+  const fmt = n => Number(n || 0).toLocaleString('en-NG');
+  const fmtNgn = n => '₦' + fmt(n);
+
+  function getReferrerField(data) {
+    if (!data) return null;
+    const fields = ['referrerUid','refererUid','referredByUid','uplineUid','referredBy','referrer','upline','invitedBy','parentId'];
+    for (const f of fields) {
+      const v = data[f];
+      if (v && String(v).trim() && v !== 'direct' && v !== 'none') return String(v).trim();
+    }
+    return null;
+  }
+
+  function resolveToUid(rawRef) {
+    if (!rawRef) return null;
+    const ref = String(rawRef).trim();
+    if (ref === 'direct' || ref === 'none' || ref === '') return null;
+    if (ref.length >= 28 && /^[a-zA-Z0-9]+$/.test(ref)) return allUsersMap.has(ref) ? ref : null;
+    for (const [uid, data] of allUsersMap) { if (data.referralCode === ref) return uid; }
+    return null;
+  }
+
+  function buildTeam(allUsers) {
+    const l1 = [], l2 = [], l3 = [];
+    for (const user of allUsers) {
+      const resolved = resolveToUid(getReferrerField(user));
+      if (resolved === currentUserId) l1.push(user);
+    }
+    const l1Uids = new Set(l1.map(u => u.uid));
+    for (const user of allUsers) {
+      if (l1Uids.has(user.uid)) continue;
+      const resolved = resolveToUid(getReferrerField(user));
+      if (resolved && l1Uids.has(resolved)) l2.push(user);
+    }
+    const l2Uids = new Set(l2.map(u => u.uid));
+    for (const user of allUsers) {
+      if (l1Uids.has(user.uid) || l2Uids.has(user.uid)) continue;
+      const resolved = resolveToUid(getReferrerField(user));
+      if (resolved && l2Uids.has(resolved)) l3.push(user);
+    }
+    return { l1, l2, l3 };
+  }
+
+  /* ═══ ENRICH MEMBER — GET REAL DATA ═══ */
+  async function enrichMember(user, level) {
+    const uid = user.uid;
+
+    // 1. Get deposits (actual deposit records)
+    let totalDeposits = 0;
+    try {
+      const depSnap = await db.collection('users').doc(uid).collection('deposits').get();
+      depSnap.forEach(d => { totalDeposits += d.data().amount || 0; });
+    } catch(e) {}
+
+    // 2. Get investments from active plans
+    let totalInvested = 0;
+    let planName = 'No plan';
+    try {
+      const planSnap = await db.collection('users').doc(uid).collection('activePlans').get();
+      planSnap.forEach(d => {
+        const p = d.data();
+        totalInvested += p.capital || 0;
+        if (!planName || planName === 'No plan') planName = p.planName || 'Investment';
+      });
+    } catch(e) {}
+
+    // 3. Check for admin direct funding (transactions with type 'admin_funding' or 'direct_credit')
+    let adminFunding = 0;
+    let isAdminFunded = false;
+    try {
+      const txSnap = await db.collection('users').doc(uid).collection('transactions')
+        .where('type', 'in', ['admin_funding', 'direct_credit', 'admin_credit', 'manual_credit']).get();
+      txSnap.forEach(d => { adminFunding += d.data().amount || 0; isAdminFunded = true; });
+    } catch(e) {}
+
+    // 4. Get actual earnings from THIS downline (from upliner's referrals subcollection)
+    let earnedFromThis = 0;
+    try {
+      const refDoc = await db.collection('users').doc(currentUserId).collection('referrals').doc(uid).get();
+      if (refDoc.exists) {
+        earnedFromThis = refDoc.data().totalEarned || 0;
+      }
+    } catch(e) {}
+
+    // 5. Also check transactions for referral bonuses from this downline
+    if (earnedFromThis === 0) {
+      try {
+        const txSnap = await db.collection('users').doc(currentUserId).collection('transactions')
+          .where('type', 'in', ['referral_bonus', 'referral']).get();
+        txSnap.forEach(d => {
+          const data = d.data();
+          if (data.downlineId === uid || data.referredUserId === uid) {
+            earnedFromThis += data.amount || 0;
+          }
+        });
+      } catch(e) {}
+    }
+
+    const isActive = totalInvested > 0;
+
+    return {
+      level, uid,
+      fullName: user.fullName || user.username || 'User',
+      email: user.email || 'N/A',
+      planName,
+      invested: totalInvested,
+      deposited: totalDeposits,
+      adminFunding,
+      isAdminFunded,
+      earnedFromThis,
+      bonus: Math.floor((totalInvested + totalDeposits) * RATES[level]),
+      isActive,
+      joinedAt: user.createdAt || null
+    };
+  }
+
+  /* ═══ LOAD TEAM ═══ */
+  async function loadTeamData() {
+    try {
+      const allSnap = await db.collection('users').get();
+      allUsersMap.clear();
+      const allUsers = [];
+      allSnap.docs.forEach(d => {
+        const data = d.data();
+        allUsers.push({ uid: d.id, ...data });
+        allUsersMap.set(d.id, data);
+      });
+
+      const { l1, l2, l3 } = buildTeam(allUsers);
+      console.log('📊 Team — L1:', l1.length, 'L2:', l2.length, 'L3:', l3.length);
+
+      allDownlines = [];
+      for (const u of l1) allDownlines.push(await enrichMember(u, 1));
+      for (const u of l2) allDownlines.push(await enrichMember(u, 2));
+      for (const u of l3) allDownlines.push(await enrichMember(u, 3));
+
+      const l1List = allDownlines.filter(d => d.level === 1);
+      const l2List = allDownlines.filter(d => d.level === 2);
+      const l3List = allDownlines.filter(d => d.level === 3);
+
+      document.getElementById('l1Count').textContent = l1List.length;
+      document.getElementById('l2Count').textContent = l2List.length;
+      document.getElementById('l3Count').textContent = l3List.length;
+      document.getElementById('totalTeam').textContent = allDownlines.length;
+      document.getElementById('totalInvested').textContent = fmtNgn(allDownlines.reduce((s, d) => s + d.invested, 0));
+      document.getElementById('totalDeposited').textContent = fmtNgn(allDownlines.reduce((s, d) => s + d.deposited, 0));
+      document.getElementById('totalEarned').textContent = fmtNgn(allDownlines.reduce((s, d) => s + d.earnedFromThis, 0));
+
+      renderTeam(1);
+    } catch(e) {
+      console.error(e);
+      document.getElementById('memberList').innerHTML = '<div class="empty-list"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>Please refresh</p></div>';
+    }
+  }
+
+  function renderTeam(level) {
+    currentLevel = level;
+    ['L1','L2','L3'].forEach((l, i) => {
+      const el = document.getElementById('stat' + l);
+      if (i + 1 === level) el.classList.add('active-stat');
+      else el.classList.remove('active-stat');
+    });
+    filterTeam();
+  }
+
+  function filterTeam() {
+    const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+    const list = allDownlines.filter(d => d.level === currentLevel);
+    const filtered = q ? list.filter(d => d.fullName.toLowerCase().includes(q) || d.email.toLowerCase().includes(q)) : list;
+
+    document.getElementById('filteredCount').textContent = filtered.length;
+    const container = document.getElementById('memberList');
+
+    if (!filtered.length) {
+      container.innerHTML = `<div class="empty-list"><i class="fas fa-users"></i><h3>${q ? 'No results' : 'No Level ' + currentLevel + ' members yet'}</h3><p>${q ? 'Try a different search' : 'Share your link!'}</p></div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    filtered.forEach((d, i) => {
+      let joinedStr = '—';
+      if (d.joinedAt) {
+        try { const dt = d.joinedAt.toDate ? d.joinedAt.toDate() : new Date(d.joinedAt); joinedStr = dt.toLocaleDateString('en-NG', { day:'2-digit', month:'short', year:'2-digit' }); } catch(e) {}
+      }
+
+      const card = document.createElement('div');
+      card.className = 'member-item';
+      card.innerHTML = `
+        <div class="mi-top">
+          <div class="mi-avatar l${d.level}">${d.fullName.charAt(0).toUpperCase()}</div>
+          <div class="mi-info">
+            <div class="mi-name">${d.fullName}</div>
+            <div class="mi-email">${d.email} · Joined ${joinedStr}</div>
+            <div class="mi-tags">
+              <span class="mi-tag level">L${d.level} · ${RATE_LABELS[d.level]}</span>
+              <span class="mi-tag ${d.isActive ? 'active' : 'inactive'}">${d.isActive ? 'Active' : 'Inactive'}</span>
+              ${d.isAdminFunded ? '<span class="mi-tag funded"><i class="fas fa-shield-alt"></i> Admin Funded</span>' : ''}
+            </div>
+          </div>
+        </div>
+        <div class="mi-stats">
+          <div class="mi-stat"><div class="val grn">${fmtNgn(d.invested)}</div><div class="lbl">Invested</div></div>
+          <div class="mi-stat"><div class="val blu">${fmtNgn(d.deposited)}</div><div class="lbl">Deposits</div></div>
+          ${d.adminFunding > 0 ? `<div class="mi-stat"><div class="val blu">${fmtNgn(d.adminFunding)}</div><div class="lbl">Admin Funding</div></div>` : ''}
+          <div class="mi-stat"><div class="val amb">${fmtNgn(d.earnedFromThis)}</div><div class="lbl">Earned</div></div>
+        </div>`;
+      container.appendChild(card);
+    });
+  }
+
+  function switchLevel(level) { renderTeam(level); }
+
+  function copyLink() {
+    navigator.clipboard?.writeText(myReferralLink).then(() => {
+      Swal.fire({ icon:'success', title:'Copied!', toast:true, timer:2000, showConfirmButton:false, position:'top-end' });
+    }).catch(() => {
+      const el = document.createElement('textarea'); el.value = myReferralLink;
+      document.body.appendChild(el); el.select(); document.execCommand('copy');
+      document.body.removeChild(el);
+      Swal.fire({ icon:'success', title:'Copied!', toast:true, timer:2000 });
+    });
+  }
+  function shareWhatsApp() { window.open(`https://wa.me/?text=${encodeURIComponent('💰 Join TEXIS and earn daily!\n\n'+myReferralLink)}`,'_blank'); }
+  function shareTelegram() { window.open(`https://t.me/share/url?url=${encodeURIComponent(myReferralLink)}&text=${encodeURIComponent('Join TEXIS!')}`,'_blank'); }
+  function shareMore() { if(navigator.share) navigator.share({title:'Join TEXIS',text:'Earn daily!',url:myReferralLink}); else copyLink(); }
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUserId = user.uid;
+    const snap = await db.collection('users').doc(currentUserId).get();
+    if (!snap.exists) { window.location.href = 'login.html'; return; }
+    const ud = snap.data();
+    document.getElementById('avatarBox').textContent = (ud.fullName || 'U').charAt(0).toUpperCase();
+    myReferralCode = ud.referralCode || ('TX' + currentUserId.slice(0,8).toUpperCase());
+    if (!ud.referralCode) db.collection('users').doc(currentUserId).update({ referralCode: myReferralCode }).catch(()=>{});
+    myReferralLink = `${window.location.origin}/register.html?ref=${myReferralCode}`;
+    document.getElementById('refCodeDisplay').textContent = myReferralCode;
+    await loadTeamData();
+  });
+
+  window.switchLevel = switchLevel;
+  window.filterTeam = filterTeam;
+  window.copyLink = copyLink;
+  window.shareWhatsApp = shareWhatsApp;
+  window.shareTelegram = shareTelegram;
+  window.shareMore = shareMore;
+</script>
+</body>
+</html>
