@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Investment Plans</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #14b8a6;
+      --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+      --bg: #f6f8fa; --card: #ffffff; --text: #1a1a2e;
+      --sub: #5a6072; --muted: #9ca3af; --border: #e5e7eb;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 100px; }
+    .topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .topbar .brand { display: flex; align-items: center; gap: 10px; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; }
+    .topbar .brand .dot { width: 10px; height: 10px; background: var(--teal); border-radius: 50%; box-shadow: 0 0 10px var(--teal-light); }
+    .topbar .balance { background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 30px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+    .topbar .balance i { color: var(--teal); }
+    .main { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
+    .page-head { margin-bottom: 24px; }
+    .page-head h1 { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+    .page-head p { font-size: 14px; color: var(--sub); }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .badge { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .badge-warn { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .badge-info { background: #f0fdfa; color: var(--teal); border: 1px solid #99f6e4; }
+    .section-head { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; margin: 28px 0 16px; display: flex; align-items: center; gap: 8px; }
+    .section-head i { color: var(--teal); }
+    .section-head .count { background: #f0fdfa; color: var(--teal); font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .plan-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 22px; transition: all 0.2s; position: relative; }
+    .plan-card:hover { border-color: var(--teal); box-shadow: 0 8px 24px rgba(13,148,136,0.08); transform: translateY(-2px); }
+    .plan-card.featured { border: 2px solid var(--teal); }
+    .plan-card.limited { opacity: 0.6; pointer-events: none; }
+    .plan-card .pop-tag { position: absolute; top: 12px; right: 12px; background: var(--teal); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
+    .plan-card .pc-icon { font-size: 32px; margin-bottom: 12px; }
+    .plan-card .pc-name { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .plan-card .pc-price { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; color: var(--teal); margin-bottom: 14px; }
+    .plan-card .pc-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+    .plan-card .pc-row:last-of-type { border: none; }
+    .pc-row .lbl { color: var(--muted); } .pc-row .val { font-weight: 700; }
+    .pc-row .val.grn { color: var(--green); } .pc-row .val.amb { color: var(--amber); }
+    .plan-card .pc-quota { display: inline-block; margin-top: 10px; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; background: #f1f5f9; color: var(--sub); }
+    .plan-card .pc-quota.full { background: #fef2f2; color: var(--red); }
+    .buy-btn { width: 100%; margin-top: 14px; padding: 14px; border: none; border-radius: 14px; background: var(--teal); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .buy-btn:hover { background: var(--teal-dark); }
+    .buy-btn:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
+    .active-card { background: #fff; border: 1px solid #bbf7d0; border-radius: 20px; padding: 20px; position: relative; }
+    .active-card .ac-badge { position: absolute; top: 10px; left: 10px; background: var(--green); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
+    .countdown { margin-top: 12px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 12px; padding: 12px; text-align: center; font-family: monospace; }
+    .countdown .cd-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .countdown .cd-time { font-size: 20px; font-weight: 700; color: var(--teal); }
+    .toast { position: fixed; bottom: 100px; right: 20px; background: #fff; border-radius: 14px; padding: 16px 20px; box-shadow: 0 12px 32px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; z-index: 999; animation: slideIn 0.3s ease; border-left: 4px solid var(--teal); max-width: 380px; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+    .toast i { font-size: 20px; }
+    .toast.success { border-color: var(--green); } .toast.success i { color: var(--green); }
+    .bottom-nav { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #fff; border: 1px solid var(--border); border-radius: 50px; padding: 6px 8px; display: flex; gap: 2px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); z-index: 200; }
+    .nav-item { padding: 10px 16px; border-radius: 40px; display: flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 12px; }
+    .nav-item.active { background: var(--teal); color: #fff; box-shadow: 0 4px 12px rgba(13,148,136,0.3); }
+    @media (max-width: 600px) { .plans-grid { grid-template-columns: 1fr; } .nav-item span { display: none; } }
+  </style>
+</head>
+<body>
+
+<div class="topbar"><div class="brand"><div class="dot"></div>TEXIS</div><div class="balance"><i class="fas fa-wallet"></i> <span id="walletDisplay">₦0</span></div></div>
+
+<div class="main">
+  <div class="page-head">
+    <h1>Investment Plans</h1>
+    <p>Earn daily returns — credited automatically at midnight (12:00 AM)</p>
+    <div class="badges">
+      <span class="badge badge-warn"><i class="fas fa-exclamation-circle"></i> Max 3 per plan</span>
+      <span class="badge badge-info"><i class="fas fa-clock"></i> Payout: 12AM only</span>
+      <span class="badge badge-info"><i class="fas fa-gift"></i> L1:20% L2:2% L3:1%</span>
+    </div>
+  </div>
+  <div class="section-head"><i class="fas fa-store"></i> Available Plans <span class="count">Choose wisely</span></div>
+  <div class="plans-grid" id="plansContainer"></div>
+  <div class="section-head" id="activeTitle" style="display:none;"><i class="fas fa-chart-line"></i> My Active Plans <span class="count" id="activeCount">0</span></div>
+  <div class="plans-grid" id="activePlansContainer"></div>
+</div>
+
+<div class="bottom-nav">
+  <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+  <a href="plans.html" class="nav-item active"><i class="fas fa-layer-group"></i><span>Plans</span></a>
+  <a href="referral.html" class="nav-item"><i class="fas fa-users"></i><span>Referral</span></a>
+  <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",
+    authDomain: "cashbridge-a688e.firebaseapp.com",
+    projectId: "cashbridge-a688e",
+    storageBucket: "cashbridge-a688e.firebasestorage.app",
+    messagingSenderId: "345273765518",
+    appId: "1:345273765518:web:29ee0b8f9717cdb50203df"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth(); const db = firebase.firestore(); const FV = firebase.firestore.FieldValue;
+  const fmt = v => '₦' + Number(v || 0).toLocaleString();
+  const MAX = 3;
+  const PLANS = [
+    { id: 1, name: '📊 Basic Plan', capital: 10000, daily: 1000, days: 20, totalProfit: 20000, icon: 'fa-chart-simple', popular: false },
+    { id: 2, name: '📈 Silver Plan', capital: 20000, daily: 2000, days: 20, totalProfit: 40000, icon: 'fa-chart-line', popular: false },
+    { id: 3, name: '🏆 Gold Plan', capital: 50000, daily: 5000, days: 20, totalProfit: 100000, icon: 'fa-crown', popular: true }
+  ];
+  let currentUser = null, userData = null, processing = false, purchaseCounts = {}, payoutTimer = null, countdownTimer = null, lastPayoutRunDate = null;
+
+  function toast(title, msg, type = 'success') {
+    const t = document.createElement('div'); t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i><div><b>${title}</b><br><small>${msg}</small></div>`;
+    document.body.appendChild(t); setTimeout(() => t.remove(), 4000);
+  }
+
+  function getMidnightMs() { const n = new Date(); const m = new Date(n); m.setHours(24,0,0,0); return m - n; }
+  function fmtCountdown(ms) { if(ms<=0) return '00:00:00'; const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000); return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+  function updateCountdowns() { const d=fmtCountdown(getMidnightMs()); document.querySelectorAll('.cd-time').forEach(el=>el.textContent=d); }
+  function startCountdown() { if(countdownTimer) clearInterval(countdownTimer); updateCountdowns(); countdownTimer=setInterval(updateCountdowns,1000); }
+  async function getPurchaseCount(uid,pid) { try{const s=await db.collection('users').doc(uid).collection('activePlans').where('planId','==',pid).get();return s.size;}catch(_){return 0;} }
+  async function loadCounts(uid) { for(const p of PLANS) purchaseCounts[p.id]=await getPurchaseCount(uid,p.id); }
+
+  function renderPlans() {
+    const el=document.getElementById('plansContainer'); if(!el||!currentUser) return;
+    el.innerHTML=PLANS.map(p=>{const c=purchaseCounts[p.id]||0,l=c>=MAX;
+      return `<div class="plan-card ${p.popular?'featured':''} ${l?'limited':''}">${p.popular?'<div class="pop-tag"><i class="fas fa-star"></i> POPULAR</div>':''}<div class="pc-icon"><i class="fas ${p.icon}"></i></div><div class="pc-name">${p.name}</div><div class="pc-price">${fmt(p.capital)}</div><div class="pc-row"><span class="lbl">📈 Daily</span><span class="val grn">${fmt(p.daily)}</span></div><div class="pc-row"><span class="lbl">⏱️ Duration</span><span class="val">${p.days} days</span></div><div class="pc-row"><span class="lbl">💰 Total</span><span class="val amb">${fmt(p.totalProfit)}</span></div><span class="pc-quota ${l?'full':''}"><i class="fas fa-ticket-alt"></i> ${c}/${MAX}</span>${!l?`<button class="buy-btn" onclick="buyPlan(${p.id},${p.capital},'${p.name.replace(/'/g,"\\'")}',${p.daily},${p.totalProfit},${p.days})"><i class="fas fa-rocket"></i> Invest Now</button>`:`<button class="buy-btn" disabled><i class="fas fa-lock"></i> Limit Reached</button>`}</div>`;}).join('');
+  }
+
+  function renderActive(plans) {
+    const c=document.getElementById('activePlansContainer'),t=document.getElementById('activeTitle'),ce=document.getElementById('activeCount');
+    if(!plans.length){if(t)t.style.display='none';c.innerHTML='';return;} if(t)t.style.display='flex'; if(ce)ce.textContent=plans.length;
+    c.innerHTML=plans.map(p=>`<div class="active-card"><div class="ac-badge"><i class="fas fa-check-circle"></i> ACTIVE</div><div class="pc-name" style="margin-top:20px;">${p.planName}</div><div class="pc-price" style="font-size:1.3rem;">${fmt(p.capital)}</div><div class="pc-row"><span class="lbl">📈 Daily</span><span class="val grn">${fmt(p.dailyEarning)}</span></div><div class="pc-row"><span class="lbl">⏱️ Days Left</span><span class="val">${p.daysLeft}</span></div><div class="pc-row"><span class="lbl">💰 Earned</span><span class="val amb">${fmt(p.totalEarned||0)}</span></div><div class="countdown"><div class="cd-label"><i class="fas fa-hourglass-half"></i> Next Payout</div><div class="cd-time">--:--:--</div></div></div>`).join('');
+    updateCountdowns();
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // ✅ GUARANTEED REFERRAL BONUS — SIMPLE, DIRECT, NO SILENT FAILURES
+  // ═══════════════════════════════════════════════════════
+  async function payReferralBonuses(amount) {
+    console.log('💸 ========== REFERRAL BONUS START ==========');
+    console.log('💸 Amount: ₦' + amount.toLocaleString());
+    
+    try {
+      // Get the investor's document
+      const meSnap = await db.collection('users').doc(currentUser.uid).get();
+      if (!meSnap.exists) { console.log('❌ Investor doc not found'); return false; }
+      const me = meSnap.data();
+      
+      console.log('📋 Investor:', me.fullName, '| UID:', currentUser.uid);
+      console.log('📋 referrerUid:', me.referrerUid, '| referredBy:', me.referredBy);
+      
+      const RATES = { 1: 0.20, 2: 0.02, 3: 0.01 };
+      
+      // Build chain — collect all 3 upliner UIDs first
+      const chain = [];
+      let nextUid = me.referrerUid || me.referredBy || null;
+      
+      // Clean the UID (remove 'direct', 'none', empty strings)
+      if (nextUid && nextUid !== 'direct' && nextUid !== 'none' && nextUid.trim() !== '') {
+        chain.push(nextUid);
+        
+        // Get L2
+        try {
+          const l1Snap = await db.collection('users').doc(nextUid).get();
+          if (l1Snap.exists) {
+            let l2Uid = l1Snap.data().referrerUid || l1Snap.data().referredBy || null;
+            if (l2Uid && l2Uid !== 'direct' && l2Uid !== 'none' && l2Uid.trim() !== '') {
+              chain.push(l2Uid);
+              
+              // Get L3
+              try {
+                const l2Snap = await db.collection('users').doc(l2Uid).get();
+                if (l2Snap.exists) {
+                  let l3Uid = l2Snap.data().referrerUid || l2Snap.data().referredBy || null;
+                  if (l3Uid && l3Uid !== 'direct' && l3Uid !== 'none' && l3Uid.trim() !== '') {
+                    chain.push(l3Uid);
+                  }
+                }
+              } catch(e) { console.log('L3 lookup error:', e.message); }
+            }
+          }
+        } catch(e) { console.log('L2 lookup error:', e.message); }
+      }
+      
+      console.log('📋 Referral chain UIDs:', chain);
+      
+      if (chain.length === 0) {
+        console.log('⚠️ No upliners found — user registered directly (no referral)');
+        return false;
+      }
+      
+      // Now credit each upliner — ONE BY ONE, not in a transaction
+      let paid = 0;
+      
+      for (let i = 0; i < chain.length; i++) {
+        const uplinerUid = chain[i];
+        const level = i + 1;
+        const bonus = Math.floor(amount * RATES[level]);
+        
+        if (bonus <= 0) {
+          console.log(`⏭️ L${level}: Bonus ₦0 (amount too small for ${RATES[level]*100}%)`);
+          continue;
+        }
+        
+        console.log(`💰 L${level}: Crediting ₦${bonus.toLocaleString()} to ${uplinerUid}`);
+        
+        try {
+          // SIMPLE APPROACH: Read → Update → Write (no transaction needed for single doc)
+          const uplineRef = db.collection('users').doc(uplinerUid);
+          const uplineSnap = await uplineRef.get();
+          
+          if (!uplineSnap.exists) {
+            console.log(`  ❌ L${level}: Upliner ${uplinerUid} NOT FOUND in database`);
+            continue;
+          }
+          
+          const uplineData = uplineSnap.data();
+          console.log(`  ✅ Found: @${uplineData.username || uplineData.fullName} | Wallet before: ₦${(uplineData.wallet||0).toLocaleString()}`);
+          
+          // Update wallet using atomic increment
+          await uplineRef.update({
+            wallet: FV.increment(bonus),
+            totalEarnings: FV.increment(bonus),
+            totalRefEarnings: FV.increment(bonus),
+            referralCount: FV.increment(level === 1 ? 1 : 0),
+            [`level${level}Count`]: FV.increment(1)
+          });
+          
+          console.log(`  ✅ Wallet updated! New balance should be ₦${((uplineData.wallet||0)+bonus).toLocaleString()}`);
+          
+          // Write referral record
+          const refDocRef = db.collection('users').doc(uplinerUid).collection('referrals').doc(currentUser.uid);
+          const existingRef = await refDocRef.get();
+          const prevEarned = existingRef.exists ? (existingRef.data().totalEarned || 0) : 0;
+          
+          await refDocRef.set({
+            uid: currentUser.uid,
+            level: level,
+            commission: RATES[level] * 100,
+            referredAt: me.createdAt || FV.serverTimestamp(),
+            fullName: me.fullName || 'User',
+            username: me.username || '',
+            email: me.email || '',
+            totalEarned: prevEarned + bonus,
+            lastInvestment: amount,
+            lastInvestmentDate: FV.serverTimestamp()
+          }, { merge: true });
+          
+          console.log(`  ✅ Referral record updated: ₦${prevEarned.toLocaleString()} → ₦${(prevEarned+bonus).toLocaleString()}`);
+          console.log(`  🎉 L${level} COMPLETE — ₦${bonus.toLocaleString()} credited!`);
+          
+          paid++;
+          toast('🎁 Referral Bonus Sent!', `Level ${level}: ₦${bonus.toLocaleString()} credited`, 'success');
+          
+        } catch(e) {
+          console.error(`  ❌ L${level} ERROR:`, e.code, e.message);
+        }
+      }
+      
+      console.log(`💸 ========== REFERRAL BONUS END: ${paid}/${chain.length} paid ==========`);
+      return paid > 0;
+      
+    } catch(e) {
+      console.error('💸 FATAL ERROR:', e.code, e.message);
+      return false;
+    }
+  }
+
+  // ── MIDNIGHT PAYOUT ──
+  function isPayoutDueAtMidnight(lastDate) { if(!lastDate) return false; const n=new Date(),tm=new Date(n.getFullYear(),n.getMonth(),n.getDate(),0,0,0,0),l=lastDate.toDate?lastDate.toDate():new Date(lastDate); return l<tm; }
+  function isFirstPayoutDue(startDate) { if(!startDate) return false; const n=new Date(),tm=new Date(n.getFullYear(),n.getMonth(),n.getDate(),0,0,0,0),s=startDate.toDate?startDate.toDate():new Date(startDate); return s<tm; }
+
+  async function runPayouts() {
+    if(!currentUser) return;
+    const today=new Date().toDateString(); if(lastPayoutRunDate===today) return;
+    const n=new Date(),h=n.getHours(),m=n.getMinutes(); if(!(h===0&&m<10)&&m%10!==0) return;
+    try{
+      const snap=await db.collection('users').doc(currentUser.uid).collection('activePlans').where('status','==','active').get(); let done=0;
+      for(const doc of snap.docs){const p=doc.data(); if(p.daysLeft<=0) continue; let due=false; if(p.lastPayoutDate) due=isPayoutDueAtMidnight(p.lastPayoutDate); else due=isFirstPayoutDue(p.startDate); if(!due) continue;
+        try{await db.runTransaction(async(t)=>{const pr=db.collection('users').doc(currentUser.uid).collection('activePlans').doc(doc.id),f=await t.get(pr); if(!f.exists||f.data().status!=='active') return; const d=f.data(); let fd=false; if(d.lastPayoutDate){const l=d.lastPayoutDate.toDate?d.lastPayoutDate.toDate():new Date(d.lastPayoutDate),ts=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),0,0,0,0); fd=l<ts;}else{fd=isFirstPayoutDue(d.startDate);} if(!fd) return; const nd=d.daysLeft-1,nt=FV.serverTimestamp(); t.update(pr,{lastPayoutDate:nt,daysLeft:nd,totalEarned:(d.totalEarned||0)+d.dailyEarning,...(nd<=0&&{status:'completed'})}); t.update(db.collection('users').doc(currentUser.uid),{wallet:FV.increment(d.dailyEarning),totalEarnings:FV.increment(d.dailyEarning)}); t.set(db.collection('users').doc(currentUser.uid).collection('transactions').doc(),{type:'daily_payout',amount:d.dailyEarning,planName:d.planName,status:'completed',description:`📈 Daily payout from ${d.planName}`,createdAt:nt});}); done++; toast('💰 Payout!',`+${fmt(p.dailyEarning)} from ${p.planName}`,'success');}catch(e){console.error('Payout error:',e);}}
+      if(done>0){console.log(`✅ ${done} payout(s) done`);lastPayoutRunDate=today;await loadData();}
+    }catch(e){console.error('Payout check:',e);}
+  }
+
+  async function loadData() {
+    if(!currentUser) return;
+    try{const snap=await db.collection('users').doc(currentUser.uid).get(); if(!snap.exists) return; userData=snap.data(); document.getElementById('walletDisplay').textContent=fmt(userData.wallet||0); const as=await db.collection('users').doc(currentUser.uid).collection('activePlans').where('status','==','active').get(); const a=[]; as.forEach(d=>{if(d.data().daysLeft>0) a.push({id:d.id,...d.data()});}); renderActive(a); await loadCounts(currentUser.uid); renderPlans();}catch(e){console.error(e);}
+  }
+
+  window.buyPlan = async function(planId, capital, name, daily, totalProfit, days) {
+    if(processing) return;
+    const count=await getPurchaseCount(currentUser.uid,planId);
+    if(count>=MAX) return Swal.fire({icon:'error',title:'Limit Reached',text:`Max ${MAX} per plan.`,confirmButtonColor:'#0d9488'});
+    if(!userData||(userData.wallet||0)<capital) return Swal.fire({icon:'warning',title:'Insufficient Balance',html:`Need <b>${fmt(capital)}</b><br>Balance: <b>${fmt(userData?.wallet||0)}</b>`,confirmButtonColor:'#0d9488'});
+    const ok=await Swal.fire({title:'Confirm Investment',html:`<div style="text-align:center"><b>${name}</b><div style="background:#f0fdfa;border-radius:14px;padding:14px;margin-top:12px;text-align:left;"><div>💰 Capital: <b>${fmt(capital)}</b></div><div>📈 Daily: <b style="color:#10b981;">${fmt(daily)}</b></div><div>📅 Duration: <b>${days} days</b></div><div>🏆 Total: <b style="color:#d97706;">${fmt(totalProfit)}</b></div></div><p style="margin-top:12px;font-size:13px;color:#64748b;">⏰ First payout at midnight tonight</p></div>`,icon:'question',showCancelButton:true,confirmButtonText:'Invest Now',confirmButtonColor:'#0d9488'});
+    if(!ok.isConfirmed) return;
+    processing=true;
+    Swal.fire({title:'Processing...',html:'<p>Creating your investment...</p>',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+    try{
+      await db.runTransaction(async(t)=>{const ur=db.collection('users').doc(currentUser.uid),us=await t.get(ur); if(!us.exists||(us.data().wallet||0)<capital) throw new Error('Insufficient funds'); t.update(ur,{wallet:FV.increment(-capital)}); t.set(db.collection('users').doc(currentUser.uid).collection('activePlans').doc(`plan_${Date.now()}_${planId}`),{planId,planName:name,capital,dailyEarning:daily,totalReturn:totalProfit,daysLeft:days,status:'active',startDate:FV.serverTimestamp(),totalEarned:0,lastPayoutDate:null});});
+      
+      Swal.update({html:'<p>Paying referral bonuses...</p>'});
+      const bonusPaid = await payReferralBonuses(capital);
+      
+      if(bonusPaid) {
+        Swal.update({html:'<p style="color:#10b981;">✅ Referral bonuses distributed!</p>'});
+        await new Promise(r=>setTimeout(r,800));
+      }
+      
+      await db.collection('users').doc(currentUser.uid).collection('transactions').add({type:'investment',amount:capital,planName:name,planId,status:'completed',description:`📊 Invested in ${name}`,createdAt:FV.serverTimestamp()}).catch(()=>{});
+      Swal.close();
+      await Swal.fire({icon:'success',title:'✅ Active!',text:bonusPaid?`${name} — first payout at midnight. Referral bonuses sent!`:`${name} — first payout at midnight.`,timer:2500,showConfirmButton:false});
+      await loadData();
+      toast('🎉 Plan Active!',`${name} earning ${fmt(daily)}/day`,'success');
+    }catch(e){Swal.fire({icon:'error',title:'Failed',text:e.message,confirmButtonColor:'#ef4444'});}finally{processing=false;}
+  };
+
+  auth.onAuthStateChanged(async user=>{if(!user){window.location.href='login.html';return;} currentUser=user; await loadCounts(user.uid); renderPlans(); await loadData(); startCountdown(); if(payoutTimer) clearInterval(payoutTimer); payoutTimer=setInterval(runPayouts,120000); setTimeout(runPayouts,3000);});
+</script>
+</body>
+</html>
