@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Investment Plans</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--teal:#0d9488;--teal-dark:#0f766e;--teal-light:#14b8a6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--bg:#f6f8fa;--card:#fff;--text:#1a1a2e;--sub:#5a6072;--muted:#9ca3af;--border:#e5e7eb}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:100px}
+    .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .topbar .brand{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:800;font-size:18px}
+    .topbar .brand .dot{width:10px;height:10px;background:var(--teal);border-radius:50%;box-shadow:0 0 10px var(--teal-light)}
+    .topbar .balance{background:#f0fdfa;border:1px solid #99f6e4;border-radius:30px;padding:8px 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+    .topbar .balance i{color:var(--teal)}
+    .main{max-width:1000px;margin:0 auto;padding:24px 16px}
+    .page-head{margin-bottom:24px}
+    .page-head h1{font-family:'Sora',sans-serif;font-size:26px;font-weight:800;margin-bottom:4px}
+    .page-head p{font-size:14px;color:var(--sub)}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .badge{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
+    .badge-warn{background:#fffbeb;color:#d97706;border:1px solid #fde68a}
+    .badge-info{background:#f0fdfa;color:var(--teal);border:1px solid #99f6e4}
+    .section-head{font-family:'Sora',sans-serif;font-size:18px;font-weight:700;margin:28px 0 16px;display:flex;align-items:center;gap:8px}
+    .section-head i{color:var(--teal)}
+    .plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:24px}
+    .plan-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:22px;transition:all .2s;position:relative}
+    .plan-card:hover{border-color:var(--teal);box-shadow:0 8px 24px rgba(13,148,136,.08);transform:translateY(-2px)}
+    .plan-card.featured{border:2px solid var(--teal)}
+    .plan-card.limited{opacity:.6;pointer-events:none}
+    .plan-card .pop-tag{position:absolute;top:12px;right:12px;background:var(--teal);color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:12px}
+    .plan-card .pc-icon{font-size:32px;margin-bottom:12px}
+    .plan-card .pc-name{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;margin-bottom:4px}
+    .plan-card .pc-price{font-family:'Sora',sans-serif;font-size:26px;font-weight:800;color:var(--teal);margin-bottom:14px}
+    .plan-card .pc-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f1f5f9}
+    .plan-card .pc-row:last-of-type{border:none}
+    .pc-row .lbl{color:var(--muted)}.pc-row .val{font-weight:700}
+    .pc-row .val.grn{color:var(--green)}.pc-row .val.amb{color:var(--amber)}
+    .plan-card .pc-quota{display:inline-block;margin-top:10px;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;background:#f1f5f9;color:var(--sub)}
+    .plan-card .pc-quota.full{background:#fef2f2;color:var(--red)}
+    .buy-btn{width:100%;margin-top:14px;padding:14px;border:none;border-radius:14px;background:var(--teal);color:#fff;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+    .buy-btn:hover{background:var(--teal-dark)}
+    .buy-btn:disabled{background:#cbd5e1;color:#94a3b8;cursor:not-allowed}
+    .active-card{background:#fff;border:1px solid #bbf7d0;border-radius:20px;padding:20px;position:relative}
+    .active-card .ac-badge{position:absolute;top:10px;left:10px;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px}
+    .countdown{margin-top:12px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:12px;text-align:center;font-family:monospace}
+    .countdown .cd-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+    .countdown .cd-time{font-size:20px;font-weight:700;color:var(--teal)}
+    .toast{position:fixed;bottom:100px;right:20px;background:#fff;border-radius:14px;padding:16px 20px;box-shadow:0 12px 32px rgba(0,0,0,.1);display:flex;align-items:center;gap:12px;z-index:999;animation:slideIn .3s ease;border-left:4px solid var(--teal);max-width:380px}
+    @keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+    .toast i{font-size:20px}.toast.success{border-color:var(--green)}.toast.success i{color:var(--green)}
+    .bottom-nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--border);border-radius:50px;padding:6px 8px;display:flex;gap:2px;box-shadow:0 4px 24px rgba(0,0,0,.06);z-index:200}
+    .nav-item{padding:10px 16px;border-radius:40px;display:flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-weight:600;font-size:12px}
+    .nav-item.active{background:var(--teal);color:#fff;box-shadow:0 4px 12px rgba(13,148,136,.3)}
+    @media(max-width:600px){.plans-grid{grid-template-columns:1fr}.nav-item span{display:none}}
+  </style>
+</head>
+<body>
+
+<div class="topbar"><div class="brand"><div class="dot"></div>TEXIS</div><div class="balance"><i class="fas fa-wallet"></i> <span id="walletDisplay">₦0</span></div></div>
+
+<div class="main">
+  <div class="page-head"><h1>Investment Plans</h1><p>Earn daily returns — credited automatically at midnight (12:00 AM)</p>
+    <div class="badges"><span class="badge badge-warn"><i class="fas fa-exclamation-circle"></i> Max 3 per plan</span><span class="badge badge-info"><i class="fas fa-clock"></i> Auto payout 12AM</span><span class="badge badge-info"><i class="fas fa-gift"></i> L1:20% L2:2% L3:1%</span></div>
+  </div>
+  <div class="section-head"><i class="fas fa-store"></i> Available Plans</div>
+  <div class="plans-grid" id="plansContainer"></div>
+  <div class="section-head" id="activeTitle" style="display:none;"><i class="fas fa-chart-line"></i> My Active Plans <span id="activeCount" style="font-size:14px;">0</span></div>
+  <div class="plans-grid" id="activePlansContainer"></div>
+</div>
+
+<div class="bottom-nav">
+  <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+  <a href="plans.html" class="nav-item active"><i class="fas fa-layer-group"></i><span>Plans</span></a>
+  <a href="referral.html" class="nav-item"><i class="fas fa-users"></i><span>Referral</span></a>
+  <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+</div>
+
+<script>
+  const firebaseConfig={apiKey:"AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",authDomain:"cashbridge-a688e.firebaseapp.com",projectId:"cashbridge-a688e",storageBucket:"cashbridge-a688e.firebasestorage.app",messagingSenderId:"345273765518",appId:"1:345273765518:web:29ee0b8f9717cdb50203df"};
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue;
+  const fmt=v=>'₦'+Number(v||0).toLocaleString(),MAX=3;
+  const PLANS=[{id:1,name:'📊 Basic Plan',capital:10000,daily:1000,days:20,totalProfit:20000,icon:'fa-chart-simple',popular:!1},{id:2,name:'📈 Silver Plan',capital:20000,daily:2000,days:20,totalProfit:40000,icon:'fa-chart-line',popular:!1},{id:3,name:'🏆 Gold Plan',capital:50000,daily:5000,days:20,totalProfit:100000,icon:'fa-crown',popular:!0}];
+  let currentUser=null,userData=null,processing=!1,purchaseCounts={},countdownTimer=null,payoutTimer=null,cachedPlans=[],lastPayoutDate='';
+
+  function toast(t,m,s='success'){const e=document.createElement('div');e.className=`toast ${s}`;e.innerHTML=`<i class="fas fa-${s==='success'?'check-circle':'exclamation-circle'}"></i><div><b>${t}</b><br><small>${m}</small></div>`;document.body.appendChild(e);setTimeout(()=>e.remove(),4000)}
+  function getMsToMidnight(){const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);return m-n}
+  function fmtCountdown(ms){if(ms<=0)return'00:00:00';const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+  function updateCountdowns(){const d=fmtCountdown(getMsToMidnight());document.querySelectorAll('.cd-time').forEach(e=>e.textContent=d)}
+  function startCountdown(){if(countdownTimer)clearInterval(countdownTimer);updateCountdowns();countdownTimer=setInterval(updateCountdowns,1000)}
+
+  // ✅ CHECK IF PAYOUT IS DUE
+  function isPayoutDueToday(lastDate){
+    if(!lastDate)return!1;
+    const now=new Date(),todayMidnight=new Date(now.getFullYear(),now.getMonth(),now.getDate(),0,0,0,0);
+    const last=lastDate.toDate?lastDate.toDate():new Date(lastDate);
+    return last<todayMidnight;
+  }
+  function isFirstPayoutDue(startDate){
+    if(!startDate)return!1;
+    const now=new Date(),todayMidnight=new Date(now.getFullYear(),now.getMonth(),now.getDate(),0,0,0,0);
+    const start=startDate.toDate?startDate.toDate():new Date(startDate);
+    return start<todayMidnight;
+  }
+
+  async function loadAllData(){
+    if(!currentUser)return;
+    try{
+      const snap=await db.collection('users').doc(currentUser.uid).get();
+      if(!snap.exists)return;userData=snap.data();
+      document.getElementById('walletDisplay').textContent=fmt(userData.wallet||0);
+      const ps=await db.collection('users').doc(currentUser.uid).collection('activePlans').where('status','==','active').get();
+      cachedPlans=[];purchaseCounts={1:0,2:0,3:0};
+      ps.forEach(d=>{const p=d.data();if(p.daysLeft>0)cachedPlans.push({id:d.id,...p});if(p.planId&&purchaseCounts[p.planId]!==undefined)purchaseCounts[p.planId]++});
+      renderActive();renderPlans();
+    }catch(e){console.error(e)}
+  }
+
+  function renderPlans(){
+    const el=document.getElementById('plansContainer');if(!el||!currentUser)return;
+    el.innerHTML=PLANS.map(p=>{const c=purchaseCounts[p.id]||0,l=c>=MAX;return`<div class="plan-card ${p.popular?'featured':''} ${l?'limited':''}">${p.popular?'<div class="pop-tag"><i class="fas fa-star"></i> POPULAR</div>':''}<div class="pc-icon"><i class="fas ${p.icon}"></i></div><div class="pc-name">${p.name}</div><div class="pc-price">${fmt(p.capital)}</div><div class="pc-row"><span class="lbl">📈 Daily</span><span class="val grn">${fmt(p.daily)}</span></div><div class="pc-row"><span class="lbl">⏱️ Duration</span><span class="val">${p.days} days</span></div><div class="pc-row"><span class="lbl">💰 Total</span><span class="val amb">${fmt(p.totalProfit)}</span></div><span class="pc-quota ${l?'full':''}"><i class="fas fa-ticket-alt"></i> ${c}/${MAX}</span>${!l?`<button class="buy-btn" onclick="buyPlan(${p.id},${p.capital},'${p.name.replace(/'/g,"\\'")}',${p.daily},${p.totalProfit},${p.days})"><i class="fas fa-rocket"></i> Invest Now</button>`:`<button class="buy-btn" disabled><i class="fas fa-lock"></i> Limit Reached</button>`}</div>`}).join('')
+  }
+
+  function renderActive(){
+    const c=document.getElementById('activePlansContainer'),t=document.getElementById('activeTitle'),ce=document.getElementById('activeCount');
+    if(!cachedPlans.length){t.style.display='none';c.innerHTML='';return}
+    t.style.display='flex';ce.textContent=cachedPlans.length;
+    c.innerHTML=cachedPlans.map(p=>`<div class="active-card"><div class="ac-badge"><i class="fas fa-check-circle"></i> ACTIVE</div><div class="pc-name" style="margin-top:20px;">${p.planName}</div><div class="pc-price" style="font-size:1.3rem;">${fmt(p.capital)}</div><div class="pc-row"><span class="lbl">📈 Daily</span><span class="val grn">${fmt(p.dailyEarning)}</span></div><div class="pc-row"><span class="lbl">⏱️ Days Left</span><span class="val">${p.daysLeft}</span></div><div class="pc-row"><span class="lbl">💰 Earned</span><span class="val amb">${fmt(p.totalEarned||0)}</span></div><div class="countdown"><div class="cd-label"><i class="fas fa-hourglass-half"></i> Next Payout</div><div class="cd-time">--:--:--</div></div></div>`).join('');
+    updateCountdowns()
+  }
+
+  // ✅ REFERRAL BONUS
+  async function payReferralBonuses(amount){
+    try{
+      const meSnap=await db.collection('users').doc(currentUser.uid).get();
+      if(!meSnap.exists)return!1;
+      const me=meSnap.data(),RATES={1:.20,2:.02,3:.01},chain=[];
+      let nid=me.referrerUid||me.referredBy||null;
+      if(nid&&nid!=='direct'&&nid!=='none'&&nid.trim()!==''){chain.push(nid);
+        try{const l1=await db.collection('users').doc(nid).get();if(l1.exists){let l2id=l1.data().referrerUid||l1.data().referredBy||null;if(l2id&&l2id!=='direct'&&l2id!=='none'&&l2id.trim()!==''){chain.push(l2id);
+          try{const l2=await db.collection('users').doc(l2id).get();if(l2.exists){let l3id=l2.data().referrerUid||l2.data().referredBy||null;if(l3id&&l3id!=='direct'&&l3id!=='none'&&l3id.trim()!=='')chain.push(l3id)}}catch(e){}}}}catch(e){}}
+      if(!chain.length)return!1;
+      let paid=0;
+      for(let i=0;i<chain.length;i++){const uid=chain[i],lvl=i+1,bonus=Math.floor(amount*RATES[lvl]);if(bonus<=0)continue;
+        try{
+          await db.collection('users').doc(uid).update({wallet:FV.increment(bonus),totalEarnings:FV.increment(bonus),totalRefEarnings:FV.increment(bonus),referralCount:FV.increment(lvl===1?1:0),['level'+lvl+'Count']:FV.increment(1)});
+          const ref=db.collection('users').doc(uid).collection('referrals').doc(currentUser.uid),ex=await ref.get();
+          await ref.set({uid:currentUser.uid,level:lvl,commission:RATES[lvl]*100,referredAt:me.createdAt||FV.serverTimestamp(),fullName:me.fullName||'User',username:me.username||'',email:me.email||'',totalEarned:(ex.exists?ex.data().totalEarned||0:0)+bonus,lastInvestment:amount,lastInvestmentDate:FV.serverTimestamp()},{merge:!0});
+          paid++
+        }catch(e){}
+      }
+      return paid>0
+    }catch(e){return!1}
+  }
+
+  // ✅ AUTOMATIC 12AM PAYOUT — Runs every 60 seconds, pays when midnight passes
+  async function runPayouts(){
+    if(!currentUser||!cachedPlans.length)return;
+    const today=new Date().toDateString();
+    if(lastPayoutDate===today)return;
+    
+    try{
+      let done=0;
+      for(const p of cachedPlans){
+        if(p.daysLeft<=0)continue;
+        let due=!1;
+        if(p.lastPayoutDate){due=isPayoutDueToday(p.lastPayoutDate)}
+        else{due=isFirstPayoutDue(p.startDate)}
+        if(!due)continue;
+
+        try{
+          const planRef=db.collection('users').doc(currentUser.uid).collection('activePlans').doc(p.id);
+          const fresh=await planRef.get();
+          if(!fresh.exists||fresh.data().status!=='active')continue;
+          const d=fresh.data();
+          
+          // Double-check within read
+          let fd=!1;
+          if(d.lastPayoutDate){fd=isPayoutDueToday(d.lastPayoutDate)}
+          else{fd=isFirstPayoutDue(d.startDate)}
+          if(!fd)continue;
+
+          const newDays=d.daysLeft-1;
+          await planRef.update({lastPayoutDate:FV.serverTimestamp(),daysLeft:newDays,totalEarned:(d.totalEarned||0)+d.dailyEarning,...(newDays<=0?{status:'completed'}:{})});
+          await db.collection('users').doc(currentUser.uid).update({wallet:FV.increment(d.dailyEarning),totalEarnings:FV.increment(d.dailyEarning)});
+
+          // Update local cache
+          p.daysLeft=newDays;p.totalEarned=(p.totalEarned||0)+p.dailyEarning;p.lastPayoutDate=new Date();
+          if(newDays<=0)p.status='completed';
+          userData.wallet=(userData.wallet||0)+p.dailyEarning;
+          done++;
+          toast('💰 Payout!','+'+fmt(p.dailyEarning)+' from '+p.planName,'success');
+        }catch(e){console.error('Payout error:',e.message)}
+      }
+      if(done>0){lastPayoutDate=today;document.getElementById('walletDisplay').textContent=fmt(userData.wallet);renderActive();console.log('✅',done,'payout(s) completed at',new Date().toLocaleTimeString())}
+    }catch(e){console.error('Payout check:',e)}
+  }
+
+  // ✅ PURCHASE PLAN
+  window.buyPlan=async function(planId,capital,name,daily,totalProfit,days){
+    if(processing)return;
+    if((purchaseCounts[planId]||0)>=MAX)return Swal.fire({icon:'error',title:'Limit Reached',text:'Max 3 per plan.',confirmButtonColor:'#0d9488'});
+    if(!userData||(userData.wallet||0)<capital)return Swal.fire({icon:'warning',title:'Insufficient Balance',html:`Need <b>${fmt(capital)}</b><br>Balance: <b>${fmt(userData?.wallet||0)}</b>`,confirmButtonColor:'#0d9488'});
+    const ok=await Swal.fire({title:'Confirm Investment',html:`<div style="text-align:center"><b>${name}</b><div style="background:#f0fdfa;border-radius:14px;padding:14px;margin-top:12px;text-align:left;"><div>💰 Capital: <b>${fmt(capital)}</b></div><div>📈 Daily: <b style="color:#10b981;">${fmt(daily)}</b></div><div>📅 Duration: <b>${days} days</b></div><div>🏆 Total: <b style="color:#d97706;">${fmt(totalProfit)}</b></div></div><p style="margin-top:12px;font-size:13px;color:#64748b;">⏰ First payout at midnight tonight</p></div>`,icon:'question',showCancelButton:!0,confirmButtonText:'Invest Now',confirmButtonColor:'#0d9488'});
+    if(!ok.isConfirmed)return;
+    processing=!0;
+    Swal.fire({title:'Processing...',html:'<p>Creating investment & paying bonuses...</p>',allowOutsideClick:!1,didOpen:()=>Swal.showLoading()});
+    try{
+      await db.collection('users').doc(currentUser.uid).update({wallet:FV.increment(-capital)});
+      const pid='plan_'+Date.now()+'_'+planId;
+      await db.collection('users').doc(currentUser.uid).collection('activePlans').doc(pid).set({planId,planName:name,capital,dailyEarning:daily,totalReturn:totalProfit,daysLeft:days,status:'active',startDate:FV.serverTimestamp(),totalEarned:0,lastPayoutDate:null});
+      Swal.update({html:'<p>Paying referral bonuses...</p>'});
+      const bp=await payReferralBonuses(capital);
+      if(bp)Swal.update({html:'<p style="color:#10b981;">✅ Referral bonuses distributed!</p>'});
+      db.collection('users').doc(currentUser.uid).collection('transactions').add({type:'investment',amount:capital,planName:name,planId,status:'completed',description:'📊 Invested in '+name,createdAt:FV.serverTimestamp()}).catch(()=>{});
+      userData.wallet=(userData.wallet||0)-capital;purchaseCounts[planId]=(purchaseCounts[planId]||0)+1;
+      cachedPlans.push({id:pid,planId,planName:name,capital,dailyEarning:daily,daysLeft:days,status:'active',totalEarned:0,lastPayoutDate:null,startDate:new Date()});
+      document.getElementById('walletDisplay').textContent=fmt(userData.wallet);renderActive();renderPlans();
+      Swal.close();await Swal.fire({icon:'success',title:'✅ Active!',text:bp?`${name} — bonuses sent!`:`${name} — first payout at midnight.`,timer:2500,showConfirmButton:!1});
+      toast('🎉 Plan Active!',`${name} earning ${fmt(daily)}/day`,'success');
+    }catch(e){let msg='Purchase failed.';if(e.code==='resource-exhausted')msg='⚠️ System busy. Try again shortly.';Swal.fire({icon:'error',title:'Failed',text:msg,confirmButtonColor:'#ef4444'});await loadAllData()}finally{processing=!1}
+  };
+
+  // ✅ START EVERYTHING
+  auth.onAuthStateChanged(async user=>{
+    if(!user){window.location.href='login.html';return}
+    currentUser=user;
+    await loadAllData();
+    startCountdown();
+    // ✅ AUTO PAYOUT: Runs every 60 seconds — drops ROI at midnight
+    if(payoutTimer)clearInterval(payoutTimer);
+    payoutTimer=setInterval(runPayouts,60000);
+    // Also run on page load to catch missed payouts
+    setTimeout(runPayouts,3000);
+  });
+</script>
+</body>
+</html>
