@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
+  <title>TEXIS · Admin Referrals</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--teal:#0d9488;--teal-dark:#0f766e;--teal-light:#14b8a6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6;--pink:#ec4899;--purple:#8b5cf6;--bg:#f6f8fa;--card:#fff;--text:#1a1a2e;--sub:#5a6072;--muted:#9ca3af;--border:#e5e7eb;--sidebar-w:250px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+    .sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid var(--border);height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+    .sidebar-brand{padding:22px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .sidebar-brand .dot{width:10px;height:10px;background:var(--teal);border-radius:50%;box-shadow:0 0 10px var(--teal-light)}
+    .sidebar-brand span{font-family:'Sora',sans-serif;font-weight:800;font-size:17px}
+    .sidebar-user{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .sidebar-user .av{width:40px;height:40px;background:linear-gradient(135deg,var(--teal-dark),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px}
+    .sidebar-user .info h4{font-size:13px;font-weight:700}.sidebar-user .info p{font-size:10px;color:var(--muted)}
+    .sidebar-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+    .sidebar-nav a{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;text-decoration:none;color:var(--sub);font-weight:600;font-size:13px;transition:all .2s}
+    .sidebar-nav a:hover{background:#f0fdfa;color:var(--teal)}
+    .sidebar-nav a.active{background:var(--teal);color:#fff;box-shadow:0 4px 12px rgba(13,148,136,.25)}
+    .sidebar-nav a i{width:18px;text-align:center}
+    .sidebar-divider{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:16px 14px 8px}
+    .sidebar-footer{padding:14px 18px;border-top:1px solid var(--border)}
+    .sidebar-footer button{width:100%;padding:10px;background:#fef2f2;color:var(--red);border:1px solid #fecaca;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+    .sidebar-footer button:hover{background:var(--red);color:#fff}
+    .main{flex:1;margin-left:var(--sidebar-w);padding:20px 24px;min-height:100vh}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+    .topbar h1{font-family:'Sora',sans-serif;font-size:22px;font-weight:800}
+    .tb-btn{padding:8px 16px;border-radius:10px;font-weight:600;font-size:12px;border:1px solid var(--border);background:#fff;color:var(--sub);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+    .tb-btn:hover{border-color:var(--teal);color:var(--teal)}.tb-btn.danger{color:var(--red);border-color:#fecaca}.tb-btn.danger:hover{background:#fef2f2}
+    .tb-btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.tb-btn.primary:hover{background:var(--teal-dark)}
+    .menu-btn{display:none;width:38px;height:38px;background:#fff;border:1px solid var(--border);border-radius:10px;align-items:center;justify-content:center;cursor:pointer;font-size:17px;color:var(--sub)}
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+    .stat-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;align-items:center;gap:10px}
+    .stat-box .si{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .si.teal{background:#f0fdfa;color:var(--teal)}.si.green{background:#f0fdf4;color:var(--green)}.si.amber{background:#fffbeb;color:var(--amber)}.si.blue{background:#eff6ff;color:var(--blue)}
+    .stat-box .sv{font-family:'Sora',sans-serif;font-size:18px;font-weight:800}.stat-box .sl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+    .commission-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+    .comm-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center}
+    .comm-card.l1{border-top:3px solid var(--teal)}.comm-card.l2{border-top:3px solid var(--amber)}.comm-card.l3{border-top:3px solid var(--pink)}
+    .comm-card .cc-pct{font-family:'Sora',sans-serif;font-size:28px;font-weight:800}.comm-card .cc-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+    .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:16px}
+    .chart-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px}
+    .chart-card h3{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .chart-card h3 i{color:var(--teal)}.chart-wrap{height:240px;position:relative}
+    .tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+    .tab{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .2s}
+    .tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+    .tab-content{display:none}.tab-content.active{display:block}
+    .search-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+    .search-bar input{flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;outline:none}
+    .search-bar input:focus{border-color:var(--teal)}
+    .search-bar select{padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:12px;font-family:inherit;background:#fff;color:var(--sub);cursor:pointer}
+    .table-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:12px;min-width:800px}
+    th{text-align:left;padding:10px 8px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;background:#f8fafc;border-bottom:2px solid var(--border)}
+    td{padding:10px 8px;border-bottom:1px solid #f1f5f9}tr:hover td{background:#f8fafc}
+    .user-cell{display:flex;align-items:center;gap:8px}
+    .user-cell .uav{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--teal-dark),var(--teal));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0}
+    .pill{padding:3px 10px;border-radius:14px;font-size:10px;font-weight:700;display:inline-block}
+    .pill-green{background:#f0fdf4;color:#16a34a}.pill-amber{background:#fffbeb;color:#d97706}.pill-teal{background:#f0fdfa;color:var(--teal)}.pill-pink{background:#fdf2f8;color:var(--pink)}.pill-red{background:#fef2f2;color:#dc2626}
+    .action-btn{width:30px;height:30px;border-radius:8px;background:#f1f5f9;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--sub);font-size:12px;transition:all .2s;margin:0 2px}
+    .action-btn:hover{background:var(--teal);color:#fff}.action-btn.credit{background:#f0fdfa;color:var(--teal)}.action-btn.credit:hover{background:var(--teal);color:#fff}
+    .pagination{display:flex;justify-content:center;gap:4px;padding:14px}
+    .page-btn{width:34px;height:34px;border-radius:8px;background:#fff;border:1px solid var(--border);cursor:pointer;font-weight:600;font-size:12px}
+    .page-btn.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);z-index:999;align-items:center;justify-content:center}
+    .modal-overlay.show{display:flex}
+    .modal-box{background:#fff;border-radius:18px;padding:24px;max-width:550px;width:90%;max-height:85vh;overflow-y:auto;animation:popIn .2s ease}
+    @keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+    .modal-box h3{font-family:'Sora',sans-serif;font-size:17px;margin-bottom:12px}
+    .modal-box .detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:12px}
+    .modal-box .detail-row .lbl{color:var(--sub)}.modal-box .detail-row .val{font-weight:700}
+    .modal-btns{display:flex;gap:8px;margin-top:14px}.modal-btns button{flex:1;padding:12px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;border:none}
+    .btn-cancel{background:#f1f5f9;color:var(--sub)}.btn-primary{background:var(--teal);color:#fff}
+    .loading-screen{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+    .loading-screen.hide{display:none}
+    .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .denied-screen{position:fixed;inset:0;background:#fff;display:none;align-items:center;justify-content:center;z-index:9998}
+    .denied-screen.show{display:flex}
+    .denied-card{text-align:center;padding:40px;max-width:380px}
+    .denied-card i{font-size:48px;color:var(--red);margin-bottom:12px}
+    .denied-card h2{font-family:'Sora',sans-serif;font-size:20px;margin-bottom:8px}
+    .denied-card button{padding:12px 24px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+    @media(max-width:850px){.sidebar{transform:translateX(-100%);transition:transform .3s}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding:16px}.menu-btn{display:flex}.charts-row{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}.commission-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen"><div class="spinner"></div><p style="color:var(--sub);font-weight:600;">Loading admin panel...</p></div>
+<div class="denied-screen" id="deniedScreen"><div class="denied-card"><i class="fas fa-shield-halved"></i><h2>Access Denied</h2><p>You don't have administrator privileges.</p><button onclick="window.location.href='login.html'">Return to Login</button></div></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-brand"><div class="dot"></div><span>TEXIS Admin</span></div>
+  <div class="sidebar-user"><div class="av" id="adminAv">A</div><div class="info"><h4 id="adminNm">Admin</h4><p>Administrator</p></div></div>
+  <div class="sidebar-nav">
+    <a href="admin-dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a href="admin-users.html"><i class="fas fa-users"></i> Users</a>
+    <a href="admin-deposits.html"><i class="fas fa-arrow-down"></i> Deposits</a>
+    <a href="admin-withdrawals.html"><i class="fas fa-arrow-up"></i> Withdrawals</a>
+    <a href="admin-investments.html"><i class="fas fa-chart-line"></i> Investments</a>
+    <a href="admin-referrals.html" class="active"><i class="fas fa-share-nodes"></i> Referrals</a>
+    <div class="sidebar-divider">Management</div>
+    <a href="admin-management.html"><i class="fas fa-users-cog"></i> Manage Users</a>
+    <a href="admin-transactions.html"><i class="fas fa-history"></i> Transactions</a>
+  </div>
+  <div class="sidebar-footer"><button id="sidebarLogout"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+</div>
+
+<div class="main" id="mainContent" style="display:none;">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;"><button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button><h1>Referral System</h1></div>
+    <div style="display:flex;gap:8px;"><button class="tb-btn primary" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button><button class="tb-btn danger" id="topLogout"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="si teal"><i class="fas fa-share-nodes"></i></div><div><div class="sv" id="totalReferrals">0</div><div class="sl">Total Referrals</div></div></div>
+    <div class="stat-box"><div class="si green"><i class="fas fa-user-check"></i></div><div><div class="sv" id="activeReferrers">0</div><div class="sl">Active Referrers</div></div></div>
+    <div class="stat-box"><div class="si amber"><i class="fas fa-coins"></i></div><div><div class="sv" id="totalCommission">₦0</div><div class="sl">Total Commission</div></div></div>
+    <div class="stat-box"><div class="si blue"><i class="fas fa-chart-line"></i></div><div><div class="sv" id="avgCommission">₦0</div><div class="sl">Avg Commission</div></div></div>
+  </div>
+
+  <div class="commission-row">
+    <div class="comm-card l1"><div class="cc-pct" style="color:var(--teal);">20%</div><div class="cc-lbl">Level 1 · Direct</div></div>
+    <div class="comm-card l2"><div class="cc-pct" style="color:var(--amber);">2%</div><div class="cc-lbl">Level 2</div></div>
+    <div class="comm-card l3"><div class="cc-pct" style="color:var(--pink);">1%</div><div class="cc-lbl">Level 3</div></div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card"><h3><i class="fas fa-chart-bar"></i> Top Referrers</h3><div class="chart-wrap"><canvas id="referrersChart"></canvas></div></div>
+    <div class="chart-card"><h3><i class="fas fa-chart-pie"></i> By Level</h3><div class="chart-wrap"><canvas id="levelChart"></canvas></div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="all">All Referrals</button>
+    <button class="tab" data-tab="referrers">By Referrer</button>
+    <button class="tab" data-tab="missing">Missing Bonuses</button>
+  </div>
+
+  <!-- All Referrals -->
+  <div class="tab-content active" id="tab-all">
+    <div class="search-bar">
+      <input type="text" id="searchAll" placeholder="Search by referrer or referred user..." oninput="renderAllRefs()"/>
+      <select id="levelFilter" onchange="renderAllRefs()"><option value="all">All Levels</option><option value="1">Level 1</option><option value="2">Level 2</option><option value="3">Level 3</option></select>
+    </div>
+    <div class="table-card"><div class="table-wrap"><table>
+      <thead><tr><th>Referrer</th><th>Referred</th><th>Level</th><th>Invested</th><th>Commission</th><th>Paid</th><th>Status</th><th></th></tr></thead>
+      <tbody id="allBody"><tr><td colspan="8" style="text-align:center;padding:32px;">Loading...</td></tr></tbody>
+    </table></div><div class="pagination" id="allPagination"></div></div>
+  </div>
+
+  <!-- By Referrer -->
+  <div class="tab-content" id="tab-referrers">
+    <div class="search-bar"><input type="text" id="searchReferrer" placeholder="Search referrer..." oninput="renderReferrers()"/></div>
+    <div class="table-card"><div class="table-wrap"><table>
+      <thead><tr><th>Referrer</th><th>Total</th><th>L1</th><th>L2</th><th>L3</th><th>Commission</th><th></th></tr></thead>
+      <tbody id="referrersBody"><tr><td colspan="7" style="text-align:center;padding:32px;">Loading...</td></tr></tbody>
+    </table></div><div class="pagination" id="referrersPagination"></div></div>
+  </div>
+
+  <!-- Missing Bonuses -->
+  <div class="tab-content" id="tab-missing">
+    <div class="search-bar"><input type="text" id="searchMissing" placeholder="Search referrer..." oninput="renderMissing()"/></div>
+    <div class="table-card"><div class="table-wrap"><table>
+      <thead><tr><th>Referrer</th><th>Referred</th><th>Level</th><th>Invested</th><th>Bonus</th><th></th></tr></thead>
+      <tbody id="missingBody"><tr><td colspan="6" style="text-align:center;padding:32px;">Loading...</td></tr></tbody>
+    </table></div><div class="pagination" id="missingPagination"></div></div>
+  </div>
+</div>
+
+<!-- Credit Modal -->
+<div class="modal-overlay" id="creditModal"><div class="modal-box"><h3>💰 Credit Referral Bonus</h3><div id="creditContent"></div><div class="modal-btns"><button class="btn-cancel" onclick="closeModal('creditModal')">Cancel</button><button class="btn-primary" onclick="processCredit()">Credit Now</button></div></div></div>
+
+<script>
+  const firebaseConfig={apiKey:"AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",authDomain:"cashbridge-a688e.firebaseapp.com",projectId:"cashbridge-a688e",storageBucket:"cashbridge-a688e.firebasestorage.app",messagingSenderId:"345273765518",appId:"1:345273765518:web:29ee0b8f9717cdb50203df"};
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue,fmt=v=>'₦'+Number(v||0).toLocaleString();
+  let allUsers=[],allRefs=[],missing=[],allUsersMap=new Map(),currentAdminName='',creditData=null,refChart,levChart,page={all:1,referrers:1,missing:1},perPage=12;
+
+  document.getElementById('menuBtn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+  function doLogout(){auth.signOut().then(()=>window.location.href='login.html')}
+  document.getElementById('sidebarLogout').addEventListener('click',doLogout);
+  document.getElementById('topLogout').addEventListener('click',doLogout);
+
+  function getReferrerField(data){if(!data)return null;const f=['referrerUid','refererUid','referredByUid','uplineUid','referredBy','referrer','upline','invitedBy','parentId'];for(const k of f){const v=data[k];if(v&&String(v).trim()&&v!=='direct'&&v!=='none')return String(v).trim()}return null}
+  function resolveToUid(rawRef){if(!rawRef)return null;const r=String(rawRef).trim();if(r==='direct'||r==='none'||r==='')return null;if(r.length>=28&&/^[a-zA-Z0-9]+$/.test(r))return allUsersMap.has(r)?r:null;for(const[uid,data]of allUsersMap){if(data.referralCode===r)return uid}return null}
+
+  // ✅ OPTIMIZED: Parallel loading
+  async function loadData(){
+    const usersSnap=await db.collection('users').get();allUsers=[];allUsersMap.clear();
+    usersSnap.forEach(d=>{const data=d.data();allUsers.push({id:d.id,...data});allUsersMap.set(d.id,data)});
+
+    // Build referral tree + get investments in parallel chunks
+    allRefs=[];missing=[];
+    for(let i=0;i<allUsers.length;i+=8){
+      const chunk=allUsers.slice(i,i+8);
+      const results=await Promise.all(chunk.map(async u=>{
+        if(u.role==='admin')return[];
+        const refs=[];
+        // Find direct referrer
+        const refUid=resolveToUid(getReferrerField(u));
+        if(!refUid||!allUsersMap.has(refUid))return refs;
+        // Determine level
+        let level=1;const l1Data=allUsersMap.get(refUid);
+        if(l1Data){const l2Uid=resolveToUid(getReferrerField(l1Data));if(l2Uid&&allUsersMap.has(l2Uid)){level=2;const l2Data=allUsersMap.get(l2Uid);if(l2Data){const l3Uid=resolveToUid(getReferrerField(l2Data));if(l3Uid&&allUsersMap.has(l3Uid))level=3}}}
+        // Get investment
+        let invested=0;try{const ps=await db.collection('users').doc(u.id).collection('activePlans').get();ps.forEach(d=>{invested+=d.data().capital||0})}catch(e){}
+        const rates={1:.20,2:.02,3:.01};const comm=Math.floor(invested*rates[level]);
+        // Check if paid
+        let paid=0;try{const rd=await db.collection('users').doc(refUid).collection('referrals').doc(u.id).get();if(rd.exists)paid=rd.data().totalEarned||0}catch(e){}
+        return[{id:u.id+'_'+refUid+'_'+level,referrerId:refUid,referrerName:(allUsersMap.get(refUid)||{}).fullName||'Unknown',referredId:u.id,referredName:u.fullName||u.username||'Unknown',level,invested,commission:comm,paid,isPaid:paid>=comm,date:u.createdAt?.toDate?.()||new Date()}]
+      }));
+      results.forEach(r=>allRefs.push(...r));
+    }
+    allRefs.sort((a,b)=>b.date-a.date);
+    missing=allRefs.filter(r=>!r.isPaid&&r.commission>0);
+    updateStats();renderAllRefs();renderReferrers();renderMissing();initCharts();
+  }
+
+  function updateStats(){
+    document.getElementById('totalReferrals').textContent=allRefs.length;
+    document.getElementById('activeReferrers').textContent=new Set(allRefs.map(r=>r.referrerId)).size;
+    const tc=allRefs.reduce((s,r)=>s+r.commission,0);
+    document.getElementById('totalCommission').textContent=fmt(tc);
+    document.getElementById('avgCommission').textContent=fmt(allRefs.length?Math.floor(tc/allRefs.length):0);
+  }
+
+  // Render functions
+  function renderAllRefs(){
+    const q=(document.getElementById('searchAll')?.value||'').toLowerCase(),lv=document.getElementById('levelFilter')?.value||'all';
+    let f=allRefs.filter(r=>(!q||r.referrerName.toLowerCase().includes(q)||r.referredName.toLowerCase().includes(q))&&(lv==='all'||r.level===parseInt(lv)));
+    const s=(page.all-1)*perPage,d=f.slice(s,s+perPage),tb=document.getElementById('allBody');
+    tb.innerHTML=d.length?d.map(r=>`<tr><td><div class="user-cell"><div class="uav">${(r.referrerName||'U').charAt(0)}</div><b>${r.referrerName}</b></div></td><td><div class="user-cell"><div class="uav">${(r.referredName||'U').charAt(0)}</div><b>${r.referredName}</b></div></td><td><span class="pill ${r.level===1?'pill-teal':r.level===2?'pill-amber':'pill-pink'}">L${r.level} · ${r.level===1?20:r.level===2?2:1}%</span></td><td><b>${fmt(r.invested)}</b></td><td><b style="color:var(--teal)">${fmt(r.commission)}</b></td><td><span style="color:var(--muted)">${fmt(r.paid)}</span></td><td>${r.isPaid?'<span class="pill pill-green">Paid</span>':'<span class="pill pill-amber">Pending</span>'}</td><td>${!r.isPaid&&r.commission>0?`<button class="action-btn credit" onclick="openCredit('${r.referrerId}','${r.referredId}',${r.level},${r.commission},'${r.referrerName.replace(/'/g,"\\'")}','${r.referredName.replace(/'/g,"\\'")}')" title="Credit"><i class="fas fa-coins"></i></button>`:''}</td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted);">No referrals</td></tr>';
+    const tp=Math.ceil(f.length/perPage);let h='';for(let i=1;i<=tp;i++)h+=`<button class="page-btn ${i===page.all?'active':''}" onclick="goToPage('all',${i})">${i}</button>`;document.getElementById('allPagination').innerHTML=h||'';
+  }
+
+  function renderReferrers(){
+    const q=(document.getElementById('searchReferrer')?.value||'').toLowerCase(),map=new Map();
+    allRefs.forEach(r=>{if(!map.has(r.referrerId))map.set(r.referrerId,{id:r.referrerId,name:r.referrerName,l1:0,l2:0,l3:0,comm:0});const d=map.get(r.referrerId);if(r.level===1)d.l1++;if(r.level===2)d.l2++;if(r.level===3)d.l3++;d.comm+=r.commission});
+    let arr=Array.from(map.values()).sort((a,b)=>b.comm-a.comm);if(q)arr=arr.filter(r=>r.name.toLowerCase().includes(q));
+    const s=(page.referrers-1)*perPage,d=arr.slice(s,s+perPage),tb=document.getElementById('referrersBody');
+    tb.innerHTML=d.length?d.map(r=>`<tr><td><div class="user-cell"><div class="uav">${(r.name||'U').charAt(0)}</div><b>${r.name}</b></div></td><td><b>${r.l1+r.l2+r.l3}</b></td><td><span class="pill pill-teal">${r.l1}</span></td><td><span class="pill pill-amber">${r.l2}</span></td><td><span class="pill pill-pink">${r.l3}</span></td><td><b style="color:var(--teal)">${fmt(r.comm)}</b></td><td><button class="action-btn" onclick="viewTree('${r.id}')" title="View Tree"><i class="fas fa-sitemap"></i></button></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">No referrers</td></tr>';
+    const tp=Math.ceil(arr.length/perPage);let h='';for(let i=1;i<=tp;i++)h+=`<button class="page-btn ${i===page.referrers?'active':''}" onclick="goToPage('referrers',${i})">${i}</button>`;document.getElementById('referrersPagination').innerHTML=h||'';
+  }
+
+  function renderMissing(){
+    const q=(document.getElementById('searchMissing')?.value||'').toLowerCase();let f=missing;if(q)f=f.filter(r=>r.referrerName.toLowerCase().includes(q));
+    const s=(page.missing-1)*perPage,d=f.slice(s,s+perPage),tb=document.getElementById('missingBody');
+    tb.innerHTML=d.length?d.map(r=>`<tr><td><div class="user-cell"><div class="uav">${(r.referrerName||'U').charAt(0)}</div><b>${r.referrerName}</b></div></td><td><div class="user-cell"><div class="uav">${(r.referredName||'U').charAt(0)}</div><b>${r.referredName}</b></div></td><td><span class="pill ${r.level===1?'pill-teal':r.level===2?'pill-amber':'pill-pink'}">L${r.level}</span></td><td><b>${fmt(r.invested)}</b></td><td><b style="color:var(--teal)">${fmt(r.commission)}</b></td><td><button class="action-btn credit" onclick="openCredit('${r.referrerId}','${r.referredId}',${r.level},${r.commission},'${r.referrerName.replace(/'/g,"\\'")}','${r.referredName.replace(/'/g,"\\'")}')" title="Credit"><i class="fas fa-coins"></i></button></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">✅ No missing bonuses</td></tr>';
+    const tp=Math.ceil(f.length/perPage);let h='';for(let i=1;i<=tp;i++)h+=`<button class="page-btn ${i===page.missing?'active':''}" onclick="goToPage('missing',${i})">${i}</button>`;document.getElementById('missingPagination').innerHTML=h||'';
+  }
+
+  window.goToPage=(t,p)=>{page[t]=p;if(t==='all')renderAllRefs();if(t==='referrers')renderReferrers();if(t==='missing')renderMissing()};
+  window.refreshData=loadData;
+
+  // Credit bonus
+  window.openCredit=(rid,uid,level,amount,rname,uname)=>{creditData={rid,uid,level,amount,rname,uname};document.getElementById('creditContent').innerHTML=`<div class="detail-row"><span class="lbl">Referrer</span><span class="val">${rname}</span></div><div class="detail-row"><span class="lbl">Referred</span><span class="val">${uname}</span></div><div class="detail-row"><span class="lbl">Level</span><span class="val"><span class="pill ${level===1?'pill-teal':level===2?'pill-amber':'pill-pink'}">Level ${level} · ${level===1?20:level===2?2:1}%</span></span></div><div class="detail-row"><span class="lbl">Amount</span><span class="val" style="color:var(--teal);font-size:16px;">${fmt(amount)}</span></div>`;document.getElementById('creditModal').classList.add('show')};
+  window.processCredit=async()=>{if(!creditData)return;const ok=await Swal.fire({title:'Confirm',text:`Credit ${fmt(creditData.amount)} to ${creditData.rname}?`,icon:'question',showCancelButton:!0,confirmButtonColor:'#0d9488'});if(!ok.isConfirmed)return;try{await db.collection('users').doc(creditData.rid).update({wallet:FV.increment(creditData.amount),totalEarnings:FV.increment(creditData.amount),totalRefEarnings:FV.increment(creditData.amount)});const ref=db.collection('users').doc(creditData.rid).collection('referrals').doc(creditData.uid),ex=await ref.get();await ref.set({uid:creditData.uid,level:creditData.level,commission:creditData.level===1?20:creditData.level===2?2:1,totalEarned:(ex.exists?ex.data().totalEarned||0:0)+creditData.amount,lastInvestment:0,manuallyCredited:!0,creditedBy:currentAdminName,creditedAt:FV.serverTimestamp()},{merge:!0});Swal.fire({icon:'success',title:'Credited!',timer:1500,showConfirmButton:!1});closeModal('creditModal');loadData()}catch(e){Swal.fire({icon:'error',title:'Failed',text:e.message})}};
+
+  // View referral tree
+  window.viewTree=async(uid)=>{const u=allUsers.find(x=>x.id===uid);if(!u)return;const children=allUsers.filter(x=>resolveToUid(getReferrerField(x))===uid);let h=`<div style="padding:8px;background:#f0fdfa;border-radius:10px;margin-bottom:12px;"><b>${u.fullName||u.username}</b><br><small>${u.email||''}</small></div>`;children.length?children.forEach(c=>{h+=`<div style="margin-left:16px;padding:6px;background:#f8fafc;border-radius:8px;margin-bottom:4px;"><b>${c.fullName||c.username}</b> · ${c.email||''}</div>`}):h+='<p style="color:var(--muted);">No direct referrals</p>';document.getElementById('creditContent').innerHTML=h;document.getElementById('creditModal').classList.add('show');document.querySelector('#creditModal .btn-primary').style.display='none'};
+
+  // Charts
+  function initCharts(){
+    const map=new Map();allRefs.forEach(r=>map.set(r.referrerName,(map.get(r.referrerName)||0)+r.commission));
+    const top=Array.from(map.entries()).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    if(refChart)refChart.destroy();if(levChart)levChart.destroy();
+    refChart=new Chart(document.getElementById('referrersChart'),{type:'bar',data:{labels:top.map(t=>t[0]),datasets:[{label:'Commission',data:top.map(t=>t[1]),backgroundColor:'#0d9488',borderRadius:6}]},options:{responsive:!0,maintainAspectRatio:!1,plugins:{legend:{display:!1}},scales:{y:{ticks:{callback:v=>'₦'+(v/1000).toFixed(0)+'k'},grid:{color:'#f1f5f9'}},x:{grid:{display:!1}}}}});
+    levChart=new Chart(document.getElementById('levelChart'),{type:'doughnut',data:{labels:['Level 1','Level 2','Level 3'],datasets:[{data:[allRefs.filter(r=>r.level===1).length,allRefs.filter(r=>r.level===2).length,allRefs.filter(r=>r.level===3).length],backgroundColor:['#0d9488','#f59e0b','#ec4899'],borderWidth:0}]},options:{responsive:!0,maintainAspectRatio:!1,plugins:{legend:{position:'bottom',labels:{usePointStyle:!0,padding:12}}}}});
+  }
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));tab.classList.add('active');document.getElementById('tab-'+tab.dataset.tab).classList.add('active')})});
+
+  window.closeModal=m=>{document.getElementById(m).classList.remove('show');if(m==='creditModal'){document.querySelector('#creditModal .btn-primary').style.display='';creditData=null}};
+
+  auth.onAuthStateChanged(async user=>{
+    if(!user){window.location.href='login.html';return}
+    try{
+      const snap=await db.collection('users').doc(user.uid).get();
+      if(!snap.exists||snap.data().role!=='admin'){document.getElementById('loadingScreen').classList.add('hide');document.getElementById('deniedScreen').classList.add('show');return}
+      const d=snap.data();currentAdminName=d.fullName||'Admin';document.getElementById('adminAv').textContent=(d.fullName||'A').charAt(0).toUpperCase();document.getElementById('adminNm').textContent=d.fullName||'Admin';
+      document.getElementById('loadingScreen').classList.add('hide');document.getElementById('mainContent').style.display='block';
+      await loadData();
+    }catch(e){document.getElementById('loadingScreen').classList.add('hide');document.getElementById('deniedScreen').classList.add('show')}
+  });
+</script>
+</body>
+</html>
