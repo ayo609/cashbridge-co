@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Withdraw Funds</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--teal:#0d9488;--teal-dark:#0f766e;--teal-light:#14b8a6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--bg:#f6f8fa;--card:#fff;--text:#1a1a2e;--sub:#5a6072;--muted:#9ca3af;--border:#e5e7eb}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+    .container{width:100%;max-width:480px;background:var(--card);border-radius:24px;padding:28px 24px;box-shadow:0 4px 24px rgba(0,0,0,.06);border:1px solid var(--border)}
+    .topbar{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+    .back-btn{width:38px;height:38px;background:var(--bg);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--sub);text-decoration:none;font-size:15px;transition:all .2s}
+    .back-btn:hover{background:var(--teal);color:#fff}
+    .topbar h1{font-family:'Sora',sans-serif;font-size:20px;font-weight:800}
+    .balance-card{background:linear-gradient(135deg,var(--teal-dark),var(--teal),var(--teal-light));border-radius:18px;padding:20px;text-align:center;margin-bottom:20px;color:#fff}
+    .balance-card .lbl{font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+    .balance-card .val{font-family:'Sora',sans-serif;font-size:32px;font-weight:800}
+    .banner{background:#f0fdfa;border:1px solid #99f6e4;border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--teal)}
+    .banner.closed{background:#fef2f2;border-color:#fecaca;color:var(--red)}
+    .banner.warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
+    .banner i{font-size:18px}
+    /* ✅ SINGLE SLOT — One withdrawal per day */
+    .limit-track{display:flex;gap:8px;margin-bottom:8px}
+    .limit-slot{width:100%;height:8px;border-radius:10px;background:#e5e7eb;transition:background .3s}
+    .limit-slot.used{background:var(--teal)}
+    .limit-info{font-size:11px;color:var(--muted);text-align:right;margin-bottom:12px;font-weight:600}
+    .pending-alert{background:#fffbeb;border:2px solid var(--amber);border-radius:14px;padding:16px;margin-bottom:16px;text-align:center}
+    .pending-alert i{font-size:28px;color:var(--amber);margin-bottom:8px;display:block}
+    .pending-alert h4{font-size:14px;font-weight:700;color:#92400e;margin-bottom:4px}
+    .pending-alert p{font-size:12px;color:var(--sub);line-height:1.5}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+    .form-group input{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;outline:none;transition:all .2s}
+    .form-group input:focus{border-color:var(--teal)}
+    .fee-box{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px;margin-bottom:16px;display:none}
+    .fee-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}
+    .fee-row.total{border-top:1px solid #fde68a;margin-top:6px;padding-top:8px;font-weight:700}
+    .submit-btn{width:100%;padding:16px;background:var(--teal);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;text-decoration:none}
+    .submit-btn:hover{background:var(--teal-dark)}.submit-btn:disabled{background:#cbd5e1;color:#94a3b8;cursor:not-allowed}
+    .disabled-card{text-align:center;padding:32px 16px}
+    .disabled-card i{font-size:44px;margin-bottom:12px}
+    .disabled-card h2{font-family:'Sora',sans-serif;font-size:18px;margin-bottom:8px}
+    .disabled-card p{font-size:13px;color:var(--sub);line-height:1.6}
+    .disabled-card .countdown{font-family:monospace;font-size:24px;font-weight:700;color:var(--teal);margin-top:12px}
+    /* ✅ One-per-day badge */
+    .one-per-day-badge{display:inline-flex;align-items:center;gap:6px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:20px;padding:8px 14px;font-size:11px;font-weight:700;color:var(--teal);margin-bottom:16px}
+    .one-per-day-badge i{font-size:14px}
+  </style>
+</head>
+<body>
+
+<div class="container" id="mainContent">
+  <div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:28px;color:var(--teal);"></i><p style="color:var(--sub);margin-top:12px;">Loading...</p></div>
+</div>
+
+<script>
+  const firebaseConfig={apiKey:"AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",authDomain:"cashbridge-a688e.firebaseapp.com",projectId:"cashbridge-a688e",storageBucket:"cashbridge-a688e.firebasestorage.app",messagingSenderId:"345273765518",appId:"1:345273765518:web:29ee0b8f9717cdb50203df"};
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue,fmt=v=>'₦'+Number(v||0).toLocaleString();
+  const MIN=1000,FEE_PCT=15;
+  // ✅ CHANGED: 1 withdrawal per day
+  const MAX_DAILY=1;
+
+  function isSunday(){return new Date().getDay()===0}
+  function isWithinWindow(){if(isSunday())return!1;const h=new Date().getHours();return h>=8&&h<17}
+  function getTimeUntilOpen(){const n=new Date();let o=new Date();o.setHours(8,0,0,0);if(n>=o||isSunday())o.setDate(o.getDate()+1);const d=o-n;return`${String(Math.floor(d/3600000)).padStart(2,'0')}:${String(Math.floor((d%3600000)/60000)).padStart(2,'0')}:${String(Math.floor((d%60000)/1000)).padStart(2,'0')}`}
+
+  // ✅ Count today's withdrawals (all statuses)
+  async function countTodayTx(uid){
+    try{
+      const snap=await db.collection('users').doc(uid).collection('withdrawals').get();
+      let count=0;
+      const today=new Date();today.setHours(0,0,0,0);
+      snap.forEach(d=>{
+        const date=d.data().createdAt?.toDate?.();
+        if(date&&date>=today)count++;
+      });
+      return count;
+    }catch(e){return 0}
+  }
+
+  // ✅ CHECK IF USER HAS PENDING/PROCESSING WITHDRAWAL
+  async function hasPendingWithdrawal(uid){
+    try{
+      const snap=await db.collection('users').doc(uid).collection('withdrawals').get();
+      let hasPending=false;
+      snap.forEach(d=>{
+        const status=d.data().status;
+        if(status==='pending'||status==='processing')hasPending=true;
+      });
+      return hasPending;
+    }catch(e){return false}
+  }
+
+  // ✅ CHECK ACTIVE PLAN
+  async function hasActivePlan(uid){
+    try{
+      const snap=await db.collection('users').doc(uid).collection('activePlans').get();
+      let has=false;
+      snap.forEach(d=>{
+        const p=d.data();
+        if(p.status==='active'&&p.daysLeft>0)has=true;
+      });
+      return has;
+    }catch(e){return false}
+  }
+
+  auth.onAuthStateChanged(async user=>{
+    if(!user){window.location.href='login.html';return}
+    const c=document.getElementById('mainContent');
+    
+    try{
+      const snap=await db.collection('users').doc(user.uid).get();
+      if(!snap.exists){window.location.href='login.html';return}
+      const data=snap.data(),balance=Number(data.wallet||0);
+
+      // ✅ Check if withdrawals are globally enabled
+      let enabled=true;
+      try{
+        const s=await db.collection('settings').doc('withdrawalSystem').get();
+        if(s.exists)enabled=s.data().enabled!==false;
+      }catch(e){}
+      
+      if(!enabled){
+        c.innerHTML=`
+          <div class="disabled-card">
+            <i class="fas fa-exclamation-triangle" style="color:var(--red);"></i>
+            <h2>Withdrawals Disabled</h2>
+            <p>Withdrawals have been disabled by admin.</p>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;">Back to Dashboard</a>`;
+        return;
+      }
+
+      // ✅ SUNDAY BLOCK
+      if(isSunday()){
+        c.innerHTML=`
+          <div class="disabled-card">
+            <i class="fas fa-calendar-times" style="color:var(--red);"></i>
+            <h2>No Withdrawals on Sunday</h2>
+            <p>Withdrawals resume Monday at 8:00 AM.</p>
+            <div class="countdown" id="cd">${getTimeUntilOpen()}</div>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;">Back to Dashboard</a>`;
+        setInterval(()=>{const el=document.getElementById('cd');if(el)el.textContent=getTimeUntilOpen()},1000);
+        return;
+      }
+
+      // ✅ TIME WINDOW CHECK
+      if(!isWithinWindow()){
+        c.innerHTML=`
+          <div class="disabled-card">
+            <i class="fas fa-clock" style="color:var(--amber);"></i>
+            <h2>Outside Withdrawal Hours</h2>
+            <p>Mon–Sat, 8AM–5PM only.</p>
+            <div class="countdown" id="cd">${getTimeUntilOpen()}</div>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;">Back to Dashboard</a>`;
+        setInterval(()=>{const el=document.getElementById('cd');if(el)el.textContent=getTimeUntilOpen()},1000);
+        return;
+      }
+
+      const todayCount=await countTodayTx(user.uid);
+      const hasPlan=await hasActivePlan(user.uid);
+      const slotsLeft=MAX_DAILY-todayCount;
+      const hasExisting=await hasPendingWithdrawal(user.uid);
+
+      // ✅ ACTIVE PLAN REQUIRED
+      if(!hasPlan){
+        c.innerHTML=`
+          <div class="disabled-card">
+            <i class="fas fa-lock" style="color:var(--amber);"></i>
+            <h2 style="color:var(--amber);">Active Investment Required</h2>
+            <p>Purchase a plan to unlock withdrawals.</p>
+          </div>
+          <a href="plans.html" class="submit-btn" style="margin-top:16px;">View Plans</a>`;
+        return;
+      }
+
+      // ✅ DAILY LIMIT REACHED (1 per day)
+      if(slotsLeft<=0){
+        c.innerHTML=`
+          <div class="disabled-card">
+            <i class="fas fa-ban" style="color:var(--red);"></i>
+            <h2>Daily Limit Reached</h2>
+            <p>Only <b>${MAX_DAILY} withdrawal</b> allowed per day.</p>
+            <p style="color:var(--muted);font-size:12px;">Resets at midnight (12:00 AM)</p>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;">Back to Dashboard</a>`;
+        return;
+      }
+
+      // ✅ MINIMUM BALANCE CHECK
+      if(balance<MIN){
+        c.innerHTML=`
+          <div class="disabled-card">
+            <i class="fas fa-wallet" style="color:var(--amber);"></i>
+            <h2 style="color:var(--amber);">Insufficient Balance</h2>
+            <p>Minimum: ${fmt(MIN)} &nbsp;·&nbsp; Your balance: ${fmt(balance)}</p>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;">Back to Dashboard</a>`;
+        return;
+      }
+      
+      // ✅ BLOCK IF PENDING WITHDRAWAL EXISTS
+      if(hasExisting){
+        c.innerHTML=`
+          <div class="disabled-card">
+            <div class="pending-alert">
+              <i class="fas fa-clock"></i>
+              <h4>⚠️ Pending Withdrawal Found</h4>
+              <p>You already have a withdrawal request that is <b>pending approval</b> or <b>being processed</b>.</p>
+              <p style="margin-top:8px;">Please wait for your existing withdrawal to be <b>approved</b> or <b>rejected</b> by the admin before submitting a new one.</p>
+              <p style="margin-top:8px;color:var(--teal);font-weight:600;">⏳ Only one withdrawal at a time is allowed.</p>
+            </div>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:8px;">Back to Dashboard</a>
+          <button class="submit-btn" onclick="location.reload()" style="margin-top:8px;background:var(--amber);">🔄 Check Again</button>`;
+        return;
+      }
+
+      // ✅✅✅ RENDER WITHDRAWAL FORM ✅✅✅
+      c.innerHTML=`
+        <div class="topbar">
+          <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+          <h1>Withdraw Funds</h1>
+        </div>
+        
+        <div class="banner">
+          <i class="fas fa-check-circle"></i>
+          <div><b>Withdrawal Window Open</b><br><small>Mon–Sat, 8AM–5PM</small></div>
+        </div>
+        
+        <!-- ✅ ONE PER DAY INDICATOR -->
+        <div class="one-per-day-badge">
+          <i class="fas fa-calendar-check"></i> 1 withdrawal per day
+        </div>
+        
+        <!-- ✅ SINGLE SLOT TRACKER -->
+        <div class="limit-track">
+          <div class="limit-slot ${todayCount>=1?'used':''}"></div>
+        </div>
+        <div class="limit-info">${todayCount}/${MAX_DAILY} used · ${slotsLeft} remaining today</div>
+        
+        <div class="balance-card">
+          <div class="lbl"><i class="fas fa-wallet"></i> Available Balance</div>
+          <div class="val">${fmt(balance)}</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" id="amount" min="${MIN}" max="${balance}" placeholder="Min: ₦${MIN.toLocaleString()}" oninput="updateFee()"/>
+        </div>
+        
+        <div class="fee-box" id="feeBox">
+          <div class="fee-row"><span>Amount</span><span id="amtDisp">₦0</span></div>
+          <div class="fee-row"><span>Fee (${FEE_PCT}%)</span><span style="color:var(--amber);" id="feeDisp">₦0</span></div>
+          <div class="fee-row total"><span>You Receive</span><span style="color:var(--green);" id="finalDisp">₦0</span></div>
+        </div>
+        
+        <div class="form-group">
+          <label>Bank Name</label>
+          <input type="text" id="bankName" placeholder="e.g., GTBank, Access Bank"/>
+        </div>
+        
+        <div class="form-group">
+          <label>Account Name</label>
+          <input type="text" id="accountName" placeholder="Full name on account"/>
+        </div>
+        
+        <div class="form-group">
+          <label>Account Number</label>
+          <input type="text" id="accountNumber" maxlength="10" placeholder="10-digit account number"/>
+        </div>
+        
+        <div class="banner warn" style="margin-bottom:8px;">
+          <i class="fas fa-info-circle"></i>
+          <div><b>One withdrawal per day</b><br><small>You can only submit 1 withdrawal today. No stacking.</small></div>
+        </div>
+        
+        <button class="submit-btn" id="submitBtn" onclick="doWithdraw()">
+          <i class="fas fa-paper-plane"></i> Submit Withdrawal
+        </button>
+      `;
+
+      // ✅ Store data globally for the form functions
+      window._userBalance=balance;
+      window._userData=data;
+      window._currentUser=user;
+
+      // ✅ Fee calculator
+      window.updateFee=()=>{
+        const a=Number(document.getElementById('amount').value);
+        const fb=document.getElementById('feeBox');
+        if(a>=MIN&&a<=balance){
+          const fee=Math.floor(a*(FEE_PCT/100));
+          document.getElementById('amtDisp').textContent=fmt(a);
+          document.getElementById('feeDisp').textContent=fmt(fee);
+          document.getElementById('finalDisp').textContent=fmt(a-fee);
+          fb.style.display='block';
+        }else{
+          fb.style.display='none';
+        }
+      };
+
+      // ✅ SUBMIT WITHDRAWAL
+      window.doWithdraw=async()=>{
+        const amount=Number(document.getElementById('amount').value);
+        const bankName=document.getElementById('bankName').value.trim();
+        const accountName=document.getElementById('accountName').value.trim();
+        const accountNumber=document.getElementById('accountNumber').value.trim();
+        
+        // Re-validate all conditions
+        if(isSunday())return Swal.fire({icon:'warning',title:'Sunday Closed',text:'Withdrawals are not available on Sundays.',confirmButtonColor:'#0d9488'});
+        
+        if(!isWithinWindow())return Swal.fire({icon:'warning',title:'Window Closed',text:'Withdrawals only Mon-Sat, 8AM-5PM.',confirmButtonColor:'#0d9488'});
+        
+        // ✅ Re-check pending withdrawal
+        if(await hasPendingWithdrawal(user.uid)){
+          return Swal.fire({
+            icon:'warning',
+            title:'Pending Withdrawal Exists',
+            text:'You already have a withdrawal being processed. Please wait for it to be resolved before submitting another.',
+            confirmButtonColor:'#0d9488'
+          });
+        }
+        
+        // ✅ Re-check daily count (1 per day)
+        const todayCount2=await countTodayTx(user.uid);
+        if(todayCount2>=MAX_DAILY){
+          return Swal.fire({
+            icon:'warning',
+            title:'Daily Limit Reached',
+            text:`Only ${MAX_DAILY} withdrawal allowed per day. Please try again tomorrow.`,
+            confirmButtonColor:'#0d9488'
+          });
+        }
+        
+        // ✅ Re-check active plan
+        if(!(await hasActivePlan(user.uid))){
+          return Swal.fire({icon:'warning',title:'Active Plan Required',text:'You need an active investment plan to withdraw.',confirmButtonColor:'#0d9488'});
+        }
+        
+        // Validate amount
+        if(amount<MIN||amount>window._userBalance){
+          return Swal.fire({icon:'warning',title:'Invalid Amount',text:`Amount must be between ${fmt(MIN)} and ${fmt(window._userBalance)}.`,confirmButtonColor:'#0d9488'});
+        }
+        
+        // Validate account number
+        if(accountNumber.length!==10||!/^\d+$/.test(accountNumber)){
+          return Swal.fire({icon:'warning',title:'Invalid Account Number',text:'Account number must be exactly 10 digits.',confirmButtonColor:'#0d9488'});
+        }
+        
+        // Validate bank & account name
+        if(!bankName||!accountName){
+          return Swal.fire({icon:'warning',title:'Missing Information',text:'Please fill in both bank name and account name.',confirmButtonColor:'#0d9488'});
+        }
+
+        const fee=Math.floor(amount*(FEE_PCT/100));
+        const finalAmt=amount-fee;
+        const wid='WTH_'+Date.now();
+        
+        // ✅ Confirmation dialog
+        const ok=await Swal.fire({
+          title:'Confirm Withdrawal',
+          html:`
+            <div style="text-align:left;background:#f0fdfa;border-radius:12px;padding:12px;margin:8px 0;">
+              <div>Amount: <b>${fmt(amount)}</b></div>
+              <div>Fee (${FEE_PCT}%): <b style="color:#d97706;">${fmt(fee)}</b></div>
+              <div>You Receive: <b style="color:#10b981;">${fmt(finalAmt)}</b></div>
+            </div>
+            <div style="text-align:left;font-size:13px;">
+              <div>🏦 Bank: <b>${bankName}</b></div>
+              <div>👤 Account: <b>${accountName}</b></div>
+              <div>🔢 Number: <b>${accountNumber}</b></div>
+            </div>
+            <p style="color:var(--amber);font-size:12px;margin-top:8px;">⚠️ Only 1 withdrawal per day. No stacking.</p>
+          `,
+          icon:'question',
+          showCancelButton:true,
+          confirmButtonText:'Yes, Submit',
+          confirmButtonColor:'#0d9488',
+          cancelButtonText:'Cancel'
+        });
+        
+        if(!ok.isConfirmed)return;
+        
+        Swal.fire({title:'Processing...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+        
+        try{
+          const userRef=db.collection('users').doc(user.uid);
+          const currentSnap=await userRef.get();
+          
+          // Final balance check
+          if((currentSnap.data().wallet||0)<amount){
+            throw new Error('Insufficient balance. Please refresh and try again.');
+          }
+          
+          // Deduct from wallet
+          await userRef.update({wallet:FV.increment(-amount)});
+          
+          // Create withdrawal record
+          await db.collection('users').doc(user.uid).collection('withdrawals').doc(wid).set({
+            withdrawalId:wid,
+            userId:user.uid,
+            username:window._userData.fullName||window._userData.username||'User',
+            email:window._userData.email||'',
+            amount:amount,
+            fee:fee,
+            amountAfterFee:finalAmt,
+            bankName:bankName,
+            accountName:accountName,
+            accountNumber:accountNumber,
+            status:'pending',
+            createdAt:FV.serverTimestamp(),
+            withdrawalDay:new Date().toDateString()
+          });
+          
+          // ✅ Log transaction
+          await db.collection('users').doc(user.uid).collection('transactions').add({
+            type:'withdrawal',
+            amount:-amount,
+            fee:fee,
+            status:'pending',
+            description:'💸 Withdrawal request submitted — ₦'+finalAmt.toLocaleString()+' to '+bankName,
+            withdrawalId:wid,
+            createdAt:FV.serverTimestamp()
+          }).catch(()=>{});
+          
+          await Swal.fire({
+            icon:'success',
+            title:'✅ Submitted Successfully!',
+            html:`
+              <p><b>${fmt(finalAmt)}</b> pending approval</p>
+              <p style="font-size:13px;color:var(--sub);">Bank: ${bankName} · ${accountNumber}</p>
+              <br>
+              <span style="color:var(--amber);font-size:13px;">⚠️ You cannot submit another withdrawal until this one is resolved.</span>
+              <br>
+              <span style="color:var(--red);font-size:12px;">🔒 1 withdrawal per day — try again tomorrow.</span>
+            `,
+            confirmButtonColor:'#0d9488'
+          });
+          
+          setTimeout(()=>window.location.href='dashboard.html',2500);
+        }catch(e){
+          console.error('Withdrawal error:',e);
+          Swal.fire({icon:'error',title:'Failed',text:e.message||'Something went wrong. Please try again.',confirmButtonColor:'#ef4444'});
+        }
+      };
+
+    }catch(e){
+      console.error('Withdrawal page error:',e);
+      c.innerHTML=`
+        <div class="disabled-card">
+          <i class="fas fa-exclamation-circle" style="color:var(--red);"></i>
+          <h2>Error Loading</h2>
+          <p>${e.message||'Something went wrong.'}</p>
+          <button class="submit-btn" onclick="location.reload()" style="margin-top:12px;">🔄 Retry</button>
+        </div>`;
+    }
+  });
+</script>
+</body>
+</html>
