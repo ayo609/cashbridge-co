@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Withdraw Funds</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--teal:#0d9488;--teal-dark:#0f766e;--teal-light:#14b8a6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--bg:#f0f4f8;--card:#fff;--text:#0f172a;--sub:#475569;--muted:#94a3b8;--border:#e2e8f0;--shadow-sm:0 1px 3px rgba(0,0,0,.04);--shadow:0 4px 16px rgba(0,0,0,.06);--radius:20px;--radius-sm:14px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);
+      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;
+      background-image:radial-gradient(ellipse at 0% 0%,#e0f2fe 0%,transparent 50%),radial-gradient(ellipse at 100% 100%,#ccfbf1 0%,transparent 50%);
+    }
+    .container{
+      width:100%;max-width:480px;background:var(--card);border-radius:var(--radius);
+      padding:28px 24px;box-shadow:var(--shadow);border:1px solid var(--border);
+    }
+    .topbar{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+    .back-btn{
+      width:40px;height:40px;background:var(--bg);border:1px solid var(--border);
+      border-radius:12px;display:flex;align-items:center;justify-content:center;
+      color:var(--sub);text-decoration:none;font-size:15px;transition:all .25s;
+    }
+    .back-btn:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+    .topbar h1{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800}
+
+    .balance-card{
+      background:linear-gradient(155deg,#0f172a,#1e293b,var(--teal-dark));
+      border-radius:18px;padding:22px;text-align:center;margin-bottom:20px;color:#fff;
+      box-shadow:0 12px 28px rgba(15,118,110,.25);position:relative;overflow:hidden;
+    }
+    .balance-card::after{content:'';position:absolute;width:100px;height:100px;background:rgba(255,255,255,.04);border-radius:50%;top:-30px;right:-20px}
+    .balance-card .lbl{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;position:relative;z-index:1}
+    .balance-card .val{font-family:'Outfit',sans-serif;font-size:34px;font-weight:800;position:relative;z-index:1}
+
+    .banner{background:#f0fdfa;border:1px solid #99f6e4;border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--teal)}
+    .banner.closed{background:#fef2f2;border-color:#fecaca;color:var(--red)}
+    .banner.warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
+    .banner i{font-size:16px}
+
+    .limit-track{display:flex;gap:8px;margin-bottom:6px}
+    .limit-slot{width:100%;height:8px;border-radius:10px;background:#e5e7eb;transition:background .4s}
+    .limit-slot.used{background:linear-gradient(90deg,var(--teal),var(--teal-light))}
+    .limit-info{font-size:11px;color:var(--muted);text-align:right;margin-bottom:14px;font-weight:600}
+
+    .pending-alert{background:#fffbeb;border:2px solid var(--amber);border-radius:var(--radius-sm);padding:18px;margin-bottom:16px;text-align:center}
+    .pending-alert i{font-size:30px;color:var(--amber);margin-bottom:10px;display:block}
+    .pending-alert h4{font-size:15px;font-weight:700;color:#92400e;margin-bottom:6px}
+    .pending-alert p{font-size:12px;color:var(--sub);line-height:1.6}
+
+    .form-group{margin-bottom:14px}
+    .form-group label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+    .form-group label i{color:var(--teal);font-size:13px}
+    .form-group input{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;outline:none;transition:all .2s;background:#f8fafc}
+    .form-group input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 4px rgba(13,148,136,.06)}
+
+    .fee-box{background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;display:none}
+    .fee-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px}
+    .fee-row.total{border-top:1px solid #fde68a;margin-top:6px;padding-top:10px;font-weight:700;font-size:14px}
+
+    .submit-btn{
+      width:100%;padding:16px;background:linear-gradient(135deg,var(--teal),var(--teal-light));
+      color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:15px;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+      transition:all .25s;font-family:inherit;box-shadow:0 4px 16px rgba(13,148,136,.2);
+    }
+    .submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,148,136,.3)}
+    .submit-btn:disabled{background:#cbd5e1;color:#94a3b8;cursor:not-allowed;box-shadow:none}
+
+    .disabled-card{text-align:center;padding:36px 20px}
+    .disabled-card i{font-size:48px;margin-bottom:14px;display:block}
+    .disabled-card h2{font-family:'Outfit',sans-serif;font-size:19px;margin-bottom:8px}
+    .disabled-card p{font-size:13px;color:var(--sub);line-height:1.6}
+    .disabled-card .countdown{font-family:'Outfit',monospace;font-size:26px;font-weight:800;color:var(--teal);margin-top:14px}
+
+    .one-per-day-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#f0fdfa,#ccfbf1);border:1px solid #99f6e4;border-radius:20px;padding:8px 16px;font-size:11px;font-weight:700;color:var(--teal);margin-bottom:16px}
+    .one-per-day-badge i{font-size:14px}
+
+    .phase-tag{display:inline-block;background:linear-gradient(135deg,var(--teal),var(--teal-light));color:#fff;font-size:9px;font-weight:700;padding:3px 10px;border-radius:10px;letter-spacing:.05em;margin-left:6px;vertical-align:middle}
+  </style>
+</head>
+<body>
+
+<div class="container" id="mainContent">
+  <div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:28px;color:var(--teal);"></i><p style="color:var(--sub);margin-top:12px;">Loading withdrawal page...</p></div>
+</div>
+
+<script>
+  // ✅ NEW FIREBASE CONFIG — TEXIS Phase 2
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoya4moqwNCuVI-EtzLcMt2gD6QNUdyCQ",
+    authDomain: "texis-b7180.firebaseapp.com",
+    projectId: "texis-b7180",
+    storageBucket: "texis-b7180.firebasestorage.app",
+    messagingSenderId: "848854390209",
+    appId: "1:848854390209:web:c5babd1ca5e0e42ba08b40"
+  };
+
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const FV = firebase.firestore.FieldValue;
+  const fmt = v => '₦' + Number(v || 0).toLocaleString();
+  const MIN_WITHDRAW = 1000;
+  const FEE_PCT = 15;
+  const MAX_DAILY = 1; // 1 withdrawal per day
+
+  let isSubmitting = false;
+
+  function isSunday() { return new Date().getDay() === 0; }
+  
+  function isWithinWindow() {
+    if (isSunday()) return false;
+    const h = new Date().getHours();
+    return h >= 8 && h < 17;
+  }
+
+  function getTimeUntilOpen() {
+    const now = new Date();
+    let open = new Date();
+    open.setHours(8, 0, 0, 0);
+    if (now >= open || isSunday()) open.setDate(open.getDate() + 1);
+    const diff = open - now;
+    return `${String(Math.floor(diff / 3600000)).padStart(2, '0')}:${String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0')}:${String(Math.floor((diff % 60000) / 1000)).padStart(2, '0')}`;
+  }
+
+  // ✅ COUNT TODAY'S WITHDRAWALS (optimised with limit)
+  async function countTodayTx(uid) {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const snap = await db.collection('users').doc(uid).collection('withdrawals')
+        .where('createdAt', '>=', today).limit(5).get();
+      return snap.size;
+    } catch (e) { return 0; }
+  }
+
+  // ✅ CHECK PENDING WITHDRAWAL (optimised)
+  async function hasPendingWithdrawal(uid) {
+    try {
+      const snap = await db.collection('users').doc(uid).collection('withdrawals')
+        .where('status', 'in', ['pending', 'processing']).limit(1).get();
+      return !snap.empty;
+    } catch (e) { return false; }
+  }
+
+  // ✅ CHECK ACTIVE PLAN (optimised)
+  async function hasActivePlan(uid) {
+    try {
+      const snap = await db.collection('users').doc(uid).collection('activePlans')
+        .where('status', '==', 'active').where('daysLeft', '>', 0).limit(1).get();
+      return !snap.empty;
+    } catch (e) { return false; }
+  }
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    const c = document.getElementById('mainContent');
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (!snap.exists) { window.location.href = 'login.html'; return; }
+      const data = snap.data();
+
+      // ⛔ BAN CHECK
+      if (data.banned === true || data.isBanned === true || data.status === 'banned') {
+        await auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const balance = Number(data.wallet || 0);
+
+      // ✅ Check if withdrawals are globally enabled (single read)
+      let enabled = true;
+      try {
+        const settingsSnap = await db.collection('settings').doc('withdrawalSystem').get();
+        if (settingsSnap.exists) enabled = settingsSnap.data().enabled !== false;
+      } catch (e) { /* use default */ }
+
+      if (!enabled) {
+        c.innerHTML = `
+          <div class="disabled-card">
+            <i class="fas fa-exclamation-triangle" style="color:var(--red);"></i>
+            <h2>Withdrawals Disabled</h2>
+            <p>Withdrawals have been temporarily disabled by admin.</p>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;text-decoration:none;">Back to Dashboard</a>`;
+        return;
+      }
+
+      // ✅ SUNDAY BLOCK
+      if (isSunday()) {
+        c.innerHTML = `
+          <div class="disabled-card">
+            <i class="fas fa-calendar-times" style="color:var(--red);"></i>
+            <h2>No Withdrawals on Sunday</h2>
+            <p>Withdrawals resume Monday at 8:00 AM.</p>
+            <div class="countdown" id="cd">${getTimeUntilOpen()}</div>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;text-decoration:none;">Back to Dashboard</a>`;
+        const cdInterval = setInterval(() => {
+          const el = document.getElementById('cd');
+          if (el) el.textContent = getTimeUntilOpen();
+          else clearInterval(cdInterval);
+        }, 1000);
+        return;
+      }
+
+      // ✅ TIME WINDOW CHECK
+      if (!isWithinWindow()) {
+        c.innerHTML = `
+          <div class="disabled-card">
+            <i class="fas fa-clock" style="color:var(--amber);"></i>
+            <h2>Outside Withdrawal Hours</h2>
+            <p>Mon–Sat, 8AM–5PM only.</p>
+            <div class="countdown" id="cd">${getTimeUntilOpen()}</div>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;text-decoration:none;">Back to Dashboard</a>`;
+        const cdInterval = setInterval(() => {
+          const el = document.getElementById('cd');
+          if (el) el.textContent = getTimeUntilOpen();
+          else clearInterval(cdInterval);
+        }, 1000);
+        return;
+      }
+
+      // ✅ RUN ALL CHECKS IN PARALLEL
+      const [todayCount, hasPlan, hasExisting] = await Promise.all([
+        countTodayTx(user.uid),
+        hasActivePlan(user.uid),
+        hasPendingWithdrawal(user.uid)
+      ]);
+
+      const slotsLeft = MAX_DAILY - todayCount;
+
+      // ✅ ACTIVE PLAN REQUIRED
+      if (!hasPlan) {
+        c.innerHTML = `
+          <div class="disabled-card">
+            <i class="fas fa-lock" style="color:var(--amber);"></i>
+            <h2 style="color:var(--amber);">Active Investment Required</h2>
+            <p>Purchase an investment plan to unlock withdrawals.</p>
+          </div>
+          <a href="plans.html" class="submit-btn" style="margin-top:16px;text-decoration:none;">View Plans</a>`;
+        return;
+      }
+
+      // ✅ DAILY LIMIT REACHED
+      if (slotsLeft <= 0) {
+        c.innerHTML = `
+          <div class="disabled-card">
+            <i class="fas fa-ban" style="color:var(--red);"></i>
+            <h2>Daily Limit Reached</h2>
+            <p>Only <b>${MAX_DAILY} withdrawal</b> allowed per day.</p>
+            <p style="color:var(--muted);font-size:12px;">Resets at midnight (12:00 AM)</p>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;text-decoration:none;">Back to Dashboard</a>`;
+        return;
+      }
+
+      // ✅ MINIMUM BALANCE CHECK
+      if (balance < MIN_WITHDRAW) {
+        c.innerHTML = `
+          <div class="disabled-card">
+            <i class="fas fa-wallet" style="color:var(--amber);"></i>
+            <h2 style="color:var(--amber);">Insufficient Balance</h2>
+            <p>Minimum: ${fmt(MIN_WITHDRAW)} &nbsp;·&nbsp; Your balance: ${fmt(balance)}</p>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:16px;text-decoration:none;">Back to Dashboard</a>`;
+        return;
+      }
+
+      // ✅ BLOCK IF PENDING WITHDRAWAL EXISTS
+      if (hasExisting) {
+        c.innerHTML = `
+          <div class="disabled-card">
+            <div class="pending-alert">
+              <i class="fas fa-clock"></i>
+              <h4>⚠️ Pending Withdrawal Found</h4>
+              <p>You already have a withdrawal request that is <b>pending approval</b> or <b>being processed</b>.</p>
+              <p style="margin-top:8px;">Please wait for it to be <b>approved</b> or <b>rejected</b> before submitting another.</p>
+              <p style="margin-top:8px;color:var(--teal);font-weight:600;">⏳ One withdrawal at a time — no stacking.</p>
+            </div>
+          </div>
+          <a href="dashboard.html" class="submit-btn" style="margin-top:8px;text-decoration:none;">Back to Dashboard</a>
+          <button class="submit-btn" onclick="location.reload()" style="margin-top:8px;background:var(--amber);">🔄 Refresh Status</button>`;
+        return;
+      }
+
+      // ✅✅✅ RENDER WITHDRAWAL FORM ✅✅✅
+      c.innerHTML = `
+        <div class="topbar">
+          <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+          <h1>Withdraw Funds <span class="phase-tag">PHASE 2</span></h1>
+        </div>
+        
+        <div class="banner">
+          <i class="fas fa-check-circle"></i>
+          <div><b>Withdrawal Window Open</b><br><small>Mon–Sat, 8AM–5PM</small></div>
+        </div>
+        
+        <div class="one-per-day-badge">
+          <i class="fas fa-calendar-check"></i> 1 withdrawal per day
+        </div>
+        
+        <div class="limit-track">
+          <div class="limit-slot ${todayCount >= 1 ? 'used' : ''}"></div>
+        </div>
+        <div class="limit-info">${todayCount}/${MAX_DAILY} used · ${slotsLeft} remaining today</div>
+        
+        <div class="balance-card">
+          <div class="lbl"><i class="fas fa-wallet"></i> Available Balance</div>
+          <div class="val">${fmt(balance)}</div>
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fas fa-coins"></i> Amount (₦)</label>
+          <input type="number" id="amount" min="${MIN_WITHDRAW}" max="${balance}" placeholder="Min: ₦${MIN_WITHDRAW.toLocaleString()}" oninput="updateFee()" inputmode="numeric"/>
+        </div>
+        
+        <div class="fee-box" id="feeBox">
+          <div class="fee-row"><span>Amount</span><span id="amtDisp">₦0</span></div>
+          <div class="fee-row"><span>Fee (${FEE_PCT}%)</span><span style="color:var(--amber);" id="feeDisp">₦0</span></div>
+          <div class="fee-row total"><span>You Receive</span><span style="color:var(--green);" id="finalDisp">₦0</span></div>
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fas fa-university"></i> Bank Name</label>
+          <input type="text" id="bankName" placeholder="e.g., GTBank, Access Bank" autocomplete="off"/>
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Account Name</label>
+          <input type="text" id="accountName" placeholder="Full name on account" autocomplete="off"/>
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fas fa-credit-card"></i> Account Number</label>
+          <input type="text" id="accountNumber" maxlength="10" placeholder="10-digit account number" inputmode="numeric" autocomplete="off"/>
+        </div>
+        
+        <div class="banner warn" style="margin-bottom:8px;">
+          <i class="fas fa-info-circle"></i>
+          <div><b>Important</b><br><small>1 withdrawal per day. No stacking. Fee: ${FEE_PCT}%.</small></div>
+        </div>
+        
+        <button class="submit-btn" id="submitBtn" onclick="doWithdraw()">
+          <i class="fas fa-paper-plane"></i> Submit Withdrawal Request
+        </button>
+      `;
+
+      // ✅ Store globally for form functions
+      window._userBalance = balance;
+      window._userData = data;
+      window._currentUser = user;
+
+      // ✅ Fee calculator
+      window.updateFee = () => {
+        const amount = Number(document.getElementById('amount').value);
+        const fb = document.getElementById('feeBox');
+        if (amount >= MIN_WITHDRAW && amount <= balance) {
+          const fee = Math.floor(amount * (FEE_PCT / 100));
+          document.getElementById('amtDisp').textContent = fmt(amount);
+          document.getElementById('feeDisp').textContent = fmt(fee);
+          document.getElementById('finalDisp').textContent = fmt(amount - fee);
+          fb.style.display = 'block';
+        } else {
+          fb.style.display = 'none';
+        }
+      };
+
+      // ✅ SUBMIT WITHDRAWAL
+      window.doWithdraw = async () => {
+        if (isSubmitting) return;
+        
+        const amount = Number(document.getElementById('amount').value);
+        const bankName = document.getElementById('bankName').value.trim();
+        const accountName = document.getElementById('accountName').value.trim();
+        const accountNumber = document.getElementById('accountNumber').value.trim();
+
+        // Re-validate conditions
+        if (isSunday()) return Swal.fire({ icon: 'warning', title: 'Sunday Closed', text: 'Withdrawals unavailable on Sundays.', confirmButtonColor: '#0d9488' });
+        if (!isWithinWindow()) return Swal.fire({ icon: 'warning', title: 'Window Closed', text: 'Mon–Sat, 8AM–5PM only.', confirmButtonColor: '#0d9488' });
+
+        // Re-check pending
+        if (await hasPendingWithdrawal(user.uid)) {
+          return Swal.fire({ icon: 'warning', title: 'Pending Withdrawal Exists', text: 'Wait for your current withdrawal to be resolved.', confirmButtonColor: '#0d9488' });
+        }
+
+        // Re-check daily count
+        if (await countTodayTx(user.uid) >= MAX_DAILY) {
+          return Swal.fire({ icon: 'warning', title: 'Daily Limit Reached', text: '1 withdrawal per day. Try again tomorrow.', confirmButtonColor: '#0d9488' });
+        }
+
+        // Re-check active plan
+        if (!(await hasActivePlan(user.uid))) {
+          return Swal.fire({ icon: 'warning', title: 'Active Plan Required', text: 'Purchase a plan to withdraw.', confirmButtonColor: '#0d9488' });
+        }
+
+        // Validate amount
+        if (isNaN(amount) || amount < MIN_WITHDRAW || amount > window._userBalance) {
+          return Swal.fire({ icon: 'warning', title: 'Invalid Amount', text: `Enter amount between ${fmt(MIN_WITHDRAW)} and ${fmt(window._userBalance)}.`, confirmButtonColor: '#0d9488' });
+        }
+
+        // Validate account number (10 digits)
+        if (accountNumber.length !== 10 || !/^\d{10}$/.test(accountNumber)) {
+          return Swal.fire({ icon: 'warning', title: 'Invalid Account', text: 'Account number must be exactly 10 digits.', confirmButtonColor: '#0d9488' });
+        }
+
+        // Validate bank & name
+        if (!bankName || !accountName) {
+          return Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Fill in bank name and account name.', confirmButtonColor: '#0d9488' });
+        }
+
+        const fee = Math.floor(amount * (FEE_PCT / 100));
+        const finalAmt = amount - fee;
+        const wid = 'WTH_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+
+        // Confirmation
+        const ok = await Swal.fire({
+          title: 'Confirm Withdrawal',
+          html: `
+            <div style="text-align:left;background:#f8fafc;border-radius:14px;padding:14px;margin:10px 0;font-size:13px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Amount:</span><b>${fmt(amount)}</b></div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Fee (${FEE_PCT}%):</span><b style="color:#d97706;">-${fmt(fee)}</b></div>
+              <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #e5e7eb;padding-top:6px;"><span>You Receive:</span><b style="color:var(--green);">${fmt(finalAmt)}</b></div>
+            </div>
+            <div style="text-align:left;font-size:13px;line-height:1.8;">
+              <div>🏦 <b>${bankName}</b></div>
+              <div>👤 ${accountName}</div>
+              <div>🔢 ${accountNumber}</div>
+            </div>
+            <p style="color:var(--amber);font-size:11px;margin-top:8px;">⚠️ 1 withdrawal per day · No stacking</p>`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, Submit',
+          confirmButtonColor: '#0d9488',
+          cancelButtonText: 'Cancel'
+        });
+
+        if (!ok.isConfirmed) return;
+
+        isSubmitting = true;
+        Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+          const userRef = db.collection('users').doc(user.uid);
+          const currentSnap = await userRef.get();
+
+          if ((currentSnap.data().wallet || 0) < amount) {
+            throw new Error('Insufficient balance. Please refresh and try again.');
+          }
+
+          // ✅ Deduct wallet
+          await userRef.update({ wallet: FV.increment(-amount) });
+
+          // ✅ Create withdrawal record (single write)
+          await db.collection('users').doc(user.uid).collection('withdrawals').doc(wid).set({
+            withdrawalId: wid,
+            userId: user.uid,
+            username: window._userData.fullName || window._userData.username || 'User',
+            email: window._userData.email || '',
+            amount,
+            fee,
+            amountAfterFee: finalAmt,
+            bankName,
+            accountName,
+            accountNumber,
+            status: 'pending',
+            phase: 'phase2',
+            createdAt: FV.serverTimestamp(),
+            withdrawalDay: new Date().toDateString()
+          });
+
+          // ✅ Log transaction
+          await db.collection('users').doc(user.uid).collection('transactions').add({
+            type: 'withdrawal',
+            amount: -amount,
+            fee,
+            status: 'pending',
+            description: '💸 Withdrawal: ₦' + finalAmt.toLocaleString() + ' to ' + bankName,
+            withdrawalId: wid,
+            createdAt: FV.serverTimestamp()
+          }).catch(() => {});
+
+          Swal.close();
+          await Swal.fire({
+            icon: 'success',
+            title: '✅ Submitted!',
+            html: `<p><b>${fmt(finalAmt)}</b> pending approval</p><p style="font-size:12px;color:var(--sub);">${bankName} · ${accountNumber}</p><br><span style="color:var(--amber);font-size:12px;">⚠️ No more withdrawals until resolved.</span><br><span style="color:var(--red);font-size:11px;">🔒 1 per day — try again tomorrow.</span>`,
+            confirmButtonColor: '#0d9488'
+          });
+
+          setTimeout(() => window.location.href = 'dashboard.html', 2500);
+
+        } catch (e) {
+          console.error('Withdrawal error:', e);
+          isSubmitting = false;
+          let msg = 'Something went wrong. Please try again.';
+          if (e.code === 'resource-exhausted') msg = 'System busy. Please wait a moment.';
+          Swal.fire({ icon: 'error', title: 'Failed', text: msg, confirmButtonColor: '#ef4444' });
+        }
+      };
+
+    } catch (e) {
+      console.error('Page error:', e);
+      c.innerHTML = `
+        <div class="disabled-card">
+          <i class="fas fa-exclamation-circle" style="color:var(--red);"></i>
+          <h2>Error Loading</h2>
+          <p>${e.message || 'Something went wrong.'}</p>
+          <button class="submit-btn" onclick="location.reload()" style="margin-top:12px;">🔄 Retry</button>
+        </div>`;
+    }
+  });
+
+  console.log('✅ Withdrawal page ready — Phase 2');
+</script>
+</body>
+</html>
