@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
+  <title>TEXIS · Admin Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --teal:#0d9488;--teal-dark:#0f766e;--teal-light:#14b8a6;
+      --green:#10b981;--amber:#f59e0b;--red:#ef4444;
+      --blue:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;
+      --bg:#f0f4f8;--card:#fff;--text:#0f172a;--sub:#475569;
+      --muted:#94a3b8;--border:#e2e8f0;
+      --shadow-sm:0 1px 3px rgba(0,0,0,.04);
+      --shadow:0 4px 16px rgba(0,0,0,.06);
+      --shadow-lg:0 12px 32px rgba(0,0,0,.08);
+      --radius:20px;--radius-sm:14px;--sidebar-w:260px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);
+      min-height:100vh;display:flex;
+      background-image:radial-gradient(ellipse at 0% 0%,#e0f2fe 0%,transparent 50%),radial-gradient(ellipse at 100% 100%,#ccfbf1 0%,transparent 50%);
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      width:var(--sidebar-w);background:rgba(255,255,255,.95);
+      backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border-right:1px solid var(--border);height:100vh;
+      position:fixed;left:0;top:0;display:flex;flex-direction:column;
+      z-index:100;overflow-y:auto;transition:transform .3s;
+    }
+    .sidebar-brand{
+      padding:22px 20px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:10px;
+    }
+    .sidebar-brand .dot{width:10px;height:10px;background:var(--red);border-radius:50%;box-shadow:0 0 12px rgba(239,68,68,.5);animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .sidebar-brand span{font-family:'Outfit',sans-serif;font-weight:800;font-size:18px}
+    .sidebar-brand .phase-tag{font-size:9px;background:var(--red);color:#fff;padding:3px 8px;border-radius:8px;font-weight:700}
+    .sidebar-user{
+      padding:16px 20px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:12px;
+    }
+    .sidebar-user .av{
+      width:42px;height:42px;background:linear-gradient(135deg,var(--red),#dc2626);
+      border-radius:12px;display:flex;align-items:center;justify-content:center;
+      color:#fff;font-weight:800;font-size:16px;flex-shrink:0;
+    }
+    .sidebar-user .info h4{font-size:13px;font-weight:700}.sidebar-user .info p{font-size:10px;color:var(--muted)}
+    .sidebar-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:3px}
+    .sidebar-nav a{
+      display:flex;align-items:center;gap:10px;padding:12px 14px;
+      border-radius:12px;text-decoration:none;color:var(--sub);
+      font-weight:600;font-size:13px;transition:all .2s;white-space:nowrap;
+    }
+    .sidebar-nav a:hover{background:rgba(239,68,68,.05);color:var(--red)}
+    .sidebar-nav a.active{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(239,68,68,.25)}
+    .sidebar-nav a i{width:18px;text-align:center;font-size:14px}
+    .sidebar-nav a .badge{margin-left:auto;background:rgba(0,0,0,.08);padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700}
+    a.active .badge{background:rgba(255,255,255,.2)}
+    .sidebar-divider{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:16px 14px 8px}
+    .sidebar-footer{padding:14px 18px;border-top:1px solid var(--border)}
+    .sidebar-footer button{
+      width:100%;padding:12px;background:#fef2f2;color:var(--red);
+      border:1px solid #fecaca;border-radius:12px;font-weight:700;
+      font-size:13px;cursor:pointer;display:flex;align-items:center;
+      justify-content:center;gap:8px;transition:all .2s;font-family:inherit;
+    }
+    .sidebar-footer button:hover{background:var(--red);color:#fff}
+
+    /* MAIN */
+    .main{flex:1;margin-left:var(--sidebar-w);padding:24px;min-height:100vh}
+    .topbar{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:24px;flex-wrap:wrap;gap:12px;
+    }
+    .topbar h1{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;display:flex;align-items:center;gap:10px}
+    .topbar h1 i{color:var(--red);font-size:22px}
+    .topbar-right{display:flex;gap:8px;align-items:center}
+    .tb-btn{
+      padding:10px 16px;border-radius:12px;font-weight:600;font-size:12px;
+      border:1px solid var(--border);background:var(--card);color:var(--sub);
+      cursor:pointer;display:flex;align-items:center;gap:6px;
+      transition:all .2s;font-family:inherit;white-space:nowrap;
+    }
+    .tb-btn:hover{border-color:var(--teal);color:var(--teal)}
+    .tb-btn.danger{color:var(--red);border-color:#fecaca}.tb-btn.danger:hover{background:var(--red);color:#fff;border-color:var(--red)}
+    .menu-btn{
+      display:none;width:40px;height:40px;background:var(--card);
+      border:1px solid var(--border);border-radius:12px;align-items:center;
+      justify-content:center;cursor:pointer;font-size:18px;color:var(--sub);
+    }
+
+    /* STATS */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+    .stat-box{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:20px;display:flex;
+      align-items:center;gap:14px;box-shadow:var(--shadow-sm);transition:all .25s;
+    }
+    .stat-box:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+    .stat-box .sb-icon{
+      width:50px;height:50px;border-radius:14px;display:flex;
+      align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+    }
+    .sb-icon.teal{background:linear-gradient(135deg,#f0fdfa,#ccfbf1);color:var(--teal)}
+    .sb-icon.green{background:linear-gradient(135deg,#f0fdf4,#dcfce7);color:var(--green)}
+    .sb-icon.amber{background:linear-gradient(135deg,#fffbeb,#fef3c7);color:var(--amber)}
+    .sb-icon.red{background:linear-gradient(135deg,#fef2f2,#fecaca);color:var(--red)}
+    .sb-icon.blue{background:linear-gradient(135deg,#eff6ff,#dbeafe);color:var(--blue)}
+    .sb-icon.purple{background:linear-gradient(135deg,#faf5ff,#f3e8ff);color:var(--purple)}
+    .stat-box .sb-val{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800}
+    .stat-box .sb-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+
+    /* CHARTS */
+    .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:24px}
+    .chart-card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:20px;box-shadow:var(--shadow-sm);
+    }
+    .chart-card h3{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .chart-card h3 i{color:var(--teal)}
+    .chart-wrap{height:260px;position:relative}
+
+    /* ACTIONS */
+    .actions-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+    .act-btn{
+      padding:12px 20px;border-radius:12px;font-weight:700;font-size:13px;
+      text-decoration:none;cursor:pointer;display:flex;align-items:center;
+      gap:8px;border:1px solid var(--border);background:var(--card);color:var(--sub);
+      transition:all .25s;font-family:inherit;
+    }
+    .act-btn:hover{border-color:var(--teal);color:var(--teal);transform:translateY(-2px);box-shadow:var(--shadow)}
+
+    /* TABLES */
+    .table-card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm);
+    }
+    .table-card h3{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .table-card h3 i{color:var(--teal)}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:12px;min-width:500px}
+    th{text-align:left;padding:12px 10px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border)}
+    td{padding:11px 10px;border-bottom:1px solid #f1f5f9}
+    tr:hover td{background:#f8fafc}
+    .pill{padding:4px 10px;border-radius:14px;font-size:10px;font-weight:700;display:inline-block}
+    .pill-green{background:#f0fdf4;color:#16a34a}.pill-red{background:#fef2f2;color:#dc2626}.pill-amber{background:#fffbeb;color:#d97706}.pill-blue{background:#eff6ff;color:#2563eb}
+
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:999;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.show{display:flex}
+    .modal-box{background:var(--card);border-radius:var(--radius);padding:28px;max-width:440px;width:100%;text-align:center;animation:popIn .25s ease}
+    @keyframes popIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+    .modal-box h3{font-family:'Outfit',sans-serif;font-size:18px;margin-bottom:6px}
+    .modal-box p{font-size:13px;color:var(--sub);margin-bottom:14px;line-height:1.6}
+    .modal-box input{width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;font-size:15px;text-align:center;font-family:inherit;outline:none;margin-bottom:16px}
+    .modal-box input:focus{border-color:var(--red)}
+    .modal-btns{display:flex;gap:10px}
+    .modal-btns button{flex:1;padding:14px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;border:none;font-family:inherit;transition:all .2s}
+    .btn-cancel{background:#f1f5f9;color:var(--sub)}.btn-cancel:hover{background:#e2e8f0}
+    .btn-danger{background:var(--red);color:#fff}.btn-danger:disabled{opacity:.4;cursor:not-allowed}.btn-danger:hover:not(:disabled){background:#dc2626}
+
+    /* LOADING */
+    .loading-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+    .loading-screen.hide{display:none}
+    .spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .denied-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:9998}
+    .denied-screen.show{display:flex}
+    .denied-card{text-align:center;padding:40px;max-width:400px}
+    .denied-card i{font-size:52px;color:var(--red);margin-bottom:14px}
+    .denied-card h2{font-family:'Outfit',sans-serif;font-size:20px;margin-bottom:8px}
+    .denied-card button{padding:14px 28px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px}
+
+    @media(max-width:900px){
+      .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+      .main{margin-left:0;padding:16px}.menu-btn{display:flex}
+      .charts-row{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:500px){.stats-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen"><div class="spinner"></div><p style="color:var(--sub);font-weight:600;">Loading admin panel...</p></div>
+<div class="denied-screen" id="deniedScreen"><div class="denied-card"><i class="fas fa-shield-halved"></i><h2>Access Denied</h2><p style="color:var(--sub);">You don't have administrator privileges.</p><button onclick="window.location.href='login.html'">Return to Login</button></div></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-brand"><div class="dot"></div><span>TEXIS</span><span class="phase-tag">ADMIN</span></div>
+  <div class="sidebar-user"><div class="av" id="adminAv">A</div><div class="info"><h4 id="adminNm">Admin</h4><p>Phase 2 · Administrator</p></div></div>
+  <div class="sidebar-nav">
+    <a href="admin-dashboard.html" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a href="admin-users.html"><i class="fas fa-users"></i> Users <span class="badge" id="badgeUsers">0</span></a>
+    <a href="admin-deposits.html"><i class="fas fa-arrow-down"></i> Deposits <span class="badge" id="badgeDeposits">0</span></a>
+    <a href="admin-withdrawals.html"><i class="fas fa-arrow-up"></i> Withdrawals <span class="badge" id="badgeWithdrawals">0</span></a>
+    <a href="admin-investments.html"><i class="fas fa-chart-line"></i> Investments <span class="badge" id="badgeInvestments">0</span></a>
+    <div class="sidebar-divider">Management</div>
+    <a href="admin-management.html"><i class="fas fa-user-gear"></i> Manage Users</a>
+    <a href="admin-ban.html"><i class="fas fa-user-slash"></i> Ban Users</a>
+    <a href="admin-delete.html"><i class="fas fa-trash-can"></i> System Wipe</a>
+    <a href="admin-suspend.html"><i class="fas fa-user-clock"></i> Suspended Users</a>
+    <a href="admin-transactions.html"><i class="fas fa-history"></i> All Transactions</a>
+    <a href="admin-admins.html"><i class="fas fa-user-shield"></i> Manage Admins</a>
+  </div>
+  <div class="sidebar-footer"><button id="sidebarLogout"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mainContent" style="display:none;">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+      <h1><i class="fas fa-chart-pie"></i> Dashboard Overview</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="tb-btn"><i class="far fa-calendar-alt"></i> <span id="currentDate"></span></div>
+      <button class="tb-btn danger" id="resetBtn"><i class="fas fa-triangle-exclamation"></i> Reset</button>
+      <button class="tb-btn" id="topLogout"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="sb-icon teal"><i class="fas fa-users"></i></div><div><div class="sb-val" id="totalUsers">0</div><div class="sb-lbl">Total Users</div></div></div>
+    <div class="stat-box"><div class="sb-icon green"><i class="fas fa-chart-line"></i></div><div><div class="sb-val" id="totalInvested">₦0</div><div class="sb-lbl">Total Invested</div></div></div>
+    <div class="stat-box"><div class="sb-icon amber"><i class="fas fa-clock"></i></div><div><div class="sb-val" id="pendingCount">0</div><div class="sb-lbl">Pending Actions</div></div></div>
+    <div class="stat-box"><div class="sb-icon purple"><i class="fas fa-gift"></i></div><div><div class="sb-val" id="totalRefBonus">₦0</div><div class="sb-lbl">Ref Bonuses Paid</div></div></div>
+    <div class="stat-box"><div class="sb-icon red"><i class="fas fa-ban"></i></div><div><div class="sb-val" id="bannedCount">0</div><div class="sb-lbl">Banned Users</div></div></div>
+    <div class="stat-box"><div class="sb-icon blue"><i class="fas fa-wallet"></i></div><div><div class="sb-val" id="totalWallets">₦0</div><div class="sb-lbl">Total Wallets</div></div></div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card"><h3><i class="fas fa-chart-line"></i> Revenue (7 Days)</h3><div class="chart-wrap"><canvas id="revenueChart"></canvas></div></div>
+    <div class="chart-card"><h3><i class="fas fa-chart-pie"></i> Breakdown</h3><div class="chart-wrap"><canvas id="txChart"></canvas></div></div>
+  </div>
+
+  <div class="actions-row">
+    <a href="admin-deposits.html" class="act-btn"><i class="fas fa-eye"></i> Review Deposits</a>
+    <a href="admin-withdrawals.html" class="act-btn"><i class="fas fa-check-circle"></i> Review Withdrawals</a>
+    <a href="admin-users.html" class="act-btn"><i class="fas fa-user-plus"></i> View Users</a>
+    <a href="admin-ban.html" class="act-btn"><i class="fas fa-gavel"></i> Ban Users</a>
+    <a href="admin-delete.html" class="act-btn"><i class="fas fa-trash-can"></i> System Wipe</a>
+  </div>
+
+  <div class="table-card"><h3><i class="fas fa-history"></i> Recent Transactions</h3><div class="table-wrap"><table><thead><tr><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="recentTxBody"><tr><td colspan="5" style="text-align:center;padding:20px;">Loading...</td></tr></tbody></table></div></div>
+  <div class="table-card"><h3><i class="fas fa-clock"></i> Pending Withdrawals</h3><div class="table-wrap"><table><thead><tr><th>User</th><th>Amount</th><th>Bank</th><th>Date</th></tr></thead><tbody id="pendingWBody"><tr><td colspan="4" style="text-align:center;padding:20px;">Loading...</td></tr></tbody></table></div></div>
+</div>
+
+<!-- RESET MODAL -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal-box">
+    <h3 style="color:var(--red);">⚠️ Factory Reset</h3>
+    <p>This will <b style="color:var(--red);">permanently delete ALL platform data.</b><br>This action cannot be undone.</p>
+    <p style="font-size:11px;color:var(--sub);margin-bottom:8px;">Type <b>RESET</b> to confirm:</p>
+    <input type="text" id="resetInput" placeholder="Type RESET here..." oninput="document.getElementById('confirmReset').disabled=this.value!=='RESET'"/>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeResetModal()">Cancel</button>
+      <button class="btn-danger" id="confirmReset" onclick="doReset()" disabled>Factory Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ✅ NEW FIREBASE CONFIG — TEXIS Phase 2
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoya4moqwNCuVI-EtzLcMt2gD6QNUdyCQ",
+    authDomain: "texis-b7180.firebaseapp.com",
+    projectId: "texis-b7180",
+    storageBucket: "texis-b7180.firebasestorage.app",
+    messagingSenderId: "848854390209",
+    appId: "1:848854390209:web:c5babd1ca5e0e42ba08b40"
+  };
+
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const fmt = v => '₦' + Number(v || 0).toLocaleString();
+
+  let revenueChart, txChart;
+
+  function updateDate() {
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  // Sidebar toggle
+  document.getElementById('menuBtn').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+
+  // Logout
+  function doLogout() { auth.signOut().then(() => window.location.href = 'login.html'); }
+  document.getElementById('sidebarLogout').addEventListener('click', doLogout);
+  document.getElementById('topLogout').addEventListener('click', doLogout);
+
+  // Reset modal
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('resetModal').classList.add('show');
+    document.getElementById('resetInput').value = '';
+    document.getElementById('confirmReset').disabled = true;
+  });
+  window.closeResetModal = () => document.getElementById('resetModal').classList.remove('show');
+
+  async function doReset() {
+    closeResetModal();
+    const sure = await Swal.fire({
+      title: '⚠️ Final Warning',
+      html: '<p style="color:#dc2626;">This will DELETE ALL platform data permanently.</p>',
+      icon: 'warning', showCancelButton: true,
+      confirmButtonText: 'Yes, Wipe Everything', confirmButtonColor: '#ef4444'
+    });
+    if (!sure.isConfirmed) return;
+
+    Swal.fire({ title: 'Resetting...', html: '<p id="resetStatus">Fetching data...</p>', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
+
+    try {
+      const usersSnap = await db.collection('users').limit(500).get();
+      const userDocs = usersSnap.docs;
+      const SUBS = ['deposits', 'withdrawals', 'activePlans', 'transactions', 'referrals'];
+
+      for (let i = 0; i < userDocs.length; i++) {
+        document.getElementById('resetStatus').textContent = `Deleting user ${i + 1}/${userDocs.length}...`;
+        for (const sub of SUBS) {
+          let snap = await db.collection('users').doc(userDocs[i].id).collection(sub).limit(100).get();
+          while (!snap.empty) {
+            const batch = db.batch();
+            snap.docs.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+            snap = await db.collection('users').doc(userDocs[i].id).collection(sub).limit(100).get();
+          }
+        }
+        await userDocs[i].ref.delete();
+      }
+      await auth.signOut();
+      Swal.fire({ icon: 'success', title: 'Reset Complete', text: 'Redirecting...', timer: 2000, showConfirmButton: false });
+      setTimeout(() => window.location.href = 'login.html', 2000);
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Reset Failed', text: err.message });
+    }
+  }
+
+  // ✅ OPTIMIZED DASHBOARD LOAD
+  async function loadDashboard() {
+    try {
+      const usersSnap = await db.collection('users').limit(300).get();
+      const userDocs = usersSnap.docs;
+      const totalUsers = userDocs.length;
+
+      let totalInvested = 0, pendingDeposits = 0, pendingWithdrawals = 0;
+      let activeInvestments = 0, totalRefBonus = 0, bannedCount = 0, totalWallets = 0;
+      const dayDeposits = Array(7).fill(0), dayWithdrawals = Array(7).fill(0), dayInvestments = Array(7).fill(0);
+      const now = new Date(), recentTx = [], pendingWList = [];
+
+      function getDayIdx(date) {
+        if (!date) return -1;
+        const d = date.toDate ? date.toDate() : new Date(date);
+        const diff = Math.floor((now - d) / (24 * 60 * 60 * 1000));
+        return (diff >= 0 && diff <= 6) ? 6 - diff : -1;
+      }
+
+      // Process users in chunks
+      for (let i = 0; i < userDocs.length; i += 5) {
+        const chunk = userDocs.slice(i, i + 5);
+        await Promise.all(chunk.map(async userDoc => {
+          const uid = userDoc.id, uData = userDoc.data();
+
+          // Banned count
+          if (uData.banned || uData.isBanned || uData.status === 'banned') bannedCount++;
+          totalWallets += Number(uData.wallet || 0);
+
+          // Active plans
+          try {
+            const plansSnap = await db.collection('users').doc(uid).collection('activePlans').where('status', '==', 'active').limit(10).get();
+            plansSnap.forEach(p => {
+              const d = p.data();
+              totalInvested += d.capital || 0;
+              activeInvestments++;
+              const idx = getDayIdx(d.startDate);
+              if (idx >= 0) dayInvestments[idx] += d.capital || 0;
+            });
+          } catch (e) { /* silent */ }
+
+          // Deposits
+          try {
+            const depSnap = await db.collection('users').doc(uid).collection('deposits').limit(20).get();
+            depSnap.forEach(d => {
+              const data = d.data();
+              if (data.status === 'pending') pendingDeposits++;
+              const idx = getDayIdx(data.createdAt);
+              if (idx >= 0) dayDeposits[idx] += data.amount || 0;
+              recentTx.push({ user: uData.fullName || 'User', type: 'Deposit', amount: data.amount || 0, status: data.status || 'completed', date: data.createdAt });
+            });
+          } catch (e) { /* silent */ }
+
+          // Withdrawals
+          try {
+            const wSnap = await db.collection('users').doc(uid).collection('withdrawals').limit(20).get();
+            wSnap.forEach(w => {
+              const data = w.data();
+              if (data.status === 'pending' || data.status === 'processing') {
+                pendingWithdrawals++;
+                pendingWList.push({ user: uData.fullName || 'User', amount: data.amount || 0, bank: data.bankName || '—', date: data.createdAt });
+              }
+              const idx = getDayIdx(data.createdAt);
+              if (idx >= 0) dayWithdrawals[idx] += data.amount || 0;
+              recentTx.push({ user: uData.fullName || 'User', type: 'Withdrawal', amount: data.amount || 0, status: data.status || 'pending', date: data.createdAt });
+            });
+          } catch (e) { /* silent */ }
+
+          // Referral bonuses
+          try {
+            const refSnap = await db.collection('users').doc(uid).collection('referrals').limit(50).get();
+            refSnap.forEach(r => { totalRefBonus += r.data().totalEarned || 0; });
+          } catch (e) { /* silent */ }
+        }));
+      }
+
+      // Sort
+      recentTx.sort((a, b) => { const ta = a.date?.toMillis?.() || a.date || 0, tb = b.date?.toMillis?.() || b.date || 0; return tb - ta; });
+      pendingWList.sort((a, b) => { const ta = a.date?.toMillis?.() || a.date || 0, tb = b.date?.toMillis?.() || b.date || 0; return tb - ta; });
+
+      // Update UI
+      document.getElementById('totalUsers').textContent = totalUsers;
+      document.getElementById('totalInvested').textContent = fmt(totalInvested);
+      document.getElementById('pendingCount').textContent = pendingDeposits + pendingWithdrawals;
+      document.getElementById('totalRefBonus').textContent = fmt(totalRefBonus);
+      document.getElementById('bannedCount').textContent = bannedCount;
+      document.getElementById('totalWallets').textContent = fmt(totalWallets);
+
+      document.getElementById('badgeUsers').textContent = totalUsers;
+      document.getElementById('badgeDeposits').textContent = pendingDeposits;
+      document.getElementById('badgeWithdrawals').textContent = pendingWithdrawals;
+      document.getElementById('badgeInvestments').textContent = activeInvestments;
+
+      // Recent transactions table
+      const txBody = document.getElementById('recentTxBody');
+      txBody.innerHTML = recentTx.length ? recentTx.slice(0, 8).map(tx => {
+        let d = '—';
+        if (tx.date) { try { const dt = tx.date.toDate ? tx.date.toDate() : new Date(tx.date); d = dt.toLocaleDateString('en-NG', { day: '2-digit', month: 'short', year: '2-digit' }); } catch (e) {} }
+        return `<tr><td><b>${tx.user}</b></td><td><span class="pill ${tx.type === 'Deposit' ? 'pill-green' : 'pill-red'}">${tx.type}</span></td><td><b>${fmt(tx.amount)}</b></td><td><span class="pill ${tx.status === 'pending' || tx.status === 'processing' ? 'pill-amber' : 'pill-green'}">${tx.status || 'completed'}</span></td><td>${d}</td></tr>`;
+      }).join('') : '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">No transactions yet</td></tr>';
+
+      // Pending withdrawals table
+      const pwBody = document.getElementById('pendingWBody');
+      pwBody.innerHTML = pendingWList.length ? pendingWList.slice(0, 8).map(w => {
+        let d = '—';
+        if (w.date) { try { const dt = w.date.toDate ? w.date.toDate() : new Date(w.date); d = dt.toLocaleDateString('en-NG', { day: '2-digit', month: 'short', year: '2-digit' }); } catch (e) {} }
+        return `<tr><td><b>${w.user}</b></td><td><span class="pill pill-amber">${fmt(w.amount)}</span></td><td>${w.bank}</td><td>${d}</td></tr>`;
+      }).join('') : '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted);">No pending withdrawals</td></tr>';
+
+      // Charts
+      const dayLabels = [];
+      for (let i = 6; i >= 0; i--) { const d = new Date(now); d.setDate(d.getDate() - i); dayLabels.push(d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })); }
+
+      if (revenueChart) revenueChart.destroy();
+      if (txChart) txChart.destroy();
+
+      revenueChart = new Chart(document.getElementById('revenueChart').getContext('2d'), {
+        type: 'line', data: { labels: dayLabels, datasets: [
+          { label: 'Deposits', data: dayDeposits, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.06)', tension: .4, fill: true },
+          { label: 'Withdrawals', data: dayWithdrawals, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.04)', tension: .4, fill: true },
+          { label: 'Investments', data: dayInvestments, borderColor: '#0d9488', backgroundColor: 'rgba(13,148,136,.06)', tension: .4, fill: true }
+        ]},
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16 } } }, scales: { y: { ticks: { callback: v => '₦' + (v / 1000).toFixed(0) + 'k' }, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+      });
+
+      txChart = new Chart(document.getElementById('txChart').getContext('2d'), {
+        type: 'doughnut', data: { labels: ['Pending Deposits', 'Pending Withdrawals', 'Active Investments'], datasets: [{ data: [pendingDeposits, pendingWithdrawals, activeInvestments], backgroundColor: ['#f59e0b', '#ef4444', '#0d9488'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12 } } } }
+      });
+
+    } catch (err) { console.error('Dashboard error:', err); }
+  }
+
+  // ✅ AUTH
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (!snap.exists || (snap.data().role !== 'admin' && snap.data().isAdmin !== true)) {
+        document.getElementById('loadingScreen').classList.add('hide');
+        document.getElementById('deniedScreen').classList.add('show');
+        return;
+      }
+      const data = snap.data();
+      document.getElementById('adminAv').textContent = (data.fullName || 'A').charAt(0).toUpperCase();
+      document.getElementById('adminNm').textContent = data.fullName || 'Admin';
+
+      document.getElementById('loadingScreen').classList.add('hide');
+      document.getElementById('mainContent').style.display = 'block';
+      updateDate();
+      await loadDashboard();
+    } catch (err) {
+      document.getElementById('loadingScreen').classList.add('hide');
+      document.getElementById('deniedScreen').classList.add('show');
+    }
+  });
+</script>
+</body>
+</html>
