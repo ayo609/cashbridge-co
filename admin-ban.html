@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Admin — Ban Users</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--teal:#0d9488;--teal-dark:#0f766e;--teal-light:#14b8a6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--bg:#f6f8fa;--card:#fff;--text:#1a1a2e;--sub:#5a6072;--muted:#9ca3af;--border:#e5e7eb}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px}
+    .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .topbar .brand{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:800;font-size:18px}
+    .topbar .brand .dot{width:10px;height:10px;background:var(--red);border-radius:50%;box-shadow:0 0 10px rgba(239,68,68,.5)}
+    .topbar .back-link{color:var(--sub);text-decoration:none;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+    .topbar .back-link:hover{color:var(--teal)}
+    .main{max-width:900px;margin:0 auto;padding:20px 16px}
+    .page-head{margin-bottom:20px}
+    .page-head h1{font-family:'Sora',sans-serif;font-size:24px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+    .page-head h1 i{color:var(--red)}
+    .page-head p{font-size:13px;color:var(--sub)}
+    .stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+    .stat-card{flex:1;min-width:120px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;text-align:center}
+    .stat-card .stat-num{font-family:'Sora',sans-serif;font-size:24px;font-weight:800;color:var(--teal)}
+    .stat-card .stat-num.red{color:var(--red)}
+    .stat-card .stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 16px}
+    .search-wrap{flex:1;min-width:200px;position:relative}
+    .search-wrap input{width:100%;padding:10px 14px 10px 38px;border:2px solid var(--border);border-radius:12px;font-size:13px;font-family:inherit;outline:none;transition:all .2s;background:var(--bg)}
+    .search-wrap input:focus{border-color:var(--teal);background:#fff}
+    .search-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px}
+    .toolbar .btn{padding:10px 16px;border-radius:10px;border:none;font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .2s;font-family:inherit}
+    .btn-select{background:var(--teal);color:#fff}.btn-select:hover{background:var(--teal-dark)}
+    .btn-deselect{background:#f1f5f9;color:var(--sub)}.btn-deselect:hover{background:#e2e8f0}
+    .btn-unban{background:var(--green);color:#fff}.btn-unban:hover{background:#059669}
+    .btn-ban{background:var(--red);color:#fff;font-size:13px!important;padding:12px 20px!important}.btn-ban:hover{background:#dc2626}
+    .btn-ban:disabled{background:#cbd5e1;color:#94a3b8;cursor:not-allowed}
+    .btn-refresh{background:var(--bg);color:var(--sub);border:1px solid var(--border)}.btn-refresh:hover{background:#fff}
+    .selection-info{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+    .selection-info .count{color:var(--red);font-weight:700}
+    .users-container{max-height:55vh;overflow-y:auto;border:1px solid var(--border);border-radius:16px;background:var(--card)}
+    .users-container::-webkit-scrollbar{width:6px}
+    .users-container::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+    .user-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background .15s;gap:12px}
+    .user-row:hover{background:#f8fafc}
+    .user-row:last-child{border-bottom:none}
+    .user-row.selected{background:#fef2f2;border-left:3px solid var(--red)}
+    .user-row.banned{opacity:.5;background:#f1f5f9}
+    .user-row .checkbox{width:20px;height:20px;border:2px solid #cbd5e1;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:10px;color:transparent}
+    .user-row.selected .checkbox{background:var(--red);border-color:var(--red);color:#fff}
+    .user-row.banned .checkbox{background:#cbd5e1;border-color:#cbd5e1}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+    .user-info{flex:1;min-width:0}
+    .user-info .name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .user-info .email{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .user-meta{text-align:right;flex-shrink:0}
+    .user-meta .wallet{font-weight:700;font-size:13px}
+    .user-meta .status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;display:inline-block;margin-top:2px}
+    .status-active{background:#f0fdfa;color:var(--teal)}
+    .status-banned{background:#fef2f2;color:var(--red)}
+    .empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+    .empty-state i{font-size:40px;margin-bottom:12px}
+    .empty-state p{font-size:13px}
+    .loading-row{text-align:center;padding:20px;color:var(--muted)}
+    .loading-row i{font-size:20px;margin-right:6px}
+    .progress-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center}
+    .progress-card{background:#fff;border-radius:20px;padding:32px 28px;text-align:center;width:90%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .progress-card h3{font-family:'Sora',sans-serif;font-size:18px;margin-bottom:8px}
+    .progress-card .sub{font-size:12px;color:var(--sub);margin-bottom:20px}
+    .progress-bar-wrap{background:#e5e7eb;border-radius:20px;height:12px;overflow:hidden;margin-bottom:8px}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--red),#dc2626);border-radius:20px;transition:width .3s ease;width:0%}
+    .progress-pct{font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:var(--red)}
+    .progress-detail{font-size:11px;color:var(--muted);margin-top:4px}
+    .progress-card .cancel-btn{margin-top:16px;padding:10px 24px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--sub);font-weight:600;font-size:12px;cursor:pointer;font-family:inherit}
+    .toast{position:fixed;bottom:30px;right:20px;background:#fff;border-radius:14px;padding:16px 20px;box-shadow:0 12px 32px rgba(0,0,0,.1);display:flex;align-items:center;gap:12px;z-index:999;animation:slideIn .3s ease;border-left:4px solid var(--teal);max-width:380px}
+    @keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+    .toast i{font-size:20px}.toast.success{border-color:var(--green)}.toast.error{border-color:var(--red)}
+    @media(max-width:600px){.stats-row{gap:8px}.stat-card{padding:10px 12px}.stat-card .stat-num{font-size:18px}.toolbar{flex-direction:column;align-items:stretch}.search-wrap{min-width:100%}.user-row{padding:10px 12px}}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><div class="dot"></div>TEXIS <span style="font-size:12px;color:var(--red);font-weight:600;">· Admin</span></div>
+  <div><a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Admin Dashboard</a></div>
+</div>
+
+<div class="main">
+  <div class="page-head">
+    <h1><i class="fas fa-user-slash"></i> Ban Users</h1>
+    <p>Banned users are <b style="color:var(--red);">permanently blocked</b> — all data wiped, cannot login. Admin can unban.</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="totalUsers">0</div><div class="stat-lbl">Total Users</div></div>
+    <div class="stat-card"><div class="stat-num" id="selectedCount">0</div><div class="stat-lbl">Selected</div></div>
+    <div class="stat-card"><div class="stat-num red" id="bannedCount">0</div><div class="stat-lbl">Banned</div></div>
+    <div class="stat-card"><div class="stat-num" id="activeCount">0</div><div class="stat-lbl">Active</div></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Search by name, email or username..." oninput="filterUsers()"/>
+    </div>
+    <button class="btn btn-select" onclick="selectAllVisible()"><i class="fas fa-check-square"></i> Select All</button>
+    <button class="btn btn-deselect" onclick="deselectAll()"><i class="fas fa-square"></i> Deselect All</button>
+    <button class="btn btn-refresh" onclick="loadUsers()"><i class="fas fa-sync-alt"></i> Refresh</button>
+    <span class="selection-info">Selected: <span class="count" id="selBadge">0</span></span>
+  </div>
+
+  <div class="users-container" id="usersList">
+    <div class="loading-row"><i class="fas fa-spinner fa-spin"></i> Loading users...</div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <button class="btn btn-ban" id="banBtn" onclick="executeBan()" disabled>
+      <i class="fas fa-gavel"></i> Ban Selected (<span id="banCountDisplay">0</span>)
+    </button>
+    <button class="btn btn-unban" id="unbanBtn" onclick="executeUnban()" disabled>
+      <i class="fas fa-unlock"></i> Unban Selected (<span id="unbanCountDisplay">0</span>)
+    </button>
+  </div>
+</div>
+
+<div class="progress-overlay" id="progressOverlay" style="display:none;">
+  <div class="progress-card">
+    <h3 id="progressTitle">⏳ Processing...</h3>
+    <p class="sub">Please don't close this page</p>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="progress-pct" id="progressPct">0%</div>
+    <div class="progress-detail" id="progressDetail">Preparing...</div>
+    <button class="cancel-btn" id="cancelBtn" onclick="cancelOperation()" style="display:none;">Cancel</button>
+  </div>
+</div>
+
+<script>
+  const firebaseConfig={apiKey:"AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",authDomain:"cashbridge-a688e.firebaseapp.com",projectId:"cashbridge-a688e",storageBucket:"cashbridge-a688e.firebasestorage.app",messagingSenderId:"345273765518",appId:"1:345273765518:web:29ee0b8f9717cdb50203df"};
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue,fmt=v=>'₦'+Number(v||0).toLocaleString();
+
+  let allUsers=[],filteredUsers=[],selectedIds=new Set(),bannedIds=new Set();
+  let isOperating=false,cancelRequested=false;
+  const BATCH_SIZE=15;
+
+  function toast(t,m,s='success'){
+    const icons={success:'check-circle',error:'exclamation-circle',warning:'exclamation-triangle'};
+    const e=document.createElement('div');
+    e.className=`toast ${s}`;
+    e.innerHTML=`<i class="fas fa-${icons[s]||icons.success}"></i><div><b>${t}</b><br><small>${m}</small></div>`;
+    document.body.appendChild(e);
+    setTimeout(()=>e.remove(),4000);
+  }
+
+  function updateCounters(){
+    document.getElementById('totalUsers').textContent=allUsers.length;
+    document.getElementById('selectedCount').textContent=selectedIds.size;
+    document.getElementById('bannedCount').textContent=bannedIds.size;
+    document.getElementById('activeCount').textContent=allUsers.length-bannedIds.size;
+    document.getElementById('selBadge').textContent=selectedIds.size;
+    document.getElementById('banCountDisplay').textContent=selectedIds.size;
+    document.getElementById('unbanCountDisplay').textContent=selectedIds.size;
+    const banBtn=document.getElementById('banBtn');
+    const unbanBtn=document.getElementById('unbanBtn');
+    banBtn.disabled=selectedIds.size===0||isOperating;
+    unbanBtn.disabled=selectedIds.size===0||isOperating;
+  }
+
+  // ✅ DELETE ALL USER SUBCOLLECTIONS
+  async function deleteSubcollections(uid){
+    const collections=['activePlans','withdrawals','transactions','referrals','adminActions','notifications'];
+    for(const col of collections){
+      try{
+        const snap=await db.collection('users').doc(uid).collection(col).limit(100).get();
+        const batch=db.batch();
+        snap.forEach(doc=>batch.delete(doc.ref));
+        await batch.commit();
+        // If there are more than 100, recursively delete
+        if(snap.size>=100){
+          await deleteSubcollectionsRecursive(uid,col);
+        }
+      }catch(e){console.log(`Skipped ${col} for ${uid}:`,e.message);}
+    }
+  }
+
+  async function deleteSubcollectionsRecursive(uid,col){
+    try{
+      const snap=await db.collection('users').doc(uid).collection(col).limit(100).get();
+      if(snap.empty)return;
+      const batch=db.batch();
+      snap.forEach(doc=>batch.delete(doc.ref));
+      await batch.commit();
+      if(snap.size>=100)await deleteSubcollectionsRecursive(uid,col);
+    }catch(e){}
+  }
+
+  async function loadUsers(){
+    const container=document.getElementById('usersList');
+    container.innerHTML='<div class="loading-row"><i class="fas fa-spinner fa-spin"></i> Loading users...</div>';
+    try{
+      allUsers=[];bannedIds.clear();
+      const snapshot=await db.collection('users').orderBy('createdAt','desc').limit(500).get();
+      snapshot.forEach(doc=>{
+        const data=doc.data();
+        const user={
+          uid:doc.id,
+          fullName:data.fullName||data.username||'Unknown',
+          email:data.email||'No email',
+          username:data.username||'',
+          wallet:data.wallet||0,
+          banned:data.banned===true||data.isBanned===true||data.status==='banned',
+          totalEarnings:data.totalEarnings||0,
+          createdAt:data.createdAt?.toDate?.()||new Date()
+        };
+        allUsers.push(user);
+        if(user.banned)bannedIds.add(user.uid);
+      });
+      allUsers.sort((a,b)=>{if(a.banned&&!b.banned)return 1;if(!a.banned&&b.banned)return -1;return b.createdAt-a.createdAt;});
+      filterUsers();updateCounters();
+      toast('✅ Users Loaded',`${allUsers.length} users · ${bannedIds.size} banned`,'success');
+    }catch(e){
+      console.error(e);
+      container.innerHTML=`<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red);"></i><p>Error: ${e.message}</p><button class="btn btn-refresh" onclick="loadUsers()" style="margin-top:12px;">Retry</button></div>`;
+    }
+  }
+
+  function filterUsers(){
+    const query=document.getElementById('searchInput').value.toLowerCase().trim();
+    filteredUsers=query?allUsers.filter(u=>u.fullName.toLowerCase().includes(query)||u.email.toLowerCase().includes(query)||u.username.toLowerCase().includes(query)||u.uid.toLowerCase().includes(query)):[...allUsers];
+    renderUserList();
+  }
+
+  function renderUserList(){
+    const container=document.getElementById('usersList');
+    if(!filteredUsers.length){container.innerHTML='<div class="empty-state"><i class="fas fa-users-slash"></i><p>No users found.</p></div>';return;}
+    container.innerHTML=filteredUsers.map(u=>{
+      const isSelected=selectedIds.has(u.uid);
+      const isBanned=u.banned||bannedIds.has(u.uid);
+      const initial=u.fullName.charAt(0).toUpperCase();
+      const avatarColor=isBanned?'#94a3b8':u.uid.charCodeAt(0)%2===0?'var(--teal)':'#6366f1';
+      return `<div class="user-row ${isSelected?'selected':''} ${isBanned?'banned':''}" onclick="toggleUser('${u.uid}',${isBanned})" data-uid="${u.uid}">
+        <div class="checkbox"><i class="fas fa-check"></i></div>
+        <div class="user-avatar" style="background:${avatarColor}">${initial}</div>
+        <div class="user-info"><div class="name">${u.fullName} ${isBanned?'<span style="font-size:10px;color:var(--red);">[BANNED]</span>':''}</div><div class="email">${u.email} ${u.username?'· @'+u.username:''}</div></div>
+        <div class="user-meta"><div class="wallet">${fmt(u.wallet)}</div><div class="status ${isBanned?'status-banned':'status-active'}">${isBanned?'BANNED':'ACTIVE'}</div></div>
+      </div>`;
+    }).join('');
+    updateCounters();
+  }
+
+  window.toggleUser=function(uid,isBanned){
+    if(isOperating)return;
+    if(selectedIds.has(uid)){selectedIds.delete(uid);}else{selectedIds.add(uid);}
+    const row=document.querySelector(`[data-uid="${uid}"]`);
+    if(row){row.classList.toggle('selected',selectedIds.has(uid));}
+    updateCounters();
+  };
+
+  window.selectAllVisible=function(){if(isOperating)return;filteredUsers.forEach(u=>{selectedIds.add(u.uid);});renderUserList();toast('✅ Selected',`${selectedIds.size} users`,'success');};
+  window.deselectAll=function(){if(isOperating)return;selectedIds.clear();renderUserList();toast('🔄 Cleared','All deselected','warning');};
+
+  // ✅✅✅ EXECUTE BAN — FULL DESTRUCTION ✅✅✅
+  window.executeBan=async function(){
+    if(selectedIds.size===0||isOperating)return;
+    const toBan=[...selectedIds].filter(id=>!bannedIds.has(id));
+    if(toBan.length===0){toast('⚠️ Skipped','All selected are already banned','warning');return;}
+
+    const confirm=await Swal.fire({
+      title:'⚠️ PERMANENT BAN',
+      html:`<div style="text-align:center"><i class="fas fa-skull" style="font-size:40px;color:var(--red);margin-bottom:12px;"></i>
+        <p>You are about to <b style="color:var(--red);">PERMANENTLY BAN ${toBan.length} user(s)</b>.</p>
+        <div style="background:#fef2f2;border-radius:10px;padding:10px;margin:10px 0;text-align:left;font-size:12px;">
+          <p>⚠️ This will:</p>
+          <p>• Block login permanently</p>
+          <p>• <b style="color:var(--red);">DELETE all investments</b></p>
+          <p>• <b style="color:var(--red);">DELETE all transactions</b></p>
+          <p>• <b style="color:var(--red);">DELETE all referrals</b></p>
+          <p>• <b style="color:var(--red);">DELETE all withdrawals</b></p>
+          <p>• Wipe wallet balance</p>
+          <p>• Lock account forever</p>
+        </div>
+        <p style="color:var(--amber);font-size:11px;">🔒 Only admin can unban later.</p></div>`,
+      icon:'warning',showCancelButton:true,
+      confirmButtonText:`Yes, PERMANENTLY BAN ${toBan.length} User(s)`,
+      confirmButtonColor:'#dc2626',cancelButtonText:'Cancel'
+    });
+    if(!confirm.isConfirmed)return;
+
+    isOperating=true;cancelRequested=false;updateCounters();
+    const overlay=document.getElementById('progressOverlay');
+    const progressBar=document.getElementById('progressBar');
+    const progressPct=document.getElementById('progressPct');
+    const progressDetail=document.getElementById('progressDetail');
+    const cancelBtn=document.getElementById('cancelBtn');
+    document.getElementById('progressTitle').textContent='⏳ Banning & Wiping Users...';
+    overlay.style.display='flex';progressBar.style.width='0%';progressPct.textContent='0%';
+    progressDetail.textContent='Deleting all data...';cancelBtn.style.display='inline-block';
+    document.getElementById('banBtn').disabled=true;document.getElementById('unbanBtn').disabled=true;
+
+    const total=toBan.length;let completed=0,failed=0;
+
+    for(let i=0;i<toBan.length;i+=BATCH_SIZE){
+      if(cancelRequested){progressDetail.textContent=`Cancelled — ${completed} done, ${toBan.length-completed} remaining`;toast('⚠️ Cancelled',`${completed}/${toBan.length} processed`,'warning');break;}
+      const batch=toBan.slice(i,i+BATCH_SIZE);
+      const promises=batch.map(async(uid)=>{
+        try{
+          // ✅ DELETE ALL SUBCOLLECTIONS
+          await deleteSubcollections(uid);
+          // ✅ UPDATE USER DOCUMENT — WIPE EVERYTHING
+          await db.collection('users').doc(uid).update({
+            banned:true,isBanned:true,status:'banned',
+            bannedAt:FV.serverTimestamp(),bannedBy:auth.currentUser?.uid||'admin',
+            wallet:0,totalEarnings:0,totalRefEarnings:0,
+            referralCount:0,referralBonusPaid:true,
+            activePlans:0,investments:0,
+            banReason:'Admin permanent ban — all data wiped',
+            previousWallet:allUsers.find(u=>u.uid===uid)?.wallet||0
+          });
+          await db.collection('bannedUsers').doc(uid).set({
+            uid:uid,email:allUsers.find(u=>u.uid===uid)?.email||'',
+            fullName:allUsers.find(u=>u.uid===uid)?.fullName||'',
+            bannedAt:FV.serverTimestamp(),bannedBy:auth.currentUser?.uid||'admin',
+            previousWallet:allUsers.find(u=>u.uid===uid)?.wallet||0
+          });
+          return {uid,success:true};
+        }catch(e){console.error(`Failed to ban ${uid}:`,e);return {uid,success:false,error:e.message};}
+      });
+      const results=await Promise.all(promises);
+      results.forEach(r=>{if(r.success){completed++;bannedIds.add(r.uid);selectedIds.delete(r.uid);}else{failed++;}});
+      const pct=Math.round((completed+failed)/total*100);
+      progressBar.style.width=pct+'%';progressPct.textContent=pct+'%';
+      progressDetail.textContent=`Banned ${completed}/${total} · Failed: ${failed}`;
+    }
+
+    progressBar.style.width='100%';progressPct.textContent='100%';
+    progressDetail.textContent=`✅ Complete — ${completed} banned & wiped, ${failed} failed`;
+    cancelBtn.style.display='none';
+    setTimeout(()=>{overlay.style.display='none';isOperating=false;cancelRequested=false;
+      if(completed>0){toast('✅ Ban Complete',`${completed} user(s) banned & wiped`+(failed>0?` · ${failed} failed`:''),'success');
+        Swal.fire({icon:'success',title:'Ban Complete',html:`<b>${completed}</b> user(s) permanently banned & data wiped.${failed>0?`<br><span style="color:var(--red);">${failed} failed</span>`:''}`,confirmButtonColor:'#0d9488'});}
+      filterUsers();updateCounters();},1500);
+  };
+
+  // ✅ UNBAN
+  window.executeUnban=async function(){
+    if(selectedIds.size===0||isOperating)return;
+    const toUnban=[...selectedIds].filter(id=>bannedIds.has(id));
+    if(toUnban.length===0){toast('⚠️ Skipped','None selected are banned','warning');return;}
+    const confirm=await Swal.fire({title:'🔓 Unban Users',html:`<p>Unban <b>${toUnban.length}</b> user(s)?</p><p style="font-size:12px;color:var(--sub);">They will be able to login again but data is not restored.</p>`,icon:'question',showCancelButton:true,confirmButtonText:'Yes, Unban',confirmButtonColor:'#10b981',cancelButtonText:'Cancel'});
+    if(!confirm.isConfirmed)return;
+    isOperating=true;cancelRequested=false;updateCounters();
+    const overlay=document.getElementById('progressOverlay');
+    const progressBar=document.getElementById('progressBar');
+    const progressPct=document.getElementById('progressPct');
+    const progressDetail=document.getElementById('progressDetail');
+    const cancelBtn=document.getElementById('cancelBtn');
+    document.getElementById('progressTitle').textContent='🔓 Unbanning Users...';
+    overlay.style.display='flex';progressBar.style.width='0%';progressPct.textContent='0%';
+    progressDetail.textContent='Restoring access...';cancelBtn.style.display='inline-block';
+    document.getElementById('banBtn').disabled=true;document.getElementById('unbanBtn').disabled=true;
+    const total=toUnban.length;let completed=0,failed=0;
+    for(let i=0;i<toUnban.length;i+=BATCH_SIZE){
+      if(cancelRequested)break;
+      const batch=toUnban.slice(i,i+BATCH_SIZE);
+      const promises=batch.map(async(uid)=>{
+        try{
+          await db.collection('users').doc(uid).update({banned:false,isBanned:false,status:'active',unbannedAt:FV.serverTimestamp(),unbannedBy:auth.currentUser?.uid||'admin'});
+          await db.collection('bannedUsers').doc(uid).delete().catch(()=>{});
+          return {uid,success:true};
+        }catch(e){return {uid,success:false};}
+      });
+      const results=await Promise.all(promises);
+      results.forEach(r=>{if(r.success){completed++;bannedIds.delete(r.uid);selectedIds.delete(r.uid);}else{failed++;}});
+      const pct=Math.round((completed+failed)/total*100);
+      progressBar.style.width=pct+'%';progressPct.textContent=pct+'%';
+      progressDetail.textContent=`Unbanned ${completed}/${total} · Failed: ${failed}`;
+    }
+    progressBar.style.width='100%';progressPct.textContent='100%';
+    progressDetail.textContent=`✅ Complete — ${completed} unbanned, ${failed} failed`;
+    cancelBtn.style.display='none';
+    setTimeout(()=>{overlay.style.display='none';isOperating=false;cancelRequested=false;
+      if(completed>0){toast('✅ Unban Complete',`${completed} user(s) unbanned`,'success');}
+      filterUsers();updateCounters();},1500);
+  };
+
+  window.cancelOperation=function(){cancelRequested=true;document.getElementById('cancelBtn').disabled=true;document.getElementById('cancelBtn').textContent='Cancelling...';};
+
+  auth.onAuthStateChanged(async user=>{
+    if(!user){window.location.href='login.html';return;}
+    try{
+      const userSnap=await db.collection('users').doc(user.uid).get();
+      if(!userSnap.exists||userSnap.data().role!=='admin'){Swal.fire({icon:'error',title:'Access Denied',text:'Admin access required.',confirmButtonColor:'#ef4444'});setTimeout(()=>window.location.href='dashboard.html',2000);return;}
+      console.log('✅ Admin verified');await loadUsers();
+    }catch(e){console.error(e);window.location.href='dashboard.html';}
+  });
+</script>
+</body>
+</html>
