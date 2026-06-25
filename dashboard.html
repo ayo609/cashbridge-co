@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --teal:#0d9488;--teal-dark:#0f766e;--teal-light:#14b8a6;
+      --green:#10b981;--amber:#f59e0b;--red:#ef4444;
+      --blue:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--indigo:#6366f1;
+      --bg:#f0f4f8;--card:#ffffff;--text:#0f172a;--sub:#475569;
+      --muted:#94a3b8;--border:#e2e8f0;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.04);
+      --shadow:0 4px 16px rgba(0,0,0,.06);
+      --shadow-lg:0 12px 32px rgba(0,0,0,.08);
+      --radius:20px;--radius-sm:14px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'DM Sans',sans-serif;
+      background:var(--bg);color:var(--text);
+      min-height:100vh;padding-bottom:100px;
+      background-image:radial-gradient(ellipse at 0% 0%,#e0f2fe 0%,transparent 50%),radial-gradient(ellipse at 100% 100%,#ccfbf1 0%,transparent 50%);
+    }
+
+    /* ── TOPBAR ── */
+    .topbar{
+      background:rgba(255,255,255,.85);backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);padding:0 24px;height:64px;
+      display:flex;align-items:center;justify-content:space-between;
+      position:sticky;top:0;z-index:100;
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-family:'Outfit',sans-serif;font-weight:800;font-size:20px}
+    .brand .dot{width:10px;height:10px;background:var(--teal);border-radius:50%;box-shadow:0 0 12px var(--teal-light)}
+    .topbar-right{display:flex;align-items:center;gap:10px}
+    .balance-pill{
+      background:linear-gradient(135deg,#f0fdfa,#e6fffa);
+      border:1px solid #99f6e4;border-radius:30px;padding:8px 18px;
+      display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;
+    }
+    .balance-pill i{color:var(--teal)}
+    .logout-btn{
+      background:#fff;border:1px solid #fecaca;border-radius:30px;padding:8px 12px;
+      color:var(--red);cursor:pointer;font-size:13px;transition:all .2s;
+      display:flex;align-items:center;gap:6px;font-weight:600;
+    }
+    .logout-btn:hover{background:var(--red);color:#fff;border-color:var(--red)}
+
+    /* ── MAIN ── */
+    .main{max-width:1050px;margin:0 auto;padding:24px 16px}
+
+    /* ── WELCOME HERO ── */
+    .welcome-hero{
+      background:linear-gradient(145deg,#0f172a 0%,#1e293b 40%,#0f766e 100%);
+      border-radius:var(--radius);padding:28px 32px;margin-bottom:24px;
+      display:flex;justify-content:space-between;align-items:center;
+      flex-wrap:wrap;gap:20px;position:relative;overflow:hidden;
+      box-shadow:0 20px 40px rgba(15,118,110,.25);
+    }
+    .welcome-hero::after{
+      content:'';position:absolute;width:200px;height:200px;
+      background:rgba(20,184,166,.08);border-radius:50%;
+      top:-60px;right:-40px;
+    }
+    .welcome-hero::before{
+      content:'';position:absolute;width:120px;height:120px;
+      background:rgba(59,130,246,.1);border-radius:50%;
+      bottom:-30px;left:-20px;
+    }
+    .welcome-left{position:relative;z-index:1}
+    .welcome-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      background:rgba(20,184,166,.2);border:1px solid rgba(20,184,166,.3);
+      border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;
+      color:var(--teal-light);margin-bottom:12px;
+    }
+    .welcome-left h2{
+      font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;
+      color:#fff;margin-bottom:4px;
+    }
+    .welcome-left p{color:rgba(255,255,255,.6);font-size:13px}
+    .balance-card{
+      background:rgba(255,255,255,.1);backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.15);border-radius:18px;
+      padding:18px 28px;text-align:center;position:relative;z-index:1;
+    }
+    .balance-card .bc-label{
+      font-size:10px;color:rgba(255,255,255,.6);
+      text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;
+    }
+    .balance-card .bc-amount{
+      font-family:'Outfit',sans-serif;font-size:30px;font-weight:800;color:#fff;
+    }
+    .balance-card .bc-eye{
+      position:absolute;top:8px;right:12px;color:rgba(255,255,255,.4);
+      cursor:pointer;font-size:14px;transition:color .2s;
+    }
+    .balance-card .bc-eye:hover{color:#fff}
+
+    /* ── STATS GRID ── */
+    .stats-grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:14px;margin-bottom:24px;
+    }
+    .stat-card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:18px 20px;
+      display:flex;align-items:center;gap:14px;
+      transition:all .25s;cursor:default;box-shadow:var(--shadow-sm);
+    }
+    .stat-card:hover{
+      transform:translateY(-3px);box-shadow:var(--shadow-lg);
+      border-color:transparent;
+    }
+    .stat-icon{
+      width:46px;height:46px;border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:18px;flex-shrink:0;
+    }
+    .stat-icon.teal{background:linear-gradient(135deg,#f0fdfa,#ccfbf1);color:var(--teal)}
+    .stat-icon.green{background:linear-gradient(135deg,#f0fdf4,#dcfce7);color:var(--green)}
+    .stat-icon.amber{background:linear-gradient(135deg,#fffbeb,#fef3c7);color:var(--amber)}
+    .stat-icon.blue{background:linear-gradient(135deg,#eff6ff,#dbeafe);color:var(--blue)}
+    .stat-icon.purple{background:linear-gradient(135deg,#faf5ff,#f3e8ff);color:var(--purple)}
+    .stat-icon.pink{background:linear-gradient(135deg,#fdf2f8,#fce7f3);color:var(--pink)}
+    .stat-info .stat-val{font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;line-height:1}
+    .stat-info .stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
+
+    /* ── QUICK ACTIONS ── */
+    .section-title{
+      font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;
+      margin-bottom:14px;display:flex;align-items:center;gap:10px;
+    }
+    .section-title i{color:var(--teal)}
+    .actions-row{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;
+    }
+    .action-card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:20px 14px;
+      text-align:center;text-decoration:none;color:var(--text);
+      font-weight:700;font-size:12px;transition:all .25s;
+      box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+    }
+    .action-card::before{
+      content:'';position:absolute;top:0;left:0;width:100%;height:3px;
+      background:var(--teal);transform:scaleX(0);transition:transform .25s;
+    }
+    .action-card:hover::before{transform:scaleX(1)}
+    .action-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+    .action-card i{font-size:24px;color:var(--teal);margin-bottom:8px;display:block}
+    .action-card.disabled{opacity:.4;pointer-events:none}
+    .action-card.warn i{color:var(--amber)}
+    .action-card.accent i{color:var(--purple)}
+
+    /* ── TRANSACTIONS CARD ── */
+    .tx-card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius);padding:24px;margin-bottom:24px;
+      box-shadow:var(--shadow-sm);
+    }
+    .tx-header{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:18px;flex-wrap:wrap;gap:12px;
+    }
+    .tx-tabs{display:flex;gap:4px;background:var(--bg);border-radius:12px;padding:4px}
+    .tx-tab{
+      padding:8px 16px;border:none;border-radius:10px;
+      font-size:12px;font-weight:600;cursor:pointer;
+      background:transparent;color:var(--muted);
+      transition:all .2s;font-family:inherit;white-space:nowrap;
+    }
+    .tx-tab.active{background:#fff;color:var(--teal);box-shadow:var(--shadow-sm)}
+    .tx-tab:hover:not(.active){color:var(--sub)}
+    .tx-list{max-height:400px;overflow-y:auto}
+    .tx-list::-webkit-scrollbar{width:4px}
+    .tx-list::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+    .tx-row{
+      display:flex;align-items:center;padding:14px 0;
+      border-bottom:1px solid #f8fafc;gap:14px;transition:background .15s;
+    }
+    .tx-row:hover{background:#f8fafc;margin:0 -16px;padding:14px 16px;border-radius:10px}
+    .tx-icon-wrap{
+      width:40px;height:40px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:15px;flex-shrink:0;
+    }
+    .tx-icon-wrap.deposit{background:#f0fdf4;color:var(--green)}
+    .tx-icon-wrap.withdrawal{background:#fffbeb;color:var(--amber)}
+    .tx-icon-wrap.roi{background:#f0fdfa;color:var(--teal)}
+    .tx-icon-wrap.referral{background:#faf5ff;color:var(--purple)}
+    .tx-icon-wrap.bonus{background:#fff7ed;color:#ea580c}
+    .tx-info{flex:1;min-width:0}
+    .tx-info .tx-name{font-weight:700;font-size:13px}
+    .tx-info .tx-meta{font-size:10px;color:var(--muted);margin-top:1px}
+    .tx-right{text-align:right;flex-shrink:0}
+    .tx-amount{font-weight:800;font-size:14px}
+    .tx-amount.plus{color:var(--green)}.tx-amount.minus{color:var(--red)}
+    .tx-status{font-size:9px;font-weight:700;padding:3px 8px;border-radius:8px;display:inline-block;margin-top:2px}
+    .tx-status.ok{background:#f0fdf4;color:#16a34a}
+    .tx-status.pending{background:#fffbeb;color:#d97706}
+    .tx-status.failed{background:#fef2f2;color:#dc2626}
+    .empty-state{text-align:center;padding:40px;color:var(--muted)}
+    .empty-state i{font-size:36px;color:#cbd5e1;margin-bottom:10px;display:block}
+    .empty-state p{font-size:13px}
+
+    /* ── SUPPORT ── */
+    .support-card{
+      background:linear-gradient(135deg,#f8fafc,#fff);
+      border:1px solid var(--border);border-radius:var(--radius);
+      padding:24px;text-align:center;box-shadow:var(--shadow-sm);
+    }
+    .support-card h3{font-family:'Outfit',sans-serif;font-size:16px;margin-bottom:6px}
+    .support-card p{color:var(--sub);font-size:12px;margin-bottom:16px}
+    .support-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .s-btn{
+      padding:12px 22px;border-radius:30px;font-weight:600;font-size:13px;
+      text-decoration:none;display:flex;align-items:center;gap:8px;
+      transition:all .25s;border:2px solid;
+    }
+    .s-btn-wa{background:#f0fdf4;color:#16a34a;border-color:#bbf7d0}
+    .s-btn-wa:hover{background:#16a34a;color:#fff;transform:translateY(-2px)}
+    .s-btn-tg{background:#f0f9ff;color:#0284c7;border-color:#bae6fd}
+    .s-btn-tg:hover{background:#0284c7;color:#fff;transform:translateY(-2px)}
+    .divider{border-top:1px dashed var(--border);margin:16px 0}
+    .group-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .g-btn{
+      padding:12px 22px;border-radius:30px;font-weight:600;font-size:13px;
+      text-decoration:none;color:#fff;display:flex;align-items:center;gap:8px;
+      transition:all .25s;
+    }
+    .g-btn-wa{background:linear-gradient(135deg,#16a34a,#15803d)}
+    .g-btn-tg{background:linear-gradient(135deg,#0284c7,#0369a1)}
+    .g-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav{
+      position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+      background:rgba(255,255,255,.9);backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border:1px solid var(--border);border-radius:50px;padding:6px 10px;
+      display:flex;gap:4px;box-shadow:0 8px 32px rgba(0,0,0,.08);z-index:200;
+    }
+    .nav-item{
+      padding:12px 18px;border-radius:40px;display:flex;align-items:center;
+      gap:8px;color:var(--muted);text-decoration:none;font-weight:600;
+      font-size:12px;transition:all .2s;
+    }
+    .nav-item.active{background:var(--teal);color:#fff;box-shadow:0 4px 16px rgba(13,148,136,.3)}
+    .nav-item:hover:not(.active){color:var(--teal);background:rgba(13,148,136,.05)}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      .actions-row{grid-template-columns:repeat(2,1fr)}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .welcome-hero{flex-direction:column;text-align:center;padding:24px 20px}
+      .balance-card{width:100%}
+    }
+    @media(max-width:480px){
+      .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .stat-card{padding:14px}
+      .stat-icon{width:38px;height:38px;font-size:15px}
+      .stat-info .stat-val{font-size:17px}
+      .tx-header{flex-direction:column;align-items:stretch}
+      .tx-tabs{overflow-x:auto;flex-wrap:nowrap}
+      .nav-item span{display:none}
+      .nav-item{padding:12px 14px}
+      .bottom-nav{padding:6px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand"><div class="dot"></div>TEXIS</div>
+  <div class="topbar-right">
+    <div class="balance-pill"><i class="fas fa-wallet"></i> <span id="headerBalance">₦0</span></div>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- WELCOME HERO -->
+  <div class="welcome-hero">
+    <div class="welcome-left">
+      <div class="welcome-badge"><i class="fas fa-shield-alt"></i> Phase 2</div>
+      <h2>Welcome back, <span id="userName">Investor</span> 👋</h2>
+      <p>Your wealth journey continues</p>
+    </div>
+    <div class="balance-card">
+      <div class="bc-label"><i class="fas fa-wallet"></i> Portfolio Balance</div>
+      <div class="bc-amount" id="walletBalance">₦0</div>
+      <span class="bc-eye" id="balanceEye" onclick="toggleBalance()"><i class="fas fa-eye"></i></span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon teal"><i class="fas fa-chart-bar"></i></div><div class="stat-info"><div class="stat-val" id="totalInvested">₦0</div><div class="stat-lbl">Total Invested</div></div></div>
+    <div class="stat-card"><div class="stat-icon green"><i class="fas fa-coins"></i></div><div class="stat-info"><div class="stat-val" id="totalEarnings">₦0</div><div class="stat-lbl">Total Earnings</div></div></div>
+    <div class="stat-card"><div class="stat-icon amber"><i class="fas fa-gift"></i></div><div class="stat-info"><div class="stat-val" id="referralBonus">₦0</div><div class="stat-lbl">Ref Earnings</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-layer-group"></i></div><div class="stat-info"><div class="stat-val" id="activePlans">0</div><div class="stat-lbl">Active Plans</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-val" id="totalReferrals">0</div><div class="stat-lbl">Referrals</div></div></div>
+    <div class="stat-card"><div class="stat-icon pink"><i class="fas fa-clock"></i></div><div class="stat-info"><div class="stat-val" id="pendingWithdrawals">0</div><div class="stat-lbl">Pending W/D</div></div></div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="section-title"><i class="fas fa-bolt"></i> Quick Actions</div>
+  <div class="actions-row">
+    <a href="deposit.html" class="action-card"><i class="fas fa-plus-circle"></i> Fund Wallet</a>
+    <a href="plans.html" class="action-card"><i class="fas fa-rocket"></i> Invest Now</a>
+    <a href="withdrawal.html" class="action-card warn" id="withdrawBtn"><i class="fas fa-arrow-down"></i> Withdraw</a>
+    <a href="referral.html" class="action-card accent"><i class="fas fa-share-nodes"></i> Refer & Earn</a>
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div class="tx-card">
+    <div class="tx-header">
+      <div class="section-title" style="margin:0"><i class="fas fa-receipt"></i> Recent Activity</div>
+      <div class="tx-tabs" id="txTabs">
+        <button class="tx-tab active" data-filter="all">All</button>
+        <button class="tx-tab" data-filter="deposit">Deposits</button>
+        <button class="tx-tab" data-filter="withdrawal">Withdrawals</button>
+        <button class="tx-tab" data-filter="roi">ROI</button>
+        <button class="tx-tab" data-filter="referral">Referrals</button>
+      </div>
+    </div>
+    <div class="tx-list" id="txList">
+      <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading transactions...</p></div>
+    </div>
+  </div>
+
+  <!-- SUPPORT -->
+  <div class="support-card">
+    <h3><i class="fas fa-headset"></i> Need Help?</h3>
+    <p>Our support team is ready to assist you</p>
+    <div class="support-btns">
+      <a href="https://wa.me/2349168032332" target="_blank" class="s-btn s-btn-wa"><i class="fab fa-whatsapp"></i> WhatsApp Support</a>
+    </div>
+    <div class="divider"></div>
+    <p style="font-size:11px;color:var(--sub);margin-bottom:12px;"><i class="fas fa-users"></i> Join our community</p>
+    <div class="group-btns">
+      <a href="https://chat.whatsapp.com/GJU7HOP7iTP6r8wmtgcZEU" target="_blank" class="g-btn g-btn-wa"><i class="fab fa-whatsapp"></i> WhatsApp Group</a>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+  <a href="plans.html" class="nav-item"><i class="fas fa-layer-group"></i><span>Plans</span></a>
+  <a href="referral.html" class="nav-item"><i class="fas fa-users"></i><span>Referral</span></a>
+  <a href="dashboard.html" class="nav-item active"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+</div>
+
+<script>
+  // ✅ NEW FIREBASE CONFIG — TEXIS Phase 2
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoya4moqwNCuVI-EtzLcMt2gD6QNUdyCQ",
+    authDomain: "texis-b7180.firebaseapp.com",
+    projectId: "texis-b7180",
+    storageBucket: "texis-b7180.firebasestorage.app",
+    messagingSenderId: "848854390209",
+    appId: "1:848854390209:web:c5babd1ca5e0e42ba08b40"
+  };
+
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const FV = firebase.firestore.FieldValue;
+  const fmt = v => '₦' + Number(v || 0).toLocaleString();
+
+  let allTransactions = [];
+  let balanceVisible = true;
+  let realBalance = 0;
+
+  // ✅ BALANCE TOGGLE
+  window.toggleBalance = function() {
+    balanceVisible = !balanceVisible;
+    const eye = document.getElementById('balanceEye');
+    const bal = document.getElementById('walletBalance');
+    const hBal = document.getElementById('headerBalance');
+    eye.innerHTML = balanceVisible ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    bal.textContent = balanceVisible ? fmt(realBalance) : '₦••••••';
+    hBal.textContent = balanceVisible ? fmt(realBalance) : '₦••••••';
+  };
+
+  // ✅ TAB FILTERING
+  document.getElementById('txTabs').addEventListener('click', (e) => {
+    if (e.target.classList.contains('tx-tab')) {
+      document.querySelectorAll('.tx-tab').forEach(t => t.classList.remove('active'));
+      e.target.classList.add('active');
+      renderTransactions(e.target.dataset.filter);
+    }
+  });
+
+  // ✅ LOGOUT
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    const r = await Swal.fire({
+      title: 'Logout', text: 'Are you sure you want to logout?',
+      icon: 'question', showCancelButton: true,
+      confirmButtonText: 'Yes, Logout', confirmButtonColor: '#0f766e'
+    });
+    if (r.isConfirmed) {
+      await auth.signOut();
+      Swal.fire({ icon: 'success', title: 'Logged Out', timer: 1200, showConfirmButton: false });
+      setTimeout(() => window.location.href = 'login.html', 800);
+    }
+  });
+
+  // ✅ AUTH STATE
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'login.html'; return; }
+
+    try {
+      // ✅ BAN CHECK — Single doc read
+      const userSnap = await db.collection('users').doc(user.uid).get();
+      if (!userSnap.exists) { window.location.href = 'login.html'; return; }
+
+      const data = userSnap.data();
+
+      // ⛔ BAN CHECK
+      if (data.banned === true || data.isBanned === true || data.status === 'banned') {
+        await auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
+        Swal.fire({
+          icon: 'error', title: '⛔ Account Banned',
+          text: 'Your account has been permanently banned.',
+          confirmButtonColor: '#ef4444'
+        }).then(() => window.location.href = 'login.html');
+        return;
+      }
+
+      // ✅ POPULATE UI
+      const firstName = (data.fullName || 'Investor').split(' ')[0];
+      realBalance = Number(data.wallet || 0);
+
+      document.getElementById('userName').textContent = firstName;
+      document.getElementById('walletBalance').textContent = balanceVisible ? fmt(realBalance) : '₦••••••';
+      document.getElementById('headerBalance').textContent = balanceVisible ? fmt(realBalance) : '₦••••••';
+      document.getElementById('totalInvested').textContent = fmt(data.totalInvested || data.totalDeposits || 0);
+      document.getElementById('totalEarnings').textContent = fmt(data.totalEarnings || 0);
+
+      // ✅ LOAD DATA IN PARALLEL
+      await Promise.all([
+        loadReferralData(user.uid),
+        loadActivePlans(user.uid),
+        loadPendingWithdrawals(user.uid),
+        loadTransactions(user.uid)
+      ]);
+
+      // Withdraw button state
+      const wBtn = document.getElementById('withdrawBtn');
+      if (realBalance < 1000) {
+        wBtn.classList.add('disabled');
+        wBtn.title = 'Minimum ₦1,000 required';
+      } else {
+        wBtn.classList.remove('disabled');
+      }
+
+    } catch (err) {
+      console.error('Dashboard error:', err);
+    }
+  });
+
+  // ✅ LOAD REFERRAL DATA
+  async function loadReferralData(uid) {
+    try {
+      const refSnap = await db.collection('users').doc(uid).collection('referrals').limit(50).get();
+      let refBonus = 0;
+      refSnap.forEach(d => refBonus += Number(d.data().totalEarned || 0));
+      document.getElementById('referralBonus').textContent = fmt(refBonus);
+      document.getElementById('totalReferrals').textContent = refSnap.size;
+    } catch (e) { console.log('Ref data:', e.message); }
+  }
+
+  // ✅ LOAD ACTIVE PLANS
+  async function loadActivePlans(uid) {
+    try {
+      const planSnap = await db.collection('users').doc(uid).collection('activePlans')
+        .where('status', '==', 'active').limit(20).get();
+      let count = 0;
+      planSnap.forEach(p => { if (p.data().daysLeft > 0) count++; });
+      document.getElementById('activePlans').textContent = count;
+    } catch (e) { console.log('Plans:', e.message); }
+  }
+
+  // ✅ LOAD PENDING WITHDRAWALS
+  async function loadPendingWithdrawals(uid) {
+    try {
+      const wSnap = await db.collection('users').doc(uid).collection('withdrawals')
+        .where('status', 'in', ['pending', 'processing']).limit(10).get();
+      document.getElementById('pendingWithdrawals').textContent = wSnap.size;
+    } catch (e) { console.log('Pending W/D:', e.message); }
+  }
+
+  // ✅ LOAD ALL TRANSACTIONS (optimised with limit)
+  async function loadTransactions(uid) {
+    allTransactions = [];
+    try {
+      const collections = [
+        { name: 'deposits', cat: 'deposit', icon: 'deposit', label: 'Deposit' },
+        { name: 'withdrawals', cat: 'withdrawal', icon: 'withdrawal', label: 'Withdrawal' },
+        { name: 'transactions', cat: 'roi', icon: 'roi', label: 'Transaction' }
+      ];
+
+      for (const col of collections) {
+        try {
+          const snap = await db.collection('users').doc(uid).collection(col.name)
+            .orderBy('createdAt', 'desc').limit(30).get();
+          snap.forEach(d => {
+            const x = d.data();
+            let cat = col.cat;
+            let icon = col.icon;
+
+            // Smart categorization for transactions subcollection
+            if (col.name === 'transactions') {
+              if (x.type === 'investment') { cat = 'deposit'; icon = 'deposit'; }
+              else if (x.type === 'referral_bonus' || x.type === 'referral') { cat = 'referral'; icon = 'referral'; }
+              else if (x.type === 'welcome_bonus') { cat = 'roi'; icon = 'bonus'; }
+              else if (x.type === 'admin_funding' || x.type === 'direct_credit' || x.type === 'manual_credit') { cat = 'deposit'; icon = 'deposit'; }
+            }
+
+            allTransactions.push({
+              id: d.id,
+              amount: x.amount || 0,
+              createdAt: x.createdAt,
+              status: x.status || 'completed',
+              type: x.type || col.label,
+              category: cat,
+              icon: icon,
+              detail: x.planName || x.description || x.bankName || x.method || col.label
+            });
+          });
+        } catch (e) { console.log(`${col.name}:`, e.message); }
+      }
+
+      // ✅ REFERRALS EARNINGS
+      try {
+        const refSnap = await db.collection('users').doc(uid).collection('referrals').limit(30).get();
+        refSnap.forEach(d => {
+          const x = d.data();
+          if (x.totalEarned && x.totalEarned > 0) {
+            allTransactions.push({
+              id: 'ref_' + d.id,
+              amount: x.totalEarned,
+              createdAt: x.lastInvestmentDate || x.referredAt,
+              status: 'completed',
+              type: 'referral_bonus',
+              category: 'referral',
+              icon: 'referral',
+              detail: `From: ${x.fullName || 'Downline'} (L${x.level || 1})`
+            });
+          }
+        });
+      } catch (e) { console.log('Ref tx:', e.message); }
+
+      // Sort by date (newest first)
+      allTransactions.sort((a, b) => {
+        const ta = a.createdAt?.toMillis?.() || a.createdAt || 0;
+        const tb = b.createdAt?.toMillis?.() || b.createdAt || 0;
+        return tb - ta;
+      });
+
+      renderTransactions('all');
+    } catch (e) { console.error('TX load:', e); }
+  }
+
+  // ✅ RENDER TRANSACTIONS
+  function renderTransactions(filter) {
+    const container = document.getElementById('txList');
+    let list = filter === 'all' ? allTransactions : allTransactions.filter(t => t.category === filter);
+
+    if (!list.length) {
+      container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No transactions found</p></div>';
+      return;
+    }
+
+    container.innerHTML = list.slice(0, 25).map(t => {
+      let date = '—', time = '';
+      if (t.createdAt) {
+        try {
+          const d = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+          date = d.toLocaleDateString('en-NG', { day: '2-digit', month: 'short', year: '2-digit' });
+          time = d.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
+        } catch (e) {}
+      }
+
+      const isPositive = t.amount > 0 && t.category !== 'withdrawal';
+      const statusClass = t.status === 'pending' || t.status === 'processing' ? 'pending' :
+                         t.status === 'failed' || t.status === 'rejected' ? 'failed' : 'ok';
+
+      return `
+        <div class="tx-row">
+          <div class="tx-icon-wrap ${t.icon}"><i class="fas fa-${t.icon === 'deposit' ? 'arrow-down' : t.icon === 'withdrawal' ? 'arrow-up' : t.icon === 'referral' ? 'users' : t.icon === 'bonus' ? 'star' : 'chart-line'}"></i></div>
+          <div class="tx-info">
+            <div class="tx-name">${t.detail || t.type}</div>
+            <div class="tx-meta">${date} · ${time}</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amount ${isPositive ? 'plus' : 'minus'}">${isPositive ? '+' : '-'}${fmt(Math.abs(t.amount))}</div>
+            <div class="tx-status ${statusClass}">${t.status || 'completed'}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  console.log('✅ Dashboard ready — Phase 2');
+</script>
+</body>
+</html>
