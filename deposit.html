@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Deposit Funds</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #14b8a6;
+      --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+      --bg: #f0f4f8; --card: #ffffff; --text: #0f172a;
+      --sub: #475569; --muted: #94a3b8; --border: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.04);
+      --shadow: 0 4px 16px rgba(0,0,0,.06);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,.08);
+      --radius: 20px; --radius-sm: 14px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; padding-bottom: 110px;
+      background-image: radial-gradient(ellipse at 0% 0%,#e0f2fe 0%,transparent 50%),radial-gradient(ellipse at 100% 100%,#ccfbf1 0%,transparent 50%);
+    }
+
+    /* TOPBAR */
+    .topbar {
+      background: rgba(255,255,255,.9); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border); padding: 0 20px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .topbar .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 19px;
+    }
+    .topbar .brand .dot {
+      width: 10px; height: 10px;
+      background: var(--teal); border-radius: 50%;
+      box-shadow: 0 0 12px var(--teal-light);
+    }
+    .balance-pill {
+      background: linear-gradient(135deg,#f0fdfa,#e6fffa);
+      border: 1px solid #99f6e4; border-radius: 30px; padding: 8px 18px;
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 14px;
+    }
+    .balance-pill i { color: var(--teal); }
+
+    .main { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+
+    /* HEADER */
+    .page-head { text-align: center; margin-bottom: 24px; }
+    .page-head .deposit-icon {
+      font-size: 44px; color: var(--teal); margin-bottom: 8px;
+    }
+    .page-head h1 { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+    .page-head p { font-size: 13px; color: var(--sub); }
+
+    /* STEPS INDICATOR */
+    .steps-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; margin-bottom: 24px;
+    }
+    .step-dot {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #fff; border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: var(--muted);
+      transition: all .3s; position: relative; z-index: 1;
+    }
+    .step-dot.active {
+      background: var(--teal); border-color: var(--teal);
+      color: #fff; box-shadow: 0 4px 16px rgba(13,148,136,.3);
+    }
+    .step-dot.done {
+      background: #f0fdf4; border-color: var(--green); color: var(--green);
+    }
+    .step-line {
+      width: 40px; height: 2px; background: var(--border);
+      transition: background .3s;
+    }
+    .step-line.done { background: var(--green); }
+
+    /* SECTION */
+    .section { display: none; }
+    .section.show {
+      display: block;
+      animation: fadeSlide .4s cubic-bezier(.16,1,.3,1);
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CARD */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+      margin-bottom: 16px; box-shadow: var(--shadow-sm);
+    }
+    .card h3 {
+      font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700;
+      margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+    }
+    .card h3 i { color: var(--teal); }
+
+    .alert {
+      background: #f0fdfa; border: 1px solid #99f6e4;
+      border-radius: 12px; padding: 12px 16px;
+      font-size: 12px; color: var(--teal);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+    }
+
+    /* AMOUNT GRID */
+    .amount-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; margin-bottom: 14px;
+    }
+    .amount-btn {
+      padding: 16px 10px; background: #fff;
+      border: 2px solid var(--border); border-radius: var(--radius-sm);
+      font-weight: 700; font-size: 13px; cursor: pointer;
+      text-align: center; transition: all .2s; color: var(--text);
+      font-family: 'Outfit', sans-serif;
+    }
+    .amount-btn:hover { border-color: var(--teal); background: #f8fafc; }
+    .amount-btn.selected {
+      border-color: var(--teal); background: linear-gradient(135deg,#f0fdfa,#ccfbf1);
+      color: var(--teal); box-shadow: 0 0 0 4px rgba(13,148,136,.08);
+    }
+    .custom-input {
+      width: 100%; padding: 14px 16px;
+      border: 2px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 15px; font-family: inherit; outline: none;
+      transition: all .2s; background: #f8fafc;
+    }
+    .custom-input:focus { border-color: var(--teal); background: #fff; }
+
+    /* BANK INFO */
+    .info-row {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 13px 0;
+      border-bottom: 1px solid #f1f5f9; font-size: 14px;
+    }
+    .info-row:last-child { border: none; padding-bottom: 0; }
+    .info-row .lbl { color: var(--sub); font-weight: 500; }
+    .info-row .val {
+      font-weight: 700; display: flex; align-items: center; gap: 8px;
+    }
+    .copy-btn {
+      padding: 5px 14px; background: #f0fdfa;
+      border: 1px solid #99f6e4; border-radius: 10px;
+      font-size: 11px; font-weight: 700; color: var(--teal);
+      cursor: pointer; transition: all .2s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--teal); color: #fff; }
+    .big-amount {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px; font-weight: 800; color: var(--teal);
+    }
+
+    .instruction {
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: var(--radius-sm); padding: 18px;
+      margin-top: 14px;
+    }
+    .instruction h4 {
+      font-size: 13px; font-weight: 700; color: var(--amber);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .instruction ol { margin-left: 20px; font-size: 13px; color: var(--sub); line-height: 2; }
+
+    /* FORM */
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; color: var(--sub);
+      text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px;
+    }
+    .form-group label i { color: var(--teal); font-size: 13px; }
+    .form-group input {
+      width: 100%; padding: 14px 16px;
+      border: 2px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: inherit; outline: none;
+      transition: all .2s; background: #f8fafc;
+    }
+    .form-group input:focus { border-color: var(--teal); background: #fff; }
+    .form-group input[readonly] { background: #f1f5f9; color: var(--sub); cursor: default; }
+
+    /* UPLOAD */
+    .upload-zone {
+      border: 2px dashed #99f6e4; border-radius: var(--radius-sm);
+      padding: 32px; text-align: center; cursor: pointer;
+      transition: all .25s; background: #f0fdfa;
+      position: relative; overflow: hidden;
+    }
+    .upload-zone:hover { border-color: var(--teal); background: #fff; }
+    .upload-zone.has-file { border-color: var(--green); background: #f0fdf4; }
+    .upload-zone input {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2;
+    }
+    .upload-zone .upload-icon { font-size: 36px; color: var(--teal); margin-bottom: 10px; }
+    .upload-zone p { font-size: 13px; color: var(--sub); }
+    .upload-zone .file-name { font-weight: 700; color: var(--green); margin-top: 6px; font-size: 12px; }
+    .upload-zone .file-size { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .preview-img {
+      max-width: 100%; max-height: 220px;
+      border-radius: 12px; margin-top: 14px;
+      display: none; border: 1px solid var(--border);
+      object-fit: contain;
+    }
+
+    /* BUTTONS */
+    .btn {
+      width: 100%; padding: 16px; border: none;
+      border-radius: var(--radius-sm); font-weight: 700;
+      font-size: 15px; cursor: pointer;
+      display: flex; align-items: center;
+      justify-content: center; gap: 10px;
+      transition: all .25s; font-family: inherit;
+      margin-top: 10px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--teal), var(--teal-light));
+      color: #fff; box-shadow: 0 4px 16px rgba(13,148,136,.25);
+    }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(13,148,136,.35); }
+    .btn-primary:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
+    .btn-outline {
+      background: #fff; color: var(--sub);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* SUCCESS */
+    .success-box { text-align: center; padding: 32px 16px; }
+    .success-box .s-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg,#f0fdf4,#dcfce7);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; font-size: 36px; color: var(--green);
+    }
+    .success-box h2 { font-family: 'Outfit', sans-serif; font-size: 22px; margin-bottom: 8px; }
+    .success-box p { font-size: 14px; color: var(--sub); line-height: 1.6; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,.9); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border); border-radius: 50px; padding: 6px 10px;
+      display: flex; gap: 4px; box-shadow: 0 8px 32px rgba(0,0,0,.08); z-index: 200;
+    }
+    .nav-item {
+      padding: 12px 18px; border-radius: 40px;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--muted); text-decoration: none;
+      font-weight: 600; font-size: 12px; transition: all .2s;
+    }
+    .nav-item.active { background: var(--teal); color: #fff; box-shadow: 0 4px 16px rgba(13,148,136,.3); }
+    .nav-item:hover:not(.active) { color: var(--teal); background: rgba(13,148,136,.05); }
+
+    @media (max-width: 500px) {
+      .amount-grid { grid-template-columns: 1fr 1fr; }
+      .nav-item span { display: none; }
+      .nav-item { padding: 12px 14px; }
+      .bottom-nav { padding: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><div class="dot"></div>TEXIS</div>
+  <div class="balance-pill"><i class="fas fa-wallet"></i> <span id="walletDisplay">₦0</span></div>
+</div>
+
+<div class="main">
+  <div class="page-head">
+    <div class="deposit-icon"><i class="fas fa-piggy-bank"></i></div>
+    <h1>Deposit Funds</h1>
+    <p>Add money to your TEXIS wallet securely</p>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps-row" id="stepsRow">
+    <div class="step-dot active" id="stepDot1">1</div>
+    <div class="step-line" id="stepLine1"></div>
+    <div class="step-dot" id="stepDot2">2</div>
+    <div class="step-line" id="stepLine2"></div>
+    <div class="step-dot" id="stepDot3">3</div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section show" id="sec1">
+    <div class="card">
+      <h3><i class="fas fa-coins"></i> Select Deposit Amount</h3>
+      <div class="alert"><i class="fas fa-info-circle"></i> Minimum deposit: ₦10,000</div>
+      <div class="amount-grid" id="amountGrid">
+        <div class="amount-btn" data-amount="10000">₦10,000</div>
+        <div class="amount-btn" data-amount="20000">₦20,000</div>
+        <div class="amount-btn" data-amount="30000">₦30,000</div>
+        <div class="amount-btn" data-amount="50000">₦50,000</div>
+        <div class="amount-btn" data-amount="100000">₦100,000</div>
+        <div class="amount-btn" data-amount="200000">₦200,000</div>
+      </div>
+      <input type="number" class="custom-input" id="customAmount" placeholder="Or enter custom amount (min ₦10,000)" min="10000" inputmode="numeric"/>
+    </div>
+    <button class="btn btn-primary" id="nextToStep2" disabled><i class="fas fa-arrow-right"></i> Continue to Payment</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="section" id="sec2">
+    <div class="card">
+      <h3><i class="fas fa-university"></i> Bank Transfer Details</h3>
+      <div class="info-row"><span class="lbl">Account Name</span><span class="val">Ayoola Temitope</span></div>
+      <div class="info-row">
+        <span class="lbl">Account Number</span>
+        <span class="val">2289071872 <button class="copy-btn" onclick="copyText('2289071872')"><i class="fas fa-copy"></i> Copy</button></span>
+      </div>
+      <div class="info-row"><span class="lbl">Bank</span><span class="val">ZENITH BANK</span></div>
+      <div class="info-row"><span class="lbl">Amount to Pay</span><span class="big-amount" id="displayAmount">₦0</span></div>
+    </div>
+    <div class="instruction">
+      <h4><i class="fas fa-list-ol"></i> Instructions</h4>
+      <ol>
+        <li>Transfer <b id="instructionAmount">₦0</b> to the account above</li>
+        <li>Take a clear screenshot of your payment confirmation</li>
+        <li>Click below to submit your proof</li>
+      </ol>
+    </div>
+    <button class="btn btn-primary" id="nextToStep3"><i class="fas fa-check-circle"></i> I've Made the Transfer</button>
+    <button class="btn btn-outline" onclick="goTo(1)"><i class="fas fa-arrow-left"></i> Back</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="section" id="sec3">
+    <div class="card">
+      <h3><i class="fas fa-receipt"></i> Submit Payment Proof</h3>
+      <div class="form-group">
+        <label><i class="fas fa-user"></i> Sender's Name *</label>
+        <input type="text" id="senderName" placeholder="Name on the bank account you sent from" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-phone"></i> Phone Number (Optional)</label>
+        <input type="tel" id="phoneNumber" placeholder="For faster verification" autocomplete="tel"/>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-coins"></i> Amount Deposited</label>
+        <input type="text" id="amountReadonly" readonly/>
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-camera"></i> Payment Screenshot *</label>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="screenshotFile" accept="image/*" onchange="handleFile(event)"/>
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <p>Tap to upload screenshot</p>
+          <p class="file-name" id="fileName"></p>
+          <p class="file-size" id="fileSize"></p>
+          <img class="preview-img" id="previewImg" alt="Payment Proof Preview"/>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="submitDeposit" disabled><i class="fas fa-paper-plane"></i> Submit Deposit Request</button>
+    <button class="btn btn-outline" onclick="goTo(2)"><i class="fas fa-arrow-left"></i> Back</button>
+  </div>
+
+  <!-- STEP 4: SUCCESS -->
+  <div class="section" id="sec4">
+    <div class="card">
+      <div class="success-box">
+        <div class="s-icon"><i class="fas fa-check"></i></div>
+        <h2>Deposit Submitted!</h2>
+        <p>Your payment proof has been received and sent for review.</p>
+        <p style="margin-top:8px;font-size:13px;">⏱️ Approval usually takes <b style="color:var(--green);">5–30 minutes</b> during business hours.</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="window.location.href='dashboard.html'"><i class="fas fa-home"></i> Back to Dashboard</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+  <a href="plans.html" class="nav-item"><i class="fas fa-layer-group"></i><span>Plans</span></a>
+  <a href="referral.html" class="nav-item"><i class="fas fa-users"></i><span>Referral</span></a>
+  <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+</div>
+
+<script>
+  // ✅ NEW FIREBASE CONFIG — TEXIS Phase 2
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoya4moqwNCuVI-EtzLcMt2gD6QNUdyCQ",
+    authDomain: "texis-b7180.firebaseapp.com",
+    projectId: "texis-b7180",
+    storageBucket: "texis-b7180.firebasestorage.app",
+    messagingSenderId: "848854390209",
+    appId: "1:848854390209:web:c5babd1ca5e0e42ba08b40"
+  };
+
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const FV = firebase.firestore.FieldValue;
+
+  const MIN_DEPOSIT = 10000;
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const BANK_DETAILS = { name: 'Ayoola Temitope', number: '2289071872', bank: 'ZENITH BANK' };
+
+  let selectedAmount = 0;
+  let currentUser = null;
+  let userData = null;
+  let screenshotFile = null;
+  let isSubmitting = false;
+
+  const fmt = v => '₦' + Number(v || 0).toLocaleString();
+
+  // ── AUTH + BAN CHECK ──
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (!snap.exists) { window.location.href = 'login.html'; return; }
+      
+      userData = snap.data();
+      
+      // ⛔ BAN CHECK
+      if (userData.banned === true || userData.isBanned === true || userData.status === 'banned') {
+        await auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      document.getElementById('walletDisplay').textContent = fmt(userData.wallet || 0);
+    } catch(e) { console.error('Auth error:', e); }
+  });
+
+  // ── AMOUNT SELECTION ──
+  const amountBtns = document.querySelectorAll('#amountGrid .amount-btn');
+  const customEl = document.getElementById('customAmount');
+  const next1 = document.getElementById('nextToStep2');
+
+  amountBtns.forEach(b => {
+    b.addEventListener('click', () => {
+      amountBtns.forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      selectedAmount = Number(b.dataset.amount);
+      customEl.value = '';
+      updateNextButton();
+    });
+  });
+
+  customEl.addEventListener('input', () => {
+    amountBtns.forEach(x => x.classList.remove('selected'));
+    const val = Number(customEl.value);
+    selectedAmount = isNaN(val) ? 0 : val;
+    updateNextButton();
+  });
+
+  function updateNextButton() {
+    next1.disabled = selectedAmount < MIN_DEPOSIT;
+  }
+
+  next1.addEventListener('click', () => {
+    if (selectedAmount < MIN_DEPOSIT) {
+      return Swal.fire({
+        icon: 'warning', title: 'Invalid Amount',
+        text: `Minimum deposit is ${fmt(MIN_DEPOSIT)}`,
+        confirmButtonColor: '#0d9488'
+      });
+    }
+    document.getElementById('displayAmount').textContent = fmt(selectedAmount);
+    document.getElementById('instructionAmount').textContent = fmt(selectedAmount);
+    document.getElementById('amountReadonly').value = fmt(selectedAmount);
+    goTo(2);
+  });
+
+  document.getElementById('nextToStep3').addEventListener('click', () => goTo(3));
+
+  // ── FILE HANDLING WITH COMPRESSION ──
+  window.handleFile = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      Swal.fire({
+        icon: 'warning', title: 'File Too Large',
+        text: `Screenshot must be under ${MAX_FILE_SIZE / (1024*1024)}MB. Current: ${(file.size/(1024*1024)).toFixed(1)}MB`,
+        confirmButtonColor: '#0d9488'
+      });
+      e.target.value = '';
+      return;
+    }
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      Swal.fire({
+        icon: 'warning', title: 'Invalid File',
+        text: 'Please upload an image file (JPG, PNG, etc.)',
+        confirmButtonColor: '#0d9488'
+      });
+      e.target.value = '';
+      return;
+    }
+    
+    screenshotFile = file;
+    
+    const zone = document.getElementById('uploadZone');
+    zone.classList.add('has-file');
+    document.getElementById('fileName').textContent = '✓ ' + file.name;
+    document.getElementById('fileSize').textContent = `Size: ${(file.size/(1024*1024)).toFixed(2)}MB`;
+    
+    // Show preview
+    const preview = document.getElementById('previewImg');
+    preview.style.display = 'block';
+    preview.src = URL.createObjectURL(file);
+    
+    document.getElementById('submitDeposit').disabled = false;
+  };
+
+  // ✅ AUTO-COMPRESS IMAGE BEFORE UPLOAD
+  async function compressImage(file, maxWidth = 1000, quality = 0.65) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          
+          // Only resize if larger than maxWidth
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+          
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          
+          // Try JPEG first for smaller size
+          const base64 = canvas.toDataURL('image/jpeg', quality);
+          resolve({ base64, width: w, height: h, originalSize: file.size, compressedSize: Math.round(base64.length * 0.75) });
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── SUBMIT DEPOSIT ──
+  document.getElementById('submitDeposit').addEventListener('click', async () => {
+    if (isSubmitting) return;
+    
+    const senderName = document.getElementById('senderName').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+
+    if (!senderName) {
+      return Swal.fire({
+        icon: 'warning', title: 'Sender Name Required',
+        text: 'Enter the name on the bank account you sent from.',
+        confirmButtonColor: '#0d9488'
+      });
+    }
+    if (!screenshotFile) {
+      return Swal.fire({
+        icon: 'warning', title: 'Screenshot Required',
+        text: 'Please upload your payment screenshot.',
+        confirmButtonColor: '#0d9488'
+      });
+    }
+    if (!currentUser) {
+      return Swal.fire({
+        icon: 'error', title: 'Session Expired',
+        text: 'Please log in again.',
+        confirmButtonColor: '#ef4444'
+      });
+    }
+
+    const confirm = await Swal.fire({
+      title: 'Confirm Deposit',
+      html: `
+        <div style="text-align:left;background:#f8fafc;border-radius:14px;padding:16px;margin:12px 0;font-size:13px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>Amount:</span><b>${fmt(selectedAmount)}</b></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>Sender:</span><b>${senderName}</b></div>
+          ${phoneNumber ? `<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>Phone:</span><b>${phoneNumber}</b></div>` : ''}
+          <div style="display:flex;justify-content:space-between;"><span>Bank:</span><b>${BANK_DETAILS.number} (${BANK_DETAILS.bank})</b></div>
+        </div>`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Submit',
+      confirmButtonColor: '#0d9488',
+      cancelButtonText: 'Cancel'
+    });
+    
+    if (!confirm.isConfirmed) return;
+
+    isSubmitting = true;
+    Swal.fire({
+      title: 'Compressing & Submitting...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    try {
+      // ✅ Compress image
+      const { base64, originalSize, compressedSize } = await compressImage(screenshotFile);
+      console.log(`📸 Image compressed: ${(originalSize/1024).toFixed(1)}KB → ${(compressedSize/1024).toFixed(1)}KB`);
+      
+      const depositId = 'DEP_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+      
+      // ✅ Single write — minimal Firestore usage
+      await db.collection('users').doc(currentUser.uid).collection('deposits').doc(depositId).set({
+        depositId,
+        userId: currentUser.uid,
+        username: userData?.fullName || 'User',
+        userEmail: userData?.email || currentUser.email || '',
+        senderName,
+        phoneNumber: phoneNumber || '',
+        amount: selectedAmount,
+        status: 'pending',
+        method: 'Bank Transfer',
+        accountName: BANK_DETAILS.name,
+        accountNumber: BANK_DETAILS.number,
+        bankName: BANK_DETAILS.bank,
+        screenshotBase64: base64,
+        imageInfo: { originalSize, compressedSize },
+        createdAt: FV.serverTimestamp(),
+        phase: 'phase2'
+      });
+
+      Swal.close();
+      goTo(4);
+
+    } catch(e) {
+      console.error('Deposit error:', e);
+      isSubmitting = false;
+      
+      let msg = 'Submission failed. Please try again.';
+      if (e.code === 'resource-exhausted') msg = 'System busy. Please wait a moment and try again.';
+      
+      Swal.fire({
+        icon: 'error', title: 'Submission Failed',
+        text: msg, confirmButtonColor: '#ef4444'
+      });
+    }
+  });
+
+  // ── NAVIGATION ──
+  window.goTo = function(step) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('show'));
+    document.getElementById('sec' + step).classList.add('show');
+
+    // Update step dots
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById('stepDot' + i);
+      dot.classList.remove('active', 'done');
+      if (i < step) dot.classList.add('done');
+      if (i === step) dot.classList.add('active');
+    }
+    
+    // Update step lines
+    document.getElementById('stepLine1').classList.toggle('done', step > 1);
+    document.getElementById('stepLine2').classList.toggle('done', step > 2);
+
+    document.getElementById('stepsRow').style.display = step === 4 ? 'none' : 'flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // ── COPY ──
+  window.copyText = function(text) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        Swal.fire({ icon: 'success', title: 'Copied!', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
+      });
+    } else {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      Swal.fire({ icon: 'success', title: 'Copied!', timer: 1500, showConfirmButton: false, toast: true, position: 'top-end' });
+    }
+  };
+
+  console.log('✅ Deposit page ready — Phase 2');
+</script>
+</body>
+</html>
