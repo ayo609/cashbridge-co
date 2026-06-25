@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Forgot Password</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --teal: #0d9488; --teal-dark: #0f766e; --teal-light: #14b8a6;
+      --amber: #f59e0b; --green: #10b981; --red: #ef4444;
+      --bg: #f0f4f8; --card: #ffffff; --text: #0f172a;
+      --sub: #475569; --muted: #94a3b8; --border: #e2e8f0;
+      --shadow: 0 4px 16px rgba(0,0,0,.06);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,.08);
+      --radius: 24px; --radius-sm: 16px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; padding: 20px;
+      background-image: radial-gradient(ellipse at 0% 0%,#e0f2fe 0%,transparent 50%),radial-gradient(ellipse at 100% 100%,#ccfbf1 0%,transparent 50%);
+    }
+
+    .container { width: 100%; max-width: 460px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 36px 28px;
+      box-shadow: var(--shadow-lg); animation: slideUp .5s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Logo */
+    .logo-section { text-align: center; margin-bottom: 28px; }
+    .logo-icon {
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-light));
+      border-radius: 18px; display: flex; align-items: center;
+      justify-content: center; font-size: 26px; color: #fff;
+      margin: 0 auto 14px; box-shadow: 0 12px 28px rgba(13,148,136,.25);
+    }
+    .brand-name {
+      font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800;
+      background: linear-gradient(135deg, var(--teal), var(--teal-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 4px;
+    }
+    .tagline { font-size: 13px; color: var(--muted); }
+
+    /* Title */
+    .title {
+      font-family: 'Outfit', sans-serif; font-size: 22px;
+      font-weight: 700; text-align: center; margin-bottom: 6px;
+    }
+    .subtitle {
+      color: var(--sub); text-align: center; margin-bottom: 24px;
+      font-size: 14px; line-height: 1.6;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: #f0fdfa; border: 1px solid #99f6e4;
+      border-radius: var(--radius-sm); padding: 16px;
+      margin-bottom: 24px; display: flex; gap: 12px;
+    }
+    .info-box i { color: var(--teal); font-size: 20px; margin-top: 2px; flex-shrink: 0; }
+    .info-box h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .info-box p { font-size: 12px; color: var(--sub); line-height: 1.6; }
+
+    /* Form */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; color: var(--sub);
+      text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px;
+    }
+    .form-label i { color: var(--teal); font-size: 13px; }
+    .input-wrapper { position: relative; }
+    .input-icon {
+      position: absolute; left: 16px; top: 50%;
+      transform: translateY(-50%); color: var(--teal);
+      font-size: 15px; opacity: .7;
+    }
+    .form-input {
+      width: 100%; padding: 15px 16px 15px 44px;
+      background: #f8fafc; border: 2px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 15px;
+      font-family: inherit; outline: none; color: var(--text);
+      transition: all .25s;
+    }
+    .form-input:focus {
+      border-color: var(--teal); background: #fff;
+      box-shadow: 0 0 0 4px rgba(13,148,136,.06);
+    }
+    .form-input::placeholder { color: var(--muted); }
+
+    /* Buttons */
+    .btn {
+      width: 100%; padding: 16px; border: none; border-radius: var(--radius-sm);
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; transition: all .25s; font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--teal), var(--teal-light));
+      color: #fff; box-shadow: 0 4px 16px rgba(13,148,136,.2);
+    }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(13,148,136,.3); }
+    .btn-primary:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
+    .btn-outline {
+      background: #fff; color: var(--sub); border: 1px solid var(--border);
+      margin-top: 12px;
+    }
+    .btn-outline:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; text-align: center;
+      margin: 20px 0; color: var(--muted); font-size: 12px; font-weight: 600;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; border-bottom: 1px solid var(--border);
+    }
+    .divider::before { margin-right: 14px; }
+    .divider::after { margin-left: 14px; }
+
+    /* Success */
+    .success-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg,#f0fdf4,#dcfce7);
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 32px; color: var(--green);
+      margin: 0 auto 20px; border: 3px solid #bbf7d0;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); box-shadow: 0 0 20px rgba(16,185,129,.15); }
+      50% { transform: scale(1.06); box-shadow: 0 0 32px rgba(16,185,129,.3); }
+    }
+    .success-message { text-align: center; }
+    .success-message h3 { font-family: 'Outfit', sans-serif; font-size: 20px; margin-bottom: 8px; }
+    .success-message p { font-size: 14px; color: var(--sub); line-height: 1.6; }
+    .success-message strong { color: var(--teal); }
+
+    .warning-box {
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: var(--radius-sm); padding: 16px;
+      margin-top: 16px; display: flex; gap: 12px;
+    }
+    .warning-box i { color: var(--amber); font-size: 18px; margin-top: 2px; flex-shrink: 0; }
+    .warning-box h4 { font-size: 13px; font-weight: 700; color: #92400e; margin-bottom: 4px; }
+    .warning-box p { font-size: 11px; color: var(--sub); line-height: 1.6; }
+
+    .resend-timer { text-align: center; margin-top: 12px; font-size: 12px; color: var(--muted); }
+    .resend-timer span { color: var(--amber); font-weight: 700; }
+    .hidden { display: none !important; }
+    .back-link { text-align: center; margin-top: 16px; font-size: 13px; color: var(--sub); }
+    .back-link a { color: var(--teal); font-weight: 700; text-decoration: none; }
+    .back-link a:hover { text-decoration: underline; }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block; width: 20px; height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%; border-top-color: #fff;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      .card { padding: 28px 20px; }
+      .brand-name { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <!-- Logo -->
+    <div class="logo-section">
+      <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+      <h1 class="brand-name">TEXIS</h1>
+      <p class="tagline">Phase 2 · Smarter Investing</p>
+    </div>
+
+    <!-- STEP 1: Email Form -->
+    <div id="emailStep">
+      <h2 class="title">Forgot Password?</h2>
+      <p class="subtitle">Enter your registered email address and we'll send you a reset link.</p>
+
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <h4>How it works</h4>
+          <p>We'll send a password reset link to your email. Click the link to create a new password. The link expires in 1 hour.</p>
+        </div>
+      </div>
+
+      <form id="forgotPasswordForm">
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-envelope"></i> Email Address</label>
+          <div class="input-wrapper">
+            <i class="input-icon fas fa-envelope"></i>
+            <input type="email" id="email" class="form-input" placeholder="Enter your registered email" required autocomplete="email"/>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i class="fas fa-paper-plane"></i> <span>Send Reset Link</span>
+        </button>
+      </form>
+
+      <div class="divider">OR</div>
+
+      <a href="login.html" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Login
+      </a>
+
+      <div class="back-link">
+        Don't have an account? <a href="register.html">Create one now →</a>
+      </div>
+    </div>
+
+    <!-- STEP 2: Success -->
+    <div id="successStep" class="hidden">
+      <div class="success-message">
+        <div class="success-icon"><i class="fas fa-check"></i></div>
+        <h3>Check Your Email!</h3>
+        <p>We've sent a password reset link to<br><strong id="sentEmail"></strong></p>
+      </div>
+
+      <div class="info-box" style="margin-top:20px;">
+        <i class="fas fa-lightbulb"></i>
+        <div>
+          <h4>Next Steps</h4>
+          <p>1. Open your email inbox<br>2. Click the "Reset Password" button<br>3. Create a new strong password<br>4. Log in with your new password</p>
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <h4>Didn't receive the email?</h4>
+          <p>• Check your spam/junk folder<br>• Make sure you entered the correct email<br>• The reset link expires in 1 hour</p>
+        </div>
+      </div>
+
+      <button id="resendBtn" class="btn btn-outline" style="margin-top:16px;">
+        <i class="fas fa-redo"></i> Send Another Link
+      </button>
+
+      <div id="resendTimer" class="resend-timer hidden">
+        Resend available in <span id="timerCount">60</span> seconds
+      </div>
+
+      <a href="login.html" class="btn btn-outline" style="margin-top:8px;">
+        <i class="fas fa-arrow-left"></i> Back to Login
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ✅ NEW FIREBASE CONFIG — TEXIS Phase 2
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoya4moqwNCuVI-EtzLcMt2gD6QNUdyCQ",
+    authDomain: "texis-b7180.firebaseapp.com",
+    projectId: "texis-b7180",
+    storageBucket: "texis-b7180.firebasestorage.app",
+    messagingSenderId: "848854390209",
+    appId: "1:848854390209:web:c5babd1ca5e0e42ba08b40"
+  };
+
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  let currentEmail = '';
+  let resendTimer = null;
+  let timerSeconds = 60;
+
+  // ✅ CONFIGURE REDIRECT URL (update this to your actual domain)
+  const actionCodeSettings = {
+    url: window.location.origin + '/reset-password.html',
+    handleCodeInApp: false
+  };
+
+  // ── START RESEND COOLDOWN ──
+  function startResendTimer() {
+    const resendBtn = document.getElementById('resendBtn');
+    const timerDiv = document.getElementById('resendTimer');
+    const timerSpan = document.getElementById('timerCount');
+
+    if (resendTimer) clearInterval(resendTimer);
+
+    timerSeconds = 60;
+    resendBtn.disabled = true;
+    timerDiv.classList.remove('hidden');
+    timerSpan.textContent = timerSeconds;
+
+    resendTimer = setInterval(() => {
+      timerSeconds--;
+      if (timerSpan) timerSpan.textContent = timerSeconds;
+      if (timerSeconds <= 0) {
+        clearInterval(resendTimer);
+        resendTimer = null;
+        resendBtn.disabled = false;
+        timerDiv.classList.add('hidden');
+      }
+    }, 1000);
+  }
+
+  // ── SEND RESET EMAIL ──
+  async function sendResetEmail(email, showLoading = true) {
+    const submitBtn = document.getElementById('submitBtn');
+    const resendBtn = document.getElementById('resendBtn');
+
+    if (!email) {
+      Swal.fire({ icon: 'warning', title: 'Email Required', text: 'Please enter your email address.', confirmButtonColor: '#0d9488' });
+      return false;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Swal.fire({ icon: 'warning', title: 'Invalid Email', text: 'Please enter a valid email address.', confirmButtonColor: '#0d9488' });
+      return false;
+    }
+
+    // Disable buttons
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      if (showLoading) submitBtn.innerHTML = '<div class="spinner"></div><span>Sending...</span>';
+    }
+    if (resendBtn) resendBtn.disabled = true;
+
+    try {
+      await auth.sendPasswordResetEmail(email, actionCodeSettings);
+      
+      if (showLoading) {
+        await Swal.fire({
+          icon: 'success', title: 'Reset Link Sent!',
+          text: `A password reset link has been sent to ${email}`,
+          confirmButtonColor: '#0d9488', timer: 3000, timerProgressBar: true
+        });
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Reset error:', error);
+
+      const errorMessages = {
+        'auth/user-not-found': 'No account found with this email address.',
+        'auth/invalid-email': 'The email address is not valid.',
+        'auth/too-many-requests': 'Too many requests. Please wait a few minutes.',
+        'auth/network-request-failed': 'Network error. Check your internet connection.'
+      };
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: errorMessages[error.code] || 'Something went wrong. Please try again.',
+        confirmButtonColor: '#ef4444',
+        footer: error.code === 'auth/user-not-found' ? '<a href="register.html" style="color:#0d9488">Create a new account</a>' : ''
+      });
+
+      return false;
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        if (showLoading) submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Send Reset Link</span>';
+      }
+      if (resendBtn && !showLoading) {
+        // Don't re-enable if timer is running
+        if (!resendTimer || timerSeconds <= 0) resendBtn.disabled = false;
+      }
+    }
+  }
+
+  // ── SHOW SUCCESS ──
+  function showSuccessStep(email) {
+    document.getElementById('emailStep').classList.add('hidden');
+    document.getElementById('successStep').classList.remove('hidden');
+    document.getElementById('sentEmail').textContent = email;
+    document.getElementById('email').value = '';
+    startResendTimer();
+  }
+
+  // ── FORM SUBMIT ──
+  document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const success = await sendResetEmail(email, true);
+    if (success) {
+      currentEmail = email;
+      showSuccessStep(email);
+    }
+  });
+
+  // ── RESEND ──
+  document.getElementById('resendBtn').addEventListener('click', async () => {
+    if (!currentEmail) {
+      document.getElementById('successStep').classList.add('hidden');
+      document.getElementById('emailStep').classList.remove('hidden');
+      document.getElementById('email').focus();
+      return;
+    }
+
+    const resendBtn = document.getElementById('resendBtn');
+    const originalHTML = resendBtn.innerHTML;
+    resendBtn.innerHTML = '<div class="spinner"></div><span>Sending...</span>';
+    resendBtn.disabled = true;
+
+    const success = await sendResetEmail(currentEmail, false);
+    if (success) {
+      await Swal.fire({
+        icon: 'success', title: 'Link Sent!',
+        text: `A new reset link has been sent to ${currentEmail}`,
+        confirmButtonColor: '#0d9488', timer: 2500, timerProgressBar: true
+      });
+      startResendTimer();
+    } else {
+      resendBtn.innerHTML = originalHTML;
+      if (!resendTimer || timerSeconds <= 0) resendBtn.disabled = false;
+    }
+  });
+
+  // ── AUTO-FOCUS ──
+  window.addEventListener('load', () => {
+    const emailInput = document.getElementById('email');
+    if (emailInput) emailInput.focus();
+  });
+
+  // ── ENTER KEY ──
+  document.getElementById('email').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('forgotPasswordForm').dispatchEvent(new Event('submit'));
+    }
+  });
+
+  console.log('✅ Forgot Password page ready — Phase 2');
+</script>
+</body>
+</html>
