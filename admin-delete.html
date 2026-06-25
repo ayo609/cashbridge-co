@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <title>TEXIS · Admin — System Wipe</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--teal:#0d9488;--teal-dark:#0f766e;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--bg:#f6f8fa;--card:#fff;--text:#1a1a2e;--sub:#5a6072;--muted:#9ca3af;--border:#e5e7eb}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px}
+    
+    .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .topbar .brand{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:800;font-size:18px}
+    .topbar .brand .dot{width:10px;height:10px;background:var(--red);border-radius:50%;box-shadow:0 0 10px rgba(239,68,68,.5);animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .topbar .back-link{color:var(--sub);text-decoration:none;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+    .topbar .back-link:hover{color:var(--teal)}
+    
+    .main{max-width:800px;margin:0 auto;padding:20px 16px}
+    
+    /* DANGER ZONE HEADER */
+    .danger-header{text-align:center;margin-bottom:24px}
+    .danger-header .skull-icon{font-size:60px;color:var(--red);margin-bottom:12px;display:block;animation:shake 2s infinite}
+    @keyframes shake{0%,100%{transform:rotate(0)}10%,30%,50%,70%,90%{transform:rotate(-3deg)}20%,40%,60%,80%{transform:rotate(3deg)}}
+    .danger-header h1{font-family:'Sora',sans-serif;font-size:28px;font-weight:800;color:var(--red);margin-bottom:8px}
+    .danger-header p{font-size:14px;color:var(--sub);max-width:500px;margin:0 auto;line-height:1.6}
+    
+    /* STATS GRID */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center}
+    .stat-card .stat-icon{font-size:24px;margin-bottom:8px;color:var(--teal)}
+    .stat-card .stat-num{font-family:'Sora',sans-serif;font-size:22px;font-weight:800}
+    .stat-card .stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    
+    /* DELETION OPTIONS */
+    .options-section{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:20px}
+    .options-section h3{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .options-section h3 i{color:var(--red)}
+    
+    .option-row{display:flex;align-items:center;padding:12px 16px;border:2px solid var(--border);border-radius:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;gap:14px}
+    .option-row:hover{border-color:var(--red);background:#fef2f2}
+    .option-row.selected{border-color:var(--red);background:#fef2f2;box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+    .option-row .opt-radio{width:22px;height:22px;border:2px solid #cbd5e1;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .option-row.selected .opt-radio{border-color:var(--red);background:var(--red)}
+    .option-row.selected .opt-radio::after{content:'';width:8px;height:8px;background:#fff;border-radius:50%}
+    .option-info{flex:1}
+    .option-info .opt-title{font-weight:700;font-size:14px;margin-bottom:2px}
+    .option-info .opt-desc{font-size:11px;color:var(--muted)}
+    .option-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;flex-shrink:0}
+    .badge-danger{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
+    .badge-warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+    
+    /* SECURITY CHECK */
+    .security-section{background:#fef2f2;border:2px solid #fecaca;border-radius:20px;padding:24px;margin-bottom:20px}
+    .security-section h3{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--red);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+    .security-section p{font-size:12px;color:#991b1b;margin-bottom:16px}
+    .security-input{width:100%;padding:14px 16px;border:2px solid #fecaca;border-radius:12px;font-size:14px;font-family:inherit;outline:none;background:#fff;transition:all .2s}
+    .security-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.1)}
+    .security-input.valid{border-color:var(--green);background:#f0fdfa}
+    
+    /* BUTTONS */
+    .btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+    .btn-delete{flex:1;min-width:200px;padding:16px 24px;border:none;border-radius:16px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;box-shadow:0 8px 24px rgba(220,38,38,.3)}
+    .btn-delete:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 32px rgba(220,38,38,.4)}
+    .btn-delete:disabled{background:#cbd5e1;color:#94a3b8;cursor:not-allowed;box-shadow:none}
+    .btn-cancel{padding:16px 24px;border:2px solid var(--border);border-radius:16px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;background:#fff;color:var(--sub);transition:all .2s}
+    .btn-cancel:hover{background:var(--bg)}
+    
+    /* PROGRESS OVERLAY */
+    .progress-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;display:none}
+    .progress-overlay.show{display:flex}
+    .progress-card{background:#fff;border-radius:24px;padding:36px 28px;text-align:center;width:90%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .progress-card .spinner{font-size:40px;color:var(--red);margin-bottom:16px}
+    .progress-card h3{font-family:'Sora',sans-serif;font-size:20px;margin-bottom:8px}
+    .progress-card .sub{font-size:12px;color:var(--sub);margin-bottom:20px}
+    
+    /* PROGRESS BARS */
+    .progress-section{margin-bottom:16px;text-align:left}
+    .progress-label{font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;display:flex;justify-content:space-between}
+    .progress-bar-wrap{background:#e5e7eb;border-radius:10px;height:8px;overflow:hidden;margin-bottom:12px}
+    .progress-bar-fill{height:100%;border-radius:10px;transition:width .3s ease;width:0%}
+    .progress-bar-fill.red{background:linear-gradient(90deg,#ef4444,#dc2626)}
+    .progress-bar-fill.amber{background:linear-gradient(90deg,#f59e0b,#d97706)}
+    .progress-bar-fill.teal{background:linear-gradient(90deg,#14b8a6,#0d9488)}
+    
+    .progress-detail{font-size:11px;color:var(--muted);margin-top:8px}
+    .progress-card .cancel-btn{margin-top:16px;padding:10px 24px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--sub);font-weight:600;font-size:12px;cursor:pointer;font-family:inherit}
+    
+    /* COMPLETION */
+    .completion-icon{font-size:60px;margin-bottom:12px;display:none}
+    .completion-icon.success{color:var(--green);display:block}
+    .completion-icon.partial{color:var(--amber);display:block}
+    
+    /* LOG */
+    .log-container{max-height:200px;overflow-y:auto;background:#1e293b;border-radius:12px;padding:12px;margin-top:12px;text-align:left;font-family:monospace;font-size:11px;display:none}
+    .log-container.show{display:block}
+    .log-line{color:#94a3b8;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+    .log-line.success{color:#4ade80}
+    .log-line.error{color:#f87171}
+    .log-line.info{color:#60a5fa}
+    
+    .toast{position:fixed;bottom:30px;right:20px;background:#fff;border-radius:14px;padding:16px 20px;box-shadow:0 12px 32px rgba(0,0,0,.1);display:flex;align-items:center;gap:12px;z-index:999;animation:slideIn .3s ease;border-left:4px solid var(--teal);max-width:380px}
+    @keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+    
+    @media(max-width:600px){
+      .stats-grid{grid-template-columns:1fr 1fr}
+      .btn-delete,.btn-cancel{width:100%}
+      .option-row{flex-wrap:wrap}
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><div class="dot"></div>TEXIS <span style="font-size:12px;color:var(--red);font-weight:600;">· Admin</span></div>
+  <div><a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Admin Dashboard</a></div>
+</div>
+
+<div class="main">
+  <!-- DANGER HEADER -->
+  <div class="danger-header">
+    <i class="fas fa-skull skull-icon"></i>
+    <h1>⚠️ System Wipe — DANGER ZONE</h1>
+    <p>This page <b style="color:var(--red);">permanently deletes</b> all user accounts, investments, transactions, and every piece of data from the system. <b>This CANNOT be undone.</b></p>
+  </div>
+
+  <!-- LIVE STATS -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-num" id="statUsers">...</div><div class="stat-lbl">Total Users</div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-chart-line"></i></div><div class="stat-num" id="statPlans">...</div><div class="stat-lbl">Active Plans</div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div><div class="stat-num" id="statWithdrawals">...</div><div class="stat-lbl">Withdrawals</div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-receipt"></i></div><div class="stat-num" id="statTransactions">...</div><div class="stat-lbl">Transactions</div></div>
+  </div>
+
+  <!-- DELETION OPTIONS -->
+  <div class="options-section">
+    <h3><i class="fas fa-list-check"></i> Select Deletion Scope</h3>
+    
+    <div class="option-row selected" onclick="selectOption('all')" data-option="all">
+      <div class="opt-radio"></div>
+      <div class="option-info">
+        <div class="opt-title">💀 Complete System Wipe</div>
+        <div class="opt-desc">Delete EVERYTHING — all users, plans, transactions, withdrawals, referrals, settings</div>
+      </div>
+      <span class="option-badge badge-danger">NUCLEAR</span>
+    </div>
+    
+    <div class="option-row" onclick="selectOption('users')" data-option="users">
+      <div class="opt-radio"></div>
+      <div class="option-info">
+        <div class="opt-title">👥 Users & Data Only</div>
+        <div class="opt-desc">Delete all users and their subcollections (plans, transactions, withdrawals, referrals)</div>
+      </div>
+      <span class="option-badge badge-danger">DESTRUCTIVE</span>
+    </div>
+    
+    <div class="option-row" onclick="selectOption('investments')" data-option="investments">
+      <div class="opt-radio"></div>
+      <div class="option-info">
+        <div class="opt-title">📊 Investments & Transactions Only</div>
+        <div class="opt-desc">Clear all active plans, completed plans, withdrawals, and transactions — keep user accounts</div>
+      </div>
+      <span class="option-badge badge-warn">CLEANUP</span>
+    </div>
+  </div>
+
+  <!-- SECURITY VERIFICATION -->
+  <div class="security-section">
+    <h3><i class="fas fa-shield-haltered"></i> Security Verification</h3>
+    <p>Type <b>DELETE EVERYTHING</b> in the box below to confirm you understand this is irreversible.</p>
+    <input type="text" class="security-input" id="securityInput" placeholder="Type: DELETE EVERYTHING" oninput="validateSecurity()"/>
+    <p style="font-size:10px;color:var(--muted);margin-top:6px;" id="securityHint">You must type the exact phrase to enable the delete button.</p>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="btn-row">
+    <button class="btn-delete" id="deleteBtn" onclick="executeDeletion()" disabled>
+      <i class="fas fa-trash-can"></i> <span id="deleteBtnText">Delete All Data</span>
+    </button>
+    <button class="btn-cancel" onclick="window.location.href='admin-dashboard.html'">
+      <i class="fas fa-arrow-left"></i> Cancel — Go Back
+    </button>
+  </div>
+</div>
+
+<!-- PROGRESS OVERLAY -->
+<div class="progress-overlay" id="progressOverlay">
+  <div class="progress-card">
+    <div class="spinner" id="progressIcon"><i class="fas fa-spinner fa-spin"></i></div>
+    <div class="completion-icon" id="completionIcon"></div>
+    <h3 id="progressTitle">🧹 System Wipe in Progress...</h3>
+    <p class="sub">DO NOT close this page or refresh</p>
+    
+    <!-- Progress Bars -->
+    <div class="progress-section" id="progressUsers" style="display:none;">
+      <div class="progress-label"><span>👥 Deleting Users</span><span id="usersPct">0%</span></div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill red" id="usersBar"></div></div>
+    </div>
+    <div class="progress-section" id="progressSubcollections" style="display:none;">
+      <div class="progress-label"><span>🗂️ Clearing Subcollections</span><span id="subcolPct">0%</span></div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill amber" id="subcolBar"></div></div>
+    </div>
+    <div class="progress-section" id="progressFinal" style="display:none;">
+      <div class="progress-label"><span>✅ Final Cleanup</span><span id="finalPct">0%</span></div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill teal" id="finalBar"></div></div>
+    </div>
+    
+    <div class="progress-detail" id="progressDetail">Initializing...</div>
+    
+    <!-- Log -->
+    <div class="log-container" id="logContainer"></div>
+    
+    <button class="cancel-btn" id="cancelBtn" onclick="cancelDeletion()" style="display:none;">⚠️ Cancel (if still responding)</button>
+  </div>
+</div>
+
+<script>
+  const firebaseConfig={apiKey:"AIzaSyCubmbN-jRq33AHGL7WxxeILOrV-1_QCxo",authDomain:"cashbridge-a688e.firebaseapp.com",projectId:"cashbridge-a688e",storageBucket:"cashbridge-a688e.firebasestorage.app",messagingSenderId:"345273765518",appId:"1:345273765518:web:29ee0b8f9717cdb50203df"};
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue,fmt=v=>Number(v||0).toLocaleString();
+
+  let selectedOption='all';
+  let isDeleting=false;
+  let cancelRequested=false;
+  const BATCH_SIZE=15;
+  const LOG_LINES=[];
+
+  function addLog(msg,type='info'){
+    LOG_LINES.push({msg,type,time:new Date().toLocaleTimeString()});
+    const container=document.getElementById('logContainer');
+    const line=document.createElement('div');
+    line.className=`log-line ${type}`;
+    line.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`;
+    container.appendChild(line);
+    container.scrollTop=container.scrollHeight;
+  }
+
+  // ✅ SELECT OPTION
+  window.selectOption=function(option){
+    if(isDeleting)return;
+    selectedOption=option;
+    document.querySelectorAll('.option-row').forEach(r=>r.classList.remove('selected'));
+    document.querySelector(`[data-option="${option}"]`).classList.add('selected');
+    
+    const labels={
+      'all':'💀 Delete All Data',
+      'users':'👥 Delete Users & Data',
+      'investments':'📊 Delete Investments Only'
+    };
+    document.getElementById('deleteBtnText').textContent=labels[option]||'Delete';
+    validateSecurity();
+  };
+
+  // ✅ VALIDATE SECURITY INPUT
+  function validateSecurity(){
+    const input=document.getElementById('securityInput').value;
+    const valid=input==='DELETE EVERYTHING';
+    document.getElementById('securityInput').classList.toggle('valid',valid);
+    document.getElementById('deleteBtn').disabled=!valid||isDeleting;
+    document.getElementById('securityHint').textContent=valid?'✅ Confirmed — You may now proceed.':'You must type the exact phrase to enable the delete button.';
+  }
+
+  // ✅ COUNT STATS
+  async function loadStats(){
+    try{
+      const usersSnap=await db.collection('users').limit(500).get();
+      document.getElementById('statUsers').textContent=usersSnap.size;
+      
+      let plansCount=0,withdrawalsCount=0,txCount=0;
+      const batch=usersSnap.docs.slice(0,20);
+      for(const doc of batch){
+        try{
+          const plansSnap=await db.collection('users').doc(doc.id).collection('activePlans').limit(100).get();
+          plansCount+=plansSnap.size;
+          const wSnap=await db.collection('users').doc(doc.id).collection('withdrawals').limit(100).get();
+          withdrawalsCount+=wSnap.size;
+          const txSnap=await db.collection('users').doc(doc.id).collection('transactions').limit(100).get();
+          txCount+=txSnap.size;
+        }catch(e){}
+      }
+      
+      document.getElementById('statPlans').textContent=plansCount+'+';
+      document.getElementById('statWithdrawals').textContent=withdrawalsCount+'+';
+      document.getElementById('statTransactions').textContent=txCount+'+';
+    }catch(e){
+      console.error('Stats error:',e);
+      document.getElementById('statUsers').textContent='?';
+      document.getElementById('statPlans').textContent='?';
+      document.getElementById('statWithdrawals').textContent='?';
+      document.getElementById('statTransactions').textContent='?';
+    }
+  }
+
+  // ✅ DELETE SUBCOLLECTION RECURSIVELY
+  async function deleteCollection(uid,collectionName){
+    try{
+      let deleted=0;
+      while(true){
+        const snap=await db.collection('users').doc(uid).collection(collectionName).limit(100).get();
+        if(snap.empty)break;
+        const batch=db.batch();
+        snap.forEach(doc=>batch.delete(doc.ref));
+        await batch.commit();
+        deleted+=snap.size;
+        if(snap.size<100)break;
+      }
+      return deleted;
+    }catch(e){return 0;}
+  }
+
+  // ✅ EXECUTE DELETION
+  window.executeDeletion=async function(){
+    if(isDeleting)return;
+    if(document.getElementById('securityInput').value!=='DELETE EVERYTHING')return;
+    
+    // FINAL CONFIRMATION
+    const confirm=await Swal.fire({
+      title:'⚠️⚠️⚠️ FINAL WARNING ⚠️⚠️⚠️',
+      html:`
+        <div style="text-align:center">
+          <i class="fas fa-skull" style="font-size:60px;color:var(--red);margin-bottom:12px;"></i>
+          <h2 style="color:var(--red);margin-bottom:8px;">THIS IS IRREVERSIBLE</h2>
+          <p style="font-size:13px;color:var(--sub);margin-bottom:12px;">
+            You are about to <b style="color:var(--red);">PERMANENTLY DELETE</b> all data.
+          </p>
+          <div style="background:#fef2f2;border-radius:12px;padding:14px;text-align:left;font-size:12px;line-height:1.8;">
+            <p>💀 <b>All user accounts</b> will be destroyed</p>
+            <p>📊 <b>All investments & plans</b> will be deleted</p>
+            <p>💰 <b>All transactions</b> will be erased</p>
+            <p>🏦 <b>All withdrawal records</b> will be removed</p>
+            <p>👥 <b>All referral data</b> will be cleared</p>
+            <p>⚙️ <b>All settings</b> will be reset</p>
+            <p style="color:var(--red);font-weight:700;">🔴 Data CANNOT be recovered after this!</p>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px;">This is for launching <b>Phase 2</b> with a clean system.</p>
+        </div>`,
+      icon:'warning',
+      showCancelButton:true,
+      confirmButtonText:'YES, DELETE EVERYTHING',
+      confirmButtonColor:'#dc2626',
+      cancelButtonText:'CANCEL — GO BACK',
+      customClass:{confirmButton:'swal2-confirm swal2-styled',cancelButton:'swal2-cancel swal2-styled'}
+    });
+    
+    if(!confirm.isConfirmed)return;
+    
+    // SECOND CONFIRMATION — Type again
+    const secondConfirm=await Swal.fire({
+      title:'Type CONFIRM to proceed',
+      input:'text',
+      inputPlaceholder:'Type: CONFIRM',
+      inputValidator:(value)=>{if(value!=='CONFIRM')return 'You must type CONFIRM exactly';},
+      showCancelButton:true,
+      confirmButtonText:'Execute Deletion',
+      confirmButtonColor:'#dc2626'
+    });
+    
+    if(!secondConfirm.isConfirmed||secondConfirm.value!=='CONFIRM')return;
+    
+    // ✅ START DELETION
+    isDeleting=true;
+    cancelRequested=false;
+    LOG_LINES.length=0;
+    
+    const overlay=document.getElementById('progressOverlay');
+    const logContainer=document.getElementById('logContainer');
+    logContainer.innerHTML='';
+    logContainer.classList.add('show');
+    
+    document.getElementById('progressIcon').style.display='block';
+    document.getElementById('completionIcon').style.display='none';
+    document.getElementById('completionIcon').className='completion-icon';
+    document.getElementById('progressTitle').textContent='🧹 System Wipe in Progress...';
+    document.getElementById('progressDetail').textContent='Initializing...';
+    document.getElementById('cancelBtn').style.display='inline-block';
+    document.getElementById('deleteBtn').disabled=true;
+    
+    // Reset progress bars
+    ['usersBar','subcolBar','finalBar'].forEach(id=>document.getElementById(id).style.width='0%');
+    ['usersPct','subcolPct','finalPct'].forEach(id=>document.getElementById(id).textContent='0%');
+    ['progressUsers','progressSubcollections','progressFinal'].forEach(id=>document.getElementById(id).style.display='none');
+    
+    overlay.classList.add('show');
+    
+    addLog('🚀 System wipe initiated...','info');
+    addLog(`Scope: ${selectedOption}`,'info');
+    
+    const startTime=Date.now();
+    let totalDeleted=0;
+    let totalFailed=0;
+    
+    try{
+      // ✅ STEP 1: GET ALL USERS
+      addLog('📋 Fetching user list...','info');
+      const usersSnap=await db.collection('users').limit(500).get();
+      const allUsers=usersSnap.docs.map(d=>d.id);
+      const totalUsers=allUsers.length;
+      
+      addLog(`Found ${totalUsers} users to process`,'info');
+      document.getElementById('progressUsers').style.display='block';
+      
+      // ✅ STEP 2: DELETE SUBCOLLECTIONS FOR EACH USER
+      document.getElementById('progressSubcollections').style.display='block';
+      addLog('🗂️ Starting subcollection deletion...','info');
+      
+      const collectionsToDelete=['activePlans','withdrawals','transactions','referrals','adminActions','notifications'];
+      let subcolTotal=0;
+      
+      for(let i=0;i<allUsers.length;i++){
+        if(cancelRequested){addLog('⚠️ Deletion cancelled by user','error');break;}
+        
+        const uid=allUsers[i];
+        
+        if(selectedOption==='all'||selectedOption==='users'){
+          // Delete all subcollections
+          for(const col of collectionsToDelete){
+            try{
+              const deleted=await deleteCollection(uid,col);
+              subcolTotal+=deleted;
+              if(deleted>0)addLog(`  ${col}: ${deleted} docs deleted`,'success');
+            }catch(e){addLog(`  ${col}: failed - ${e.message}`,'error');}
+          }
+        }else if(selectedOption==='investments'){
+          // Only delete investment-related collections
+          const investCols=['activePlans','withdrawals','transactions'];
+          for(const col of investCols){
+            try{
+              const deleted=await deleteCollection(uid,col);
+              subcolTotal+=deleted;
+              if(deleted>0)addLog(`  ${col}: ${deleted} docs deleted`,'success');
+            }catch(e){addLog(`  ${col}: failed - ${e.message}`,'error');}
+          }
+        }
+        
+        // Update progress
+        const pct=Math.round((i+1)/totalUsers*100);
+        document.getElementById('usersBar').style.width=pct+'%';
+        document.getElementById('usersPct').textContent=pct+'%';
+        document.getElementById('subcolBar').style.width=pct+'%';
+        document.getElementById('subcolPct').textContent=pct+'%';
+        document.getElementById('progressDetail').textContent=`Processing user ${i+1}/${totalUsers}...`;
+      }
+      
+      addLog(`📊 Total subcollection docs deleted: ${subcolTotal}`,'info');
+      
+      // ✅ STEP 3: DELETE USER DOCUMENTS
+      document.getElementById('progressFinal').style.display='block';
+      addLog('👥 Deleting user documents...','info');
+      
+      let deletedUsers=0;
+      
+      if(selectedOption==='all'||selectedOption==='users'){
+        for(let i=0;i<allUsers.length;i+=BATCH_SIZE){
+          if(cancelRequested){addLog('⚠️ User deletion cancelled','error');break;}
+          
+          const batch=allUsers.slice(i,i+BATCH_SIZE);
+          const writeBatch=db.batch();
+          batch.forEach(uid=>writeBatch.delete(db.collection('users').doc(uid)));
+          
+          try{
+            await writeBatch.commit();
+            deletedUsers+=batch.length;
+            addLog(`  Batch deleted: ${batch.length} users`,'success');
+          }catch(e){
+            addLog(`  Batch failed: ${e.message}`,'error');
+            totalFailed+=batch.length;
+            // Try individually
+            for(const uid of batch){
+              try{await db.collection('users').doc(uid).delete();deletedUsers++;}catch(e2){totalFailed++;}
+            }
+          }
+          
+          const pct=Math.round((i+batch.length)/allUsers.length*100);
+          document.getElementById('finalBar').style.width=pct+'%';
+          document.getElementById('finalPct').textContent=pct+'%';
+        }
+        
+        totalDeleted+=deletedUsers;
+        addLog(`👥 Users deleted: ${deletedUsers}`,'success');
+      }
+      
+      // ✅ STEP 4: DELETE OTHER COLLECTIONS
+      if(selectedOption==='all'){
+        addLog('⚙️ Deleting system collections...','info');
+        
+        const systemCollections=['bannedUsers','settings','adminLogs','systemConfig'];
+        for(const col of systemCollections){
+          try{
+            const snap=await db.collection(col).limit(100).get();
+            if(!snap.empty){
+              const writeBatch=db.batch();
+              snap.forEach(doc=>writeBatch.delete(doc.ref));
+              await writeBatch.commit();
+              addLog(`  Collection '${col}': ${snap.size} docs deleted`,'success');
+              totalDeleted+=snap.size;
+            }else{
+              addLog(`  Collection '${col}': empty - skipped`,'info');
+            }
+          }catch(e){addLog(`  Collection '${col}': skipped - ${e.message}`,'info');}
+        }
+      }
+      
+      // ✅ COMPLETION
+      const elapsed=((Date.now()-startTime)/1000).toFixed(1);
+      
+      document.getElementById('progressIcon').style.display='none';
+      const completionIcon=document.getElementById('completionIcon');
+      
+      if(totalFailed===0){
+        completionIcon.className='completion-icon success';
+        completionIcon.innerHTML='<i class="fas fa-check-circle"></i>';
+        document.getElementById('progressTitle').textContent='✅ System Wipe Complete!';
+      }else{
+        completionIcon.className='completion-icon partial';
+        completionIcon.innerHTML='<i class="fas fa-exclamation-triangle"></i>';
+        document.getElementById('progressTitle').textContent='⚠️ Wipe Complete (with errors)';
+      }
+      
+      document.getElementById('progressDetail').textContent=
+        `Done in ${elapsed}s · ${totalDeleted.toLocaleString()} deleted · ${totalFailed} failed`;
+      document.getElementById('cancelBtn').style.display='none';
+      
+      // Update all progress bars to 100%
+      ['usersBar','subcolBar','finalBar'].forEach(id=>document.getElementById(id).style.width='100%');
+      ['usersPct','subcolPct','finalPct'].forEach(id=>document.getElementById(id).textContent='100%');
+      
+      addLog('✅ System wipe complete!','success');
+      addLog(`📊 Total deleted: ${totalDeleted.toLocaleString()} documents`,'success');
+      addLog(`⏱️ Time elapsed: ${elapsed}s`,'success');
+      if(totalFailed>0)addLog(`⚠️ Failed: ${totalFailed} items`,'error');
+      
+      // ✅ Show completion dialog
+      setTimeout(async ()=>{
+        await Swal.fire({
+          icon:totalFailed===0?'success':'warning',
+          title:totalFailed===0?'✅ System Wiped Successfully':'⚠️ Wipe Complete (Some Errors)',
+          html:`
+            <p><b>${totalDeleted.toLocaleString()}</b> documents permanently deleted.</p>
+            ${totalFailed>0?`<p style="color:var(--red);">${totalFailed} items could not be deleted.</p>`:''}
+            <p style="font-size:12px;color:var(--sub);">Time: ${elapsed}s</p>
+            <p style="color:var(--teal);font-weight:700;margin-top:12px;">🎉 System is ready for Phase 2!</p>`,
+          confirmButtonColor:'#0d9488'
+        });
+        
+        // Redirect to admin dashboard
+        window.location.href='admin-dashboard.html';
+      },1000);
+      
+    }catch(e){
+      console.error('Deletion error:',e);
+      addLog(`❌ FATAL ERROR: ${e.message}`,'error');
+      document.getElementById('progressTitle').textContent='❌ Deletion Failed';
+      document.getElementById('progressDetail').textContent='Error: '+e.message;
+      document.getElementById('progressIcon').style.display='none';
+      document.getElementById('completionIcon').style.display='block';
+      document.getElementById('completionIcon').className='completion-icon partial';
+      document.getElementById('completionIcon').innerHTML='<i class="fas fa-times-circle" style="color:var(--red);"></i>';
+      
+      Swal.fire({icon:'error',title:'Deletion Failed',text:e.message,confirmButtonColor:'#ef4444'});
+    }finally{
+      isDeleting=false;
+      cancelRequested=false;
+      document.getElementById('deleteBtn').disabled=true;
+      document.getElementById('cancelBtn').style.display='none';
+    }
+  };
+
+  // ✅ CANCEL
+  window.cancelDeletion=function(){
+    cancelRequested=true;
+    document.getElementById('cancelBtn').disabled=true;
+    document.getElementById('cancelBtn').textContent='Cancelling...';
+    addLog('⚠️ Cancel requested — finishing current batch...','error');
+  };
+
+  // ✅ AUTH CHECK
+  auth.onAuthStateChanged(async user=>{
+    if(!user){window.location.href='login.html';return;}
+    try{
+      const userSnap=await db.collection('users').doc(user.uid).get();
+      if(!userSnap.exists||userSnap.data().role!=='admin'){
+        Swal.fire({icon:'error',title:'Access Denied',text:'Admin access required.',confirmButtonColor:'#ef4444'});
+        setTimeout(()=>window.location.href='dashboard.html',2000);
+        return;
+      }
+      console.log('✅ Admin verified — System Wipe page ready');
+      await loadStats();
+    }catch(e){console.error(e);window.location.href='dashboard.html';}
+  });
+</script>
+</body>
+</html>
