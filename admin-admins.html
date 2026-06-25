@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
+  <title>TEXIS · Admin Management</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--teal:#0d9488;--teal-dark:#0f766e;--teal-light:#14b8a6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--bg:#f0f4f8;--card:#fff;--text:#0f172a;--sub:#475569;--muted:#94a3b8;--border:#e2e8f0;--shadow-sm:0 1px 3px rgba(0,0,0,.04);--shadow:0 4px 16px rgba(0,0,0,.06);--shadow-lg:0 12px 32px rgba(0,0,0,.08);--radius:20px;--radius-sm:14px;--sidebar-w:260px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;background-image:radial-gradient(ellipse at 0% 0%,#e0f2fe 0%,transparent 50%),radial-gradient(ellipse at 100% 100%,#ccfbf1 0%,transparent 50%)}
+    .sidebar{width:var(--sidebar-w);background:rgba(255,255,255,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--border);height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;z-index:100;overflow-y:auto;transition:transform .3s}
+    .sidebar-brand{padding:22px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .sidebar-brand .dot{width:10px;height:10px;background:var(--red);border-radius:50%;box-shadow:0 0 12px rgba(239,68,68,.5);animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .sidebar-brand span{font-family:'Outfit',sans-serif;font-weight:800;font-size:18px}
+    .sidebar-brand .phase-tag{font-size:9px;background:var(--red);color:#fff;padding:3px 8px;border-radius:8px;font-weight:700}
+    .sidebar-user{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+    .sidebar-user .av{width:42px;height:42px;background:linear-gradient(135deg,var(--red),#dc2626);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;flex-shrink:0}
+    .sidebar-user .info h4{font-size:13px;font-weight:700}.sidebar-user .info p{font-size:10px;color:var(--muted)}
+    .sidebar-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:3px}
+    .sidebar-nav a{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;text-decoration:none;color:var(--sub);font-weight:600;font-size:13px;transition:all .2s;white-space:nowrap}
+    .sidebar-nav a:hover{background:rgba(239,68,68,.05);color:var(--red)}
+    .sidebar-nav a.active{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(239,68,68,.25)}
+    .sidebar-nav a i{width:18px;text-align:center;font-size:14px}
+    .sidebar-nav a .badge{margin-left:auto;background:rgba(0,0,0,.08);padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700}
+    a.active .badge{background:rgba(255,255,255,.2)}
+    .sidebar-divider{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:16px 14px 8px}
+    .sidebar-footer{padding:14px 18px;border-top:1px solid var(--border)}
+    .sidebar-footer button{width:100%;padding:12px;background:#fef2f2;color:var(--red);border:1px solid #fecaca;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;font-family:inherit}
+    .sidebar-footer button:hover{background:var(--red);color:#fff}
+    .main{flex:1;margin-left:var(--sidebar-w);padding:24px;min-height:100vh}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .topbar h1{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;display:flex;align-items:center;gap:10px}
+    .topbar h1 i{color:var(--purple)}
+    .topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .tb-btn{padding:10px 16px;border-radius:12px;font-weight:600;font-size:12px;border:1px solid var(--border);background:var(--card);color:var(--sub);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;font-family:inherit;white-space:nowrap}
+    .tb-btn:hover{border-color:var(--teal);color:var(--teal)}
+    .tb-btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.tb-btn.primary:hover{background:var(--teal-dark)}
+    .menu-btn{display:none;width:40px;height:40px;background:var(--card);border:1px solid var(--border);border-radius:12px;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--sub)}
+    .section-head{font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;margin:24px 0 14px;display:flex;align-items:center;gap:10px}
+    .section-head i{color:var(--purple)}
+    .section-head .count{background:#faf5ff;color:var(--purple);font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:22px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+    .search-box{position:relative;margin-bottom:14px}
+    .search-box input{width:100%;padding:12px 16px 12px 42px;border:2px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;outline:none;background:var(--bg);transition:all .2s}
+    .search-box input:focus{border-color:var(--teal);background:#fff}
+    .search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
+    .add-admin-box{display:flex;gap:10px;margin-bottom:14px}
+    .add-admin-box input{flex:1;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;outline:none;transition:all .2s}
+    .add-admin-box input:focus{border-color:var(--teal)}
+    .add-admin-box button{padding:14px 22px;background:var(--purple);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit}
+    .add-admin-box button:hover{background:#7c3aed}
+    .admin-list{display:flex;flex-direction:column;gap:8px}
+    .admin-item{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#f8fafc;border:1px solid #f1f5f9;border-radius:var(--radius-sm);gap:12px;transition:all .2s}
+    .admin-item:hover{border-color:var(--purple);box-shadow:var(--shadow-sm)}
+    .admin-item .ai-left{display:flex;align-items:center;gap:14px}
+    .admin-item .ai-av{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--purple),#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:17px;flex-shrink:0}
+    .admin-item .ai-info .ai-name{font-weight:700;font-size:14px}
+    .admin-item .ai-info .ai-email{font-size:11px;color:var(--muted)}
+    .admin-item .ai-info .ai-badge{display:inline-block;margin-top:3px;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;background:#faf5ff;color:var(--purple)}
+    .admin-item .ai-info .ai-badge.super{background:#fef3c7;color:#b45309}
+    .admin-item .ai-actions{display:flex;gap:6px;flex-shrink:0}
+    .ai-btn{padding:8px 14px;border-radius:10px;font-weight:600;font-size:11px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--sub);transition:all .2s;display:flex;align-items:center;gap:4px;font-family:inherit}
+    .ai-btn:hover{border-color:var(--teal);color:var(--teal)}
+    .ai-btn.danger{color:var(--red);border-color:#fecaca}.ai-btn.danger:hover{background:var(--red);color:#fff}
+    .ai-btn.warn{color:var(--amber);border-color:#fde68a}.ai-btn.warn:hover{background:var(--amber);color:#fff}
+    .empty-state{text-align:center;padding:32px;color:var(--muted)}.empty-state i{font-size:36px;color:#cbd5e1;margin-bottom:8px;display:block}
+    .note-box{background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--teal);display:flex;align-items:center;gap:8px}
+    .note-box i{font-size:16px;flex-shrink:0}
+    .loading-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+    .loading-screen.hide{display:none}
+    .spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .denied-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:9998}
+    .denied-screen.show{display:flex}
+    .denied-card{text-align:center;padding:40px;max-width:400px}
+    .denied-card i{font-size:52px;color:var(--red);margin-bottom:14px}.denied-card h2{font-family:'Outfit',sans-serif;font-size:20px;margin-bottom:8px}
+    .denied-card button{padding:14px 28px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px}
+    @media(max-width:900px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding:16px}.menu-btn{display:flex}}
+    @media(max-width:500px){.add-admin-box{flex-direction:column}.add-admin-box button{width:100%}}
+  </style>
+</head>
+<body>
+<div class="loading-screen" id="loadingScreen"><div class="spinner"></div><p style="color:var(--sub);font-weight:600;">Verifying admin access...</p></div>
+<div class="denied-screen" id="deniedScreen"><div class="denied-card"><i class="fas fa-shield-halved"></i><h2>Access Denied</h2><p style="color:var(--sub);">Administrator privileges required.</p><button onclick="window.location.href='login.html'">Return to Login</button></div></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-brand"><div class="dot"></div><span>TEXIS</span><span class="phase-tag">ADMIN</span></div>
+  <div class="sidebar-user"><div class="av" id="adminAv">A</div><div class="info"><h4 id="adminNm">Admin</h4><p>Phase 2 · Administrator</p></div></div>
+  <div class="sidebar-nav">
+    <a href="admin-dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a href="admin-users.html"><i class="fas fa-users"></i> Users</a>
+    <a href="admin-deposits.html"><i class="fas fa-arrow-down"></i> Deposits</a>
+    <a href="admin-withdrawals.html"><i class="fas fa-arrow-up"></i> Withdrawals</a>
+    <a href="admin-investments.html"><i class="fas fa-chart-line"></i> Investments</a>
+    <div class="sidebar-divider">Management</div>
+    <a href="admin-management.html" class="active"><i class="fas fa-user-shield"></i> Manage Admins <span class="badge" id="badgeAdmins">0</span></a>
+    <a href="admin-ban.html"><i class="fas fa-user-slash"></i> Ban Users</a>
+    <a href="admin-delete.html"><i class="fas fa-trash-can"></i> System Wipe</a>
+    <a href="admin-suspend.html"><i class="fas fa-user-clock"></i> Suspend Users</a>
+    <a href="admin-transactions.html"><i class="fas fa-history"></i> Transactions</a>
+  </div>
+  <div class="sidebar-footer"><button id="sidebarLogout"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+</div>
+
+<div class="main" id="mainContent" style="display:none;">
+  <div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button><h1><i class="fas fa-user-shield"></i> Admin Management</h1></div><div class="topbar-right"><button class="tb-btn primary" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button><button class="tb-btn" id="topLogout"><i class="fas fa-sign-out-alt"></i></button></div></div>
+
+  <div class="section-head"><i class="fas fa-crown"></i> Current Admins <span class="count" id="adminCount">0</span></div>
+  <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchAdmin" placeholder="Search admins by name, username, or email..." oninput="renderAdmins()"/></div>
+  <div class="admin-list" id="adminList"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading admins...</p></div></div>
+
+  <div class="section-head"><i class="fas fa-user-plus"></i> Add New Admin <span class="count">Promote</span></div>
+  <div class="card">
+    <div class="note-box"><i class="fas fa-info-circle"></i> Enter the username or email of the user you want to promote to admin. The user must already exist.</div>
+    <div class="add-admin-box"><input type="text" id="newAdminUsername" placeholder="Enter username or email to promote..." onkeydown="if(event.key==='Enter')promoteToAdmin()"/><button onclick="promoteToAdmin()"><i class="fas fa-crown"></i> Make Admin</button></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:4px;">You can also search by referral code. Only regular users can be promoted.</p>
+  </div>
+</div>
+
+<script>
+  const firebaseConfig = {apiKey:"AIzaSyCoya4moqwNCuVI-EtzLcMt2gD6QNUdyCQ",authDomain:"texis-b7180.firebaseapp.com",projectId:"texis-b7180",storageBucket:"texis-b7180.firebasestorage.app",messagingSenderId:"848854390209",appId:"1:848854390209:web:c5babd1ca5e0e42ba08b40"};
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue;
+  let admins=[],currentAdminId=null,currentAdminName='',isLoading=false;
+
+  document.getElementById('menuBtn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+  function doLogout(){auth.signOut().then(()=>window.location.href='login.html')}
+  document.getElementById('sidebarLogout').addEventListener('click',doLogout);document.getElementById('topLogout').addEventListener('click',doLogout);
+
+  // ✅ Load ALL admins with cursor pagination
+  async function loadAdmins(){
+    if(isLoading)return;isLoading=true;
+    document.getElementById('adminList').innerHTML='<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading admins...</p></div>';
+    try{
+      admins=[];
+      let lastDoc=null;
+      while(true){
+        let query=db.collection('users').where('role','==','admin').limit(50);
+        if(lastDoc)query=query.startAfter(lastDoc);
+        const snap=await query.get();if(snap.empty)break;
+        snap.forEach(d=>admins.push({id:d.id,...d.data()}));
+        lastDoc=snap.docs[snap.docs.length-1];
+        if(snap.size<50)break;
+        await new Promise(r=>setTimeout(r,100));
+      }
+      admins.sort((a,b)=>(b.fullName||b.username||'').localeCompare(a.fullName||a.username||''));
+      document.getElementById('adminCount').textContent=admins.length;
+      document.getElementById('badgeAdmins').textContent=admins.length;
+      renderAdmins();
+    }catch(e){console.error(e)}
+    finally{isLoading=false}
+  }
+
+  function renderAdmins(){
+    const q=(document.getElementById('searchAdmin')?.value||'').toLowerCase();
+    const list=q?admins.filter(a=>(a.fullName||'').toLowerCase().includes(q)||(a.username||'').toLowerCase().includes(q)||(a.email||'').toLowerCase().includes(q)):admins;
+    const el=document.getElementById('adminList');
+    if(!list.length){el.innerHTML='<div class="empty-state"><i class="fas fa-user-shield"></i><p>No admins found</p></div>';return}
+    el.innerHTML=list.map(a=>{const isSuper=a.id===currentAdminId;return`<div class="admin-item"><div class="ai-left"><div class="ai-av">${(a.fullName||'A').charAt(0).toUpperCase()}</div><div class="ai-info"><div class="ai-name">${a.fullName||'Unknown'} ${isSuper?'<span class="ai-badge super">You</span>':''}</div><div class="ai-email">@${a.username||'—'} · ${a.email||'—'}</div><span class="ai-badge"><i class="fas fa-shield-alt"></i> Admin</span></div></div><div class="ai-actions">${!isSuper?`<button class="ai-btn warn" onclick="demoteAdmin('${a.id}','${(a.fullName||a.username).replace(/'/g,"\\'")}')"><i class="fas fa-user"></i> Remove</button>`:'<span style="font-size:10px;color:var(--muted);">Current User</span>'}</div></div>`}).join('')
+  }
+
+  window.promoteToAdmin=async()=>{
+    const input=document.getElementById('newAdminUsername').value.trim().toLowerCase();
+    if(!input)return Swal.fire({icon:'warning',title:'Enter Username',text:'Please enter a username, email, or referral code.',confirmButtonColor:'#0d9488'});
+    Swal.fire({title:'Finding user...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+    let snap=await db.collection('users').where('username','==',input).limit(1).get();
+    if(snap.empty)snap=await db.collection('users').where('email','==',input).limit(1).get();
+    if(snap.empty)snap=await db.collection('users').where('referralCode','==',input.toUpperCase()).limit(1).get();
+    Swal.close();
+    if(snap.empty)return Swal.fire({icon:'error',title:'User Not Found',text:`No user found matching "${input}".`,confirmButtonColor:'#0d9488'});
+    const user=snap.docs[0].data(),uid=snap.docs[0].id;
+    if(user.role==='admin')return Swal.fire({icon:'info',title:'Already Admin',text:`${user.fullName||user.username} is already an admin.`,confirmButtonColor:'#0d9488'});
+    if(uid===currentAdminId)return Swal.fire({icon:'info',title:'That\'s You',text:'You are already the super admin.',confirmButtonColor:'#0d9488'});
+    if(user.banned||user.isBanned||user.status==='banned')return Swal.fire({icon:'error',title:'User is Banned',text:'Cannot promote a banned user to admin.',confirmButtonColor:'#0d9488'});
+    const ok=await Swal.fire({title:'Promote to Admin?',html:`Make <b>${user.fullName||user.username}</b> (${user.email||'no email'}) an admin?<br><br><span style="color:var(--amber);">They will have full access to the admin panel.</span>`,icon:'question',showCancelButton:true,confirmButtonText:'Yes, Make Admin',confirmButtonColor:'#0d9488'});
+    if(!ok.isConfirmed)return;
+    try{
+      await db.collection('users').doc(uid).update({role:'admin',isAdmin:true});
+      await db.collection('users').doc(uid).collection('transactions').add({type:'role_change',description:'👑 Promoted to Admin by '+currentAdminName,createdAt:FV.serverTimestamp()});
+      Swal.fire({icon:'success',title:'Promoted!',text:`${user.fullName||user.username} is now an admin.`,confirmButtonColor:'#0d9488'});
+      document.getElementById('newAdminUsername').value='';loadAdmins();
+    }catch(e){Swal.fire({icon:'error',title:'Failed',text:e.message,confirmButtonColor:'#ef4444'})}
+  };
+
+  window.demoteAdmin=async(uid,name)=>{
+    if(uid===currentAdminId)return Swal.fire({icon:'error',title:'Cannot Demote Yourself',text:'You cannot remove your own admin status.',confirmButtonColor:'#0d9488'});
+    const ok=await Swal.fire({title:'Remove Admin?',html:`Remove admin privileges from <b>${name}</b>?<br><br><span style="color:var(--red);">They will become a regular user and lose admin panel access.</span>`,icon:'warning',showCancelButton:true,confirmButtonText:'Yes, Remove',confirmButtonColor:'#ef4444'});
+    if(!ok.isConfirmed)return;
+    try{
+      await db.collection('users').doc(uid).update({role:'user',isAdmin:false});
+      await db.collection('users').doc(uid).collection('transactions').add({type:'role_change',description:'⬇️ Demoted to User by '+currentAdminName,createdAt:FV.serverTimestamp()});
+      Swal.fire({icon:'success',title:'Demoted!',text:`${name} is now a regular user.`,confirmButtonColor:'#0d9488'});loadAdmins();
+    }catch(e){Swal.fire({icon:'error',title:'Failed',text:e.message,confirmButtonColor:'#ef4444'})}
+  };
+
+  window.refreshData=loadAdmins;
+
+  auth.onAuthStateChanged(async user=>{if(!user){window.location.href='login.html';return}currentAdminId=user.uid;try{const snap=await db.collection('users').doc(user.uid).get();if(!snap.exists||(snap.data().role!=='admin'&&snap.data().isAdmin!==true)){document.getElementById('loadingScreen').classList.add('hide');document.getElementById('deniedScreen').classList.add('show');return}const d=snap.data();currentAdminName=d.fullName||'Admin';document.getElementById('adminAv').textContent=(d.fullName||'A').charAt(0).toUpperCase();document.getElementById('adminNm').textContent=d.fullName||'Admin';document.getElementById('loadingScreen').classList.add('hide');document.getElementById('mainContent').style.display='block';await loadAdmins()}catch(e){document.getElementById('loadingScreen').classList.add('hide');document.getElementById('deniedScreen').classList.add('show')}});
+</script>
+</body>
+</html>
